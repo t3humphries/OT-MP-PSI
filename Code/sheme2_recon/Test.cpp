@@ -164,7 +164,7 @@ int main()
 	p = 1000000007;
 	ZZ_p::init(p);
 	
-	string filename = "ss1_match.json";
+	string filename = "../prototype/test_cases/ss2_match.json";
 	Share shares[size];
 	readFile(filename, shares, size); // a pointer
 
