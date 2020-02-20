@@ -1,7 +1,16 @@
 #include "ShareGen.h"
+#include "nlohmann/json.hpp"
 
-using namespace std;
 using namespace NTL;
+using namespace std;
+using json = nlohmann::json;
+
+// class Share {
+// 	ZZ id;
+// 	ZZ bin;
+// 	ZZ_p SS;
+// 	ZZ_p SS_mac;
+// };
 
 ZZ_p hash_(ZZ x, ZZ p){
 	ZZ_p::init(p);
@@ -28,7 +37,6 @@ void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 	__ssa >> __temp_ZZ;
 	conv(__out, __temp_ZZ);
 }
-
 
 Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
 
@@ -216,5 +224,57 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 	return ans;
 }
 
+int main()
+{
+	int p = 1000000007;
+	int q = 500000003;
+	int g = 3;
+	int id, X=7, Y=8, t=10, key=4, key_mac=5;
+	ZZ_p::init(ZZ(p));
+	// ZZ r1 [2] = {ZZ(1), ZZ(1)}; 
+	// ZZ r2 [2] = {ZZ(1), ZZ(1)};
+	// Share ans = ShareGen_1(ZZ(p), ZZ_p(3), ZZ(id), ZZ(bin), 3, ZZ(key), ZZ(key_mac), r1, r2);
+	json j;
+	Share ans;
+	ZZ r1[t-1], r2[t-1];
+	stringstream ssa;
+	ofstream o1("../test_cases/ss1_match.json");
+	ofstream o2("../test_cases/ss2_match.json");
 
+	for (int i = 0; i < t-1; i++){
+		r1[i] = rand() % 1000;
+		r2[i] = rand() % 1000;
+	}
+	o1 << "[" << endl;
+	o2 << "[" << endl;
+	for (int i = 0; i < t-1; i++){
+		id = rand() % 100;
+		ans = ShareGen_1(ZZ(p), ZZ_p(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
+		j["id"] = id;
+		ssa << ans.bin;
+		j["bin"] = ssa.str().c_str(); ssa.str("");
+		ssa << ans.SS;
+		j["SS"] = ssa.str().c_str(); ssa.str("");
+		ssa << ans.SS_mac;
+		j["SS_MAC"] = ssa.str().c_str(); ssa.str("");
+		o1 << j;
+		if (i != t-2){o1 << ",";}
+		o1 << endl;
 
+		ans = ShareGen_2(ZZ(p), ZZ(q), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
+		j["id"] = id;
+		ssa << ans.bin;
+		j["bin"] = ssa.str().c_str(); ssa.str("");
+		ssa << ans.SS;
+		j["SS"] = ssa.str().c_str(); ssa.str("");
+		ssa << ans.SS_mac;
+		j["SS_MAC"] = ssa.str().c_str(); ssa.str("");
+		o2 << j;
+		if (i != t-2){o2 << ",";}
+		o2 << endl;
+
+	}
+	o1 << "]";
+	o2 << "]";
+
+}
