@@ -247,7 +247,7 @@ int main()
 	}
 	o1 << "[" << endl;
 	o2 << "[" << endl;
-	for (int i = 0; i < t-1; i++){
+	for (int i = 0; i < t; i++){
 		id = rand() % 100;
 		ans = ShareGen_1(ZZ(p), ZZ_p(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
 		j["id"] = id;
