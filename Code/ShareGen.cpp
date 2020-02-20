@@ -47,7 +47,7 @@ void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
 
 	ZZ_p::init(p);
-	// Element Holder
+	//////////////////// Element Holder ////////////////////
 
 	ZZ_p h_x = hash_(X, p);
 	ZZ alpha, alpha_inv;
@@ -65,7 +65,7 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 	ZZ_p h_x_alpha = NTL::power(h_x, alpha);
 	ZZ_p g_alpha = NTL::power(g, alpha);
 	
-	// Key Holder
+	//////////////////// Key Holder ////////////////////
 
 	ZZ r;
 	ZZ_p R, R_inverse, R_alpha;
@@ -92,7 +92,7 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 		masked_mac_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, randoms_mac[i]);
 	}
 
-	// Element Holder
+	//////////////////// Element Holder ////////////////////
 
 	ZZ_p masked_secret = NTL::power(masked_secret_alpha, alpha_inv);
 	ZZ_p masked_coefficients[t-1];
@@ -139,7 +139,7 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 		pcs_encrypt(pk, hr, __mpz_mac_coefficients[i], __mpz_mac_coefficients[i]);
 	}
 
-	// Key Holder
+	//////////////////// Key Holder ////////////////////
 
 	mpz_t __mpz_temp;
 	mpz_init(__mpz_temp);
@@ -159,7 +159,7 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 		pcs_ee_add(pk, __mpz_mac, __mpz_mac, __mpz_mac_coefficients[i]);
 	}
 
-	// Element Holder
+	//////////////////// Element Holder ////////////////////
 
 	pcs_decrypt(vk, __mpz_secret, __mpz_secret);	
 	pcs_decrypt(vk, __mpz_mac, __mpz_mac);
@@ -176,4 +176,59 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 	};
 	return ans;
 }
+
+Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
+
+	//////////////////// Element Holder ////////////////////
+	ZZ_p::init(p);
+	ZZ_p h_x = hash_(X, p);
+	h_x = h_x * h_x;
+	ZZ alpha, alpha_inv;
+	{
+		ZZ_pPush push(q);
+		ZZ_p __temp = random_ZZ_p();
+		alpha = rep(__temp);
+		__temp = 1 / __temp;
+		alpha_inv = rep(__temp);
+	}
+	ZZ_p h_x_alpha = NTL::power(h_x, alpha);
+
+	//////////////////// Key Holder ////////////////////
+	ZZ secret_exp, mac_exp;
+	{
+		ZZ_pPush(q);
+		ZZ_p __secret_exp, __mac_exp, id_pows, __temp;
+		conv(__secret_exp, key);
+		conv(__mac_exp, key * key_mac);
+		conv(id_pows, id);
+		for (int i = 0; i < t-1; i++){
+			conv(__temp, randoms[i]);
+			__secret_exp += id_pows * __temp;
+			conv(__temp, randoms_mac[i]);
+			__mac_exp += id_pows * __temp;
+			conv(__temp, id);
+			id_pows *= __temp;
+		}
+		secret_exp = rep(__secret_exp);
+		mac_exp = rep(__mac_exp);
+	}
+
+	ZZ_p secret = NTL::power(h_x, secret_exp);
+	ZZ_p mac= NTL::power(h_x, mac_exp);
+
+	//////////////////// Element Holder ////////////////////
+
+	secret = NTL::power(secret, alpha_inv);
+	mac = NTL::power(mac, alpha_inv);
+
+	Share ans = {
+		.id = id,
+		.bin = ZZ(1),
+		.SS = secret,
+		.SS_mac = mac
+	};
+	return ans;
+}
+
+
 
