@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 //TODO: change to command line arg
 const long PRIME = 1000000007;
-const string FILENAME = "../prototype/test_cases/ss1_match.json";
+const string FILENAME = "../test_cases/ss1_match.json";
 const int t = 10;
 const long k2 = 5;
 
