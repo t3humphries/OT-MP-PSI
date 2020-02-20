@@ -5,6 +5,8 @@ Very simple test file that takes in a single json of shares and attempts to reco
 #include <NTL/ZZ.h>
 #include "nlohmann/json.hpp"
 #include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace NTL;
@@ -38,12 +40,14 @@ void readFile(string filename,Share shares[], int size) //Reads a single file an
 	std::ifstream shares_file(filename);
 	json temp;
 	shares_file >> temp;
-	
+
 	for(int i = 0;i<size;i++)
 	{
 		shares[i].id=temp[i]["id"];
-		shares[i].SS=temp[i]["SS"];
-		shares[i].SS_mac=temp[i]["SS_MAC"];
+		std::string str = temp[i]["SS"];
+		shares[i].SS= atol(str.c_str());
+		str = temp[i]["SS_MAC"];
+		shares[i].SS_mac= atol(str.c_str());
 	}
 }
 
