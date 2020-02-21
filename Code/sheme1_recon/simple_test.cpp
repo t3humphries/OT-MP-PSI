@@ -5,6 +5,8 @@ Very simple test file that takes in a single json of shares and attempts to reco
 #include <NTL/ZZ.h>
 #include "nlohmann/json.hpp"
 #include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace NTL;
@@ -12,9 +14,13 @@ using json = nlohmann::json;
 
 //TODO: change to command line arg
 const long PRIME = 1000000007;
-const string FILENAME = "../test_cases/ss1_match.json";
+const long Q = 500000003;
+const string FILENAME = "../test_cases/ss2_match.json";
+const int SCHEME = 2;  //1 for scheme 1 else scheme 2
 const int t = 10;
 const long k2 = 5;
+
+long placeholder; // placeholder for conversions
 
 class Share
 {
@@ -23,27 +29,21 @@ class Share
 	ZZ_p SS;
 	ZZ_p SS_mac;
 	Share(){}
-	Share(ZZ_p identity, ZZ_p SShare, ZZ_p SShare_mac)
-	{
-		id = identity;
-		SS = SShare;
-		SS_mac = SShare_mac;
-	}
-
 };
-
 
 void readFile(string filename,Share shares[], int size) //Reads a single file and makes an array of Shares out of it
 {	
 	std::ifstream shares_file(filename);
 	json temp;
 	shares_file >> temp;
-	
+
 	for(int i = 0;i<size;i++)
 	{
 		shares[i].id=temp[i]["id"];
-		shares[i].SS=temp[i]["SS"];
-		shares[i].SS_mac=temp[i]["SS_MAC"];
+		std::string str = temp[i]["SS"];
+		shares[i].SS= atol(str.c_str());
+		str = temp[i]["SS_MAC"];
+		shares[i].SS_mac= atol(str.c_str());
 	}
 }
 
@@ -80,17 +80,84 @@ ZZ_p reconScheme1(Share shares[], int size, int mac) //mac=1 to recon SS_mac and
 	return secret; 
 }
 
-int in_intersection(Share shares[], int t, long k2 ) //returns true/false if reconstructed succesfully
+ZZ_p reconScheme2(Share sharesp[], int size, int mac)
+{
+	ZZ_p prod_in_plain, prod_in_exp, exponent; // prod in plain is the product not in the exponent, while prod in exp is the product in the exponent. Both are intialized to 1
+	prod_in_plain = 1; 
+	prod_in_exp = 1;
+	exponent = 1;
+	ZZ_p converted[size];
+	
+	for(int i = 0; i<size ; i++)
+	{
+		ZZ_p prod_in_expq;
+		{
+			ZZ_pPush push;
+			ZZ q;
+			q=Q;
+			ZZ_p::init(q); //intialize new modulus
+
+			// convert prod_in_exp to the new modulus
+
+			placeholder = conv<long>(prod_in_exp);
+			prod_in_expq = conv<ZZ_p>(placeholder);
+			
+			// switch modulus for shares
+			for (int x=0 ; x<size ; x++)
+			{
+				placeholder = conv<long>(sharesp[x].id);
+				converted[x] = conv<ZZ_p>(placeholder);
+			}
+
+			for(int j=0; j<size; j++)
+			{
+				if(i != j)
+				{
+					prod_in_expq *= converted[j] / (converted[j] - converted[i]);  //perform the product in the exponent
+				}
+			}
+		}
+		
+		placeholder = conv<long>(prod_in_expq);
+		prod_in_exp = conv<ZZ_p>(placeholder);
+
+		if(mac == 1)
+		{
+			placeholder = conv<long>(prod_in_exp);
+			exponent = power(sharesp[i].SS_mac, placeholder);
+			prod_in_plain *= exponent;
+		}
+		else
+		{
+			placeholder = conv<long>(prod_in_exp);
+			exponent = power(sharesp[i].SS, placeholder);
+			prod_in_plain *= exponent;
+		}
+		prod_in_exp = 1;
+	}
+
+	return prod_in_plain;
+}
+
+int in_intersection(Share shares[], int t, long k2) //returns true/false if reconstructed succesfully
 {
 	ZZ_p secret, secret_mac, k2_secret;
-
-	secret=reconScheme1(shares,t,0);
-	secret_mac = reconScheme1(shares,t,1);
+	if(SCHEME == 1)
+	{
+		secret=reconScheme1(shares,t,0);
+		secret_mac = reconScheme1(shares,t,1);
+	}
+	else
+	{
+		secret=reconScheme2(shares,t,0);
+		secret_mac = reconScheme2(shares,t,1);
+	}
 
 	k2_secret = power(secret,k2);
 
 	return k2_secret == secret_mac;
 }
+
 int main()
 {
 	//Initialize modulus 
@@ -107,7 +174,14 @@ int main()
 	if(reconstruct)
 	{
 		cout<< "It reconstruted!\n";
-		cout<<"H(x)="<<reconScheme1(shares,t,0);
+		if (SCHEME == 1)
+		{
+			cout<<"H(x)="<<reconScheme1(shares,t,0);
+		}
+		else
+		{
+			cout<<"H(x)="<<reconScheme2(shares,t,0);
+		}	
 	}
 	else
 	{
