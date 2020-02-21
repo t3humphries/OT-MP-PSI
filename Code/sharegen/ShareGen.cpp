@@ -207,8 +207,8 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 		mac_exp = rep(__mac_exp);
 	}
 
-	ZZ_p secret = NTL::power(h_x, secret_exp);
-	ZZ_p mac= NTL::power(h_x, mac_exp);
+	ZZ_p secret = NTL::power(h_x_alpha, secret_exp);
+	ZZ_p mac= NTL::power(h_x_alpha, mac_exp);
 
 	//////////////////// Element Holder ////////////////////
 
