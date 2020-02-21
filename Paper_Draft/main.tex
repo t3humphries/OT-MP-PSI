@@ -1,0 +1,181 @@
+\documentclass[10pt, sigconf]{acmart}
+\settopmatter{printacmref=false}
+\renewcommand\footnotetextcopyrightpermission[1]{} 
+\usepackage[utf8]{inputenc}
+\usepackage{comment}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{xifthen}
+\usepackage[underline=false]{pgf-umlsd}
+\usepackage{tikz}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{algpseudocode}
+\newcommand{\formatcomment}[1]{\scriptsize\textcolor{blue!25!black}{\texttt{#1}}}
+\newcommand{\InlineComment}[1]{\vspace*{0.5ex}\State\formatcomment{/*\,#1\,*/}\vspace*{0.5ex}}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill\parbox{5.2cm}{\formatcomment{//\,#1}}}
+\algrenewcommand\algorithmicprocedure{\textbf{algorithm}}
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+
+\usepackage[n ,advantage, operators, sets , adversary, landau, probability, notions, logic, ff , mm, primitives, events, complexity, asymptotics, keys]{cryptocode}
+\usepackage{booktabs} % For formal tables
+%\usepackage{color,soul}
+\usepackage{comment}
+\usepackage{amssymb}
+\usepackage[normalem]{ulem} % use normalem to protect \emph
+ \newcommand{\superscript}[1]{\ensuremath{{}^{\textrm{\scriptsize #1}}}}
+ \newcommand{\roughtext}[1]{\begin{color}{SkyBlue}#1\end{color}}
+ \newcommand{\mntext}[1]{\colorbox{SkyBlue}{\begin{color}{black}#1\end{color}}}
+ \newcommand{\mn}[2][]{{\tiny\superscript{\mntext{\arabic{mn}}}}\marginpar{\scriptsize{
+ 			\ifthenelse{\isempty{#1}}
+ 			{\mntext{\parbox{0.95\marginparwidth}{\superscript{\arabic{mn}}~\raggedright{#2}}}}
+ 			{\mntext{\parbox{0.95\marginparwidth}{\superscript{\arabic{mn}}#1 says~:~\raggedright{#2}}}}
+ 		}}\stepcounter{mn}}
+
+\title{Over-Threshold Multi-Party Private Set Intersection}
+\date{}
+\usepackage{natbib}
+\usepackage{graphicx}
+\onecolumn
+
+\begin{document}
+\pagestyle{plain} % removes running headers
+\onecolumn
+\begingroup
+\centering
+{\Huge Over-Threshold Multi-Party Private Set Intersection}\\[3em]
+\endgroup
+% \maketitle
+% \begin{abstract}
+% \end{abstract}
+
+\section{Introduction}
+
+Use case: collaborating network operations centers under different legislations
+
+Brief problem intro
+
+Comparison to Kissner, Song protocol: \\
+- $O(1)$ rounds vs. $O(m)$
+- problem-adaptive communication complexity $O(nmk)$ vs. $O(nm^3)$ \\
+
+Comparison to generic secure computation: \\
+- lower communication complexity $O(nmk)$ vs. $O(nm^3 \log^2 nm)$ -- assuming optimal circuit is $O(nm \log^2 nm)$ \\
+- constant round multi-party protocols not yet practical
+
+SS-OPRF
+
+Two variants: SS in the exponent, communication O(nmk); SS in the base, communication O(nmkt)
+
+Contributions \\
+- new construction of over-threshold multi-party private set intersection protocol with communication ... and security ... \\
+- two secret-shared oblivious pseudo-random function (SS-OPRF) \\
+- practical evaluation?
+
+\section{Problem Description}
+
+$m$ parties, each with a set of size $n$, would like to compute the number of occurences of each element that occurs at least $t$, but nothing else.
+The computation should be secure against a coalition of $k$ semi-honest parties.
+
+\section{Background}
+
+\subsection{OPRF}
+
+$A -> S: x^a$ \\
+$S -> A: x^{as}$ \\
+$A: x^s$
+
+\subsection{Secret Shares}
+
+Shamir secret shares
+
+\subsection{Definition SS-OPRF}
+
+OPRF that outputs secret share of PRF
+
+Note that the ss polynomial needs to be different for every message
+
+\subsection{Paillier and Damgard Jurik Crytposystems}
+
+\section{Protocol Overview}
+\input{Algorithm_Mas}
+
+\section{SS-OPRF}
+
+\subsection{Security Definition}
+
+Obliviousness
+
+Random PRF Output
+
+No reconstruction even given PRF
+
+\subsection{SS-OPRF 1}
+
+Rasoul's construction, secret sharing in the exponent
+
+$A -> S: x^r$ \\
+$S -> A: x^{rSS(c)}$
+$A: x^{SS(c)}$
+
+Not sure I got this right.
+
+Problem reconstruction involves modular exponentiation
+
+\subsection{Security Proof}
+
+\subsection{SS-OPRF 2}
+
+My construction, 2 round protocol
+
+$A -> S: g^r, x^r$ \\
+$S -> A: (g^r)^{\log s} x^{rc}$ \\
+$A -> S: E(((g^r)^{\log s} x^{rc})^{1/r}) = E(s x^c)$ \\
+$S -> A: E(SS(x^c))$
+
+\subsection{Security Proof}
+
+\section{Completing the Protocol}
+
+\subsection{Verifying the Reconstruction of Shares}
+
+Give $x^c$ and $x^{cc'}$, reveal $c'$
+
+\subsection{Distributing S}
+
+Share $c = c_1 c_2 c_3 ...$
+
+Also distribute decryption
+
+\subsection{Reducing the number of possible share combinations}
+
+Use hashing to bin the elements.  Only reconstruct within one bin
+
+\section{Evaluation}
+
+\subsection{SS-OPRF}
+
+Time and communication to compute one SS-OPRF1
+Time and communication to compute one SS-OPRF2
+
+\subsection{Reconstruction}
+
+Time to reconstruct OT-SI in the base
+Time to reconstruct OT-SI in the exponent
+
+\section{Related Work}
+
+Kissner, Song
+
+Generic Secure Computation, PSI via Secure computation
+
+PSI protocols based on OPRF
+
+PSI protocols based on hashing
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
