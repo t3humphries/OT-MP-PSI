@@ -6,8 +6,6 @@ using namespace std;
 using json = nlohmann::json;
 
 ZZ_p hash_(ZZ x, ZZ p){
-	if (x == ZZ(7))
-		return ZZ_p(3123);
 	ZZ_p::init(p);
 	hash<string> ptr_hash;
 	std::stringstream ssa;

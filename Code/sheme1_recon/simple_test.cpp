@@ -164,11 +164,11 @@ int main()
 		cout<< "It reconstruted!\n";
 		if (SCHEME == 1)
 		{
-			cout<<"H(x)="<<reconScheme1(shares,t,0);
+			cout<<"H(x)=" << reconScheme1(shares,t,0) << endl;
 		}
 		else
 		{
-			cout<<"H(x)="<<reconScheme2(shares,t,0);
+			cout<<"H(x)=" << reconScheme2(shares,t,0) << endl;
 		}	
 	}
 	else
