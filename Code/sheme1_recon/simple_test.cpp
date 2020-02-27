@@ -15,12 +15,10 @@ using json = nlohmann::json;
 //TODO: change to command line arg
 const long PRIME = 1000000007;
 const long Q = 500000003;
-const string FILENAME = "../test_cases/ss2_match.json";
-const int SCHEME = 2;  //1 for scheme 1 else scheme 2
+const string FILENAME = "../test_cases/ss1_match.json";
+const int SCHEME = 1;  //1 for scheme 1 else scheme 2
 const int t = 10;
 const long k2 = 5;
-
-ZZ placeholder; // placeholder for conversions
 
 class Share
 {
@@ -80,72 +78,54 @@ ZZ_p reconScheme1(Share shares[], int size, int mac) //mac=1 to recon SS_mac and
 	return secret; 
 }
 
-ZZ_p reconScheme2(Share sharesp[], int size, int mac)
+ZZ_p reconScheme2(Share shares[], int size, int mac)
 {
-	ZZ_p::init(ZZ(PRIME));
-	ZZ_p prod_in_plain, __term; 
-	// ZZ_p prod_in_exp; // prod in plain is the product not in the exponent, while prod in exp is the product in the exponent. Both are intialized to 1
-	prod_in_plain = ZZ_p(1); 
-	// prod_in_exp = 1;
-	__term = ZZ_p(1);
-	// ZZ_p converted[size];
+	ZZ_p secret, temp;
+	ZZ temp2; 
+	secret = ZZ_p(1); 
+	temp = ZZ_p(1);
 	
 	for(int i = 0; i<size ; i++)
 	{
 		{
-			ZZ_pPush push;//(ZZ(Q));
-			// ZZ q;
-			// q=Q;
+			ZZ_pPush push;
 			ZZ_p::init(ZZ(Q)); //intialize new modulus
+
 			ZZ_p prod_in_expq = ZZ_p(1);
-			ZZ_p converted[size];
-
-			// convert prod_in_exp to the new modulus
-
-			// placeholder = conv<ZZ>(prod_in_exp);
-			// prod_in_expq = conv<ZZ_p>(placeholder);
-
+			ZZ_p numerator = ZZ_p(1);
+			ZZ_p denominator = ZZ_p(1);
+			ZZ_p converted_IDs[size];
 			
 			// switch modulus for shares
 			for (int x=0 ; x<size ; x++)
 			{
-				// placeholder = conv<ZZ>(sharesp[x].id);
-				// converted[x] = conv<ZZ_p>(placeholder);
-				conv(converted[x], sharesp[x].id);
+				conv(converted_IDs[x], shares[x].id);
 			}
 
 			for(int j=0; j<size; j++)
 			{
 				if(i != j)
 				{
-					prod_in_expq *= converted[j] / (converted[j] - converted[i]);  //perform the product in the exponent
+					numerator *= converted_IDs[j];
+					denominator *= (converted_IDs[j] - converted_IDs[i]); 
 				}
 			}
-			// cout << prod_in_expq.modulus() << endl;
-			placeholder = conv<ZZ>(prod_in_expq);
-			// prod_in_exp = conv<ZZ_p>(placeholder);
-
+			prod_in_expq = numerator / denominator;
+			temp2 = conv<ZZ>(prod_in_expq);
 		}
 		
-
 		if(mac == 1)
 		{
-			// placeholder = conv<ZZ>(prod_in_exp);
-			// cout << sharesp[i].SS_mac << endl;
-			__term = NTL::power(sharesp[i].SS_mac, placeholder);
-			prod_in_plain *= __term;
+			temp = NTL::power(shares[i].SS_mac, temp2);
+			secret *= temp;
 		}
 		else
 		{
-			// placeholder = conv<ZZ>(prod_in_exp);
-			// cout << placeholder << endl;
-			__term = NTL::power(sharesp[i].SS, placeholder);
-			prod_in_plain *= __term;
+			temp = NTL::power(shares[i].SS, temp2);
+			secret *= temp;
 		}
-		// prod_in_exp = 1;
 	}
-
-	return prod_in_plain;
+	return secret;
 }
 
 int in_intersection(Share shares[], int t, long k2) //returns true/false if reconstructed succesfully
@@ -161,9 +141,6 @@ int in_intersection(Share shares[], int t, long k2) //returns true/false if reco
 		secret=reconScheme2(shares,t,0);
 		secret_mac = reconScheme2(shares,t,1);
 	}
-
-	cout << secret << endl;
-
 	k2_secret = power(secret,k2);
 
 	return k2_secret == secret_mac;
