@@ -13,6 +13,8 @@ using json = nlohmann::json;
 // };
 
 ZZ_p hash_(ZZ x, ZZ p){
+	if (x == ZZ(7))
+		return ZZ_p(3123);
 	ZZ_p::init(p);
 	hash<string> ptr_hash;
 	std::stringstream ssa;
@@ -171,26 +173,34 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 	return ans;
 }
 
-Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
+Share_d ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
 
 	//////////////////// Element Holder ////////////////////
 	ZZ_p::init(p);
 	ZZ_p h_x = hash_(X, p);
-	h_x = h_x * h_x;
+	// h_x = h_x * h_x;
 	ZZ alpha, alpha_inv;
 	{
-		ZZ_pPush push(q);
+		ZZ_pPush push(p-1);
 		ZZ_p __temp = random_ZZ_p();
+		// ZZ_p __temp = ZZ_p(1);
+		while  (GCD(rep(__temp), ZZ(p-1)) > 1) {
+			__temp = random_ZZ_p();
+		}
+		// ZZ_p __ans = ZZ_p(__temp);
 		alpha = rep(__temp);
 		__temp = 1 / __temp;
+		// __ans *= __temp;
 		alpha_inv = rep(__temp);
+		// cout << __ans << endl;
 	}
 	ZZ_p h_x_alpha = NTL::power(h_x, alpha);
 
 	//////////////////// Key Holder ////////////////////
 	ZZ secret_exp, mac_exp;
 	{
-		ZZ_pPush(q);
+		ZZ_pPush push(p-1);
+		// ZZ_p::init(q);
 		ZZ_p __secret_exp, __mac_exp, id_pows, __temp;
 		conv(__secret_exp, key);
 		conv(__mac_exp, key * key_mac);
@@ -207,22 +217,54 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 		mac_exp = rep(__mac_exp);
 	}
 
+	// cout << secret_exp << endl;
+	// cout << mac_exp << endl;
+
 	ZZ_p secret = NTL::power(h_x_alpha, secret_exp);
 	ZZ_p mac= NTL::power(h_x_alpha, mac_exp);
+	// cout << secret << endl;
 
 	//////////////////// Element Holder ////////////////////
 
 	secret = NTL::power(secret, alpha_inv);
 	mac = NTL::power(mac, alpha_inv);
 
-	Share ans = {
+	// cout << secret << endl;
+
+	Share_d ans = {
 		.id = id,
 		.bin = ZZ(1),
 		.SS = secret,
-		.SS_mac = mac
+		.SS_mac = mac,
+		.h = h_x
 	};
 	return ans;
 }
+
+Share_d ShareGen_2_clear(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
+
+}
+
+
+// int main(){
+// 	int p = 1000000007;
+// 	int q = 500000003;
+// 	int id=1, X=1, t=3, key=4, key_mac=1;
+// 	ZZ r1 [2] = {ZZ(3), ZZ(1)};
+// 	ZZ r2 [2] = {ZZ(3), ZZ(1)};
+// 	Share_d ans = ShareGen_2(ZZ(p), ZZ(q), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
+// 	cout << ans.SS << endl << ans.SS_mac << endl;
+// 	cout << ans.SS * NTL::power(ans.h, key_mac * key - key ) << endl;
+// }
+
+
+// int main(){
+// 	int p = 1000000007;
+// 	ZZ_p::init(ZZ(p));
+// 	ZZ_p ans = hash_(ZZ(7), ZZ(p));
+// 	ans = ans * ans;
+// 	cout << NTL::power(ans, ZZ(4)) << endl;
+// }
 
 int main()
 {
@@ -235,27 +277,35 @@ int main()
 	// ZZ r2 [2] = {ZZ(1), ZZ(1)};
 	// Share ans = ShareGen_1(ZZ(p), ZZ_p(3), ZZ(id), ZZ(bin), 3, ZZ(key), ZZ(key_mac), r1, r2);
 	json j;
-	Share ans;
+	Share ans_n;
+	Share_d ans;
 	ZZ r1[t-1], r2[t-1];
 	stringstream ssa;
 	ofstream o1("../test_cases/ss1_match.json");
 	ofstream o2("../test_cases/ss2_match.json");
-
+	
+	// long __nums1[2] = {24, 33};
+	// long __nums2[2] = {715157332, 924071444};
 	for (int i = 0; i < t-1; i++){
-		r1[i] = rand() % 1000;
-		r2[i] = rand() % 1000;
+		r1[i] = rand() % 1000 +1;
+		r2[i] = rand() % 1000 +1;
+		// r1[i] = ZZ(__nums1[i]);
+		// r2[i] = ZZ(__nums2[i]);
 	}
 	o1 << "[" << endl;
 	o2 << "[" << endl;
 	for (int i = 0; i < t; i++){
-		id = rand() % 100;
-		ans = ShareGen_1(ZZ(p), ZZ_p(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
+		id = rand() % 100 + 1;
+		// id = i+1;
+
+		// id = 384;
+		ans_n = ShareGen_1(ZZ(p), ZZ_p(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
 		j["id"] = id;
-		ssa << ans.bin;
+		ssa << ans_n.bin;
 		j["bin"] = ssa.str().c_str(); ssa.str("");
-		ssa << ans.SS;
+		ssa << ans_n.SS;
 		j["SS"] = ssa.str().c_str(); ssa.str("");
-		ssa << ans.SS_mac;
+		ssa << ans_n.SS_mac;
 		j["SS_MAC"] = ssa.str().c_str(); ssa.str("");
 		o1 << j;
 		if (i != t-2){o1 << ",";}
@@ -269,8 +319,9 @@ int main()
 		j["SS"] = ssa.str().c_str(); ssa.str("");
 		ssa << ans.SS_mac;
 		j["SS_MAC"] = ssa.str().c_str(); ssa.str("");
+		cout << j << endl;
 		o2 << j;
-		if (i != t-2){o2 << ",";}
+		if (i != t-1){o2 << ",";}
 		o2 << endl;
 
 	}

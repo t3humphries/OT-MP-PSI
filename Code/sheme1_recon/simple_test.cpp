@@ -20,7 +20,7 @@ const int SCHEME = 2;  //1 for scheme 1 else scheme 2
 const int t = 10;
 const long k2 = 5;
 
-long placeholder; // placeholder for conversions
+ZZ placeholder; // placeholder for conversions
 
 class Share
 {
@@ -82,31 +82,36 @@ ZZ_p reconScheme1(Share shares[], int size, int mac) //mac=1 to recon SS_mac and
 
 ZZ_p reconScheme2(Share sharesp[], int size, int mac)
 {
-	ZZ_p prod_in_plain, prod_in_exp, exponent; // prod in plain is the product not in the exponent, while prod in exp is the product in the exponent. Both are intialized to 1
-	prod_in_plain = 1; 
-	prod_in_exp = 1;
-	exponent = 1;
-	ZZ_p converted[size];
+	ZZ_p::init(ZZ(PRIME));
+	ZZ_p prod_in_plain, __term; 
+	// ZZ_p prod_in_exp; // prod in plain is the product not in the exponent, while prod in exp is the product in the exponent. Both are intialized to 1
+	prod_in_plain = ZZ_p(1); 
+	// prod_in_exp = 1;
+	__term = ZZ_p(1);
+	// ZZ_p converted[size];
 	
 	for(int i = 0; i<size ; i++)
 	{
-		ZZ_p prod_in_expq;
 		{
-			ZZ_pPush push;
-			ZZ q;
-			q=Q;
-			ZZ_p::init(q); //intialize new modulus
+			ZZ_pPush push;//(ZZ(Q));
+			// ZZ q;
+			// q=Q;
+			ZZ_p::init(ZZ(Q)); //intialize new modulus
+			ZZ_p prod_in_expq = ZZ_p(1);
+			ZZ_p converted[size];
 
 			// convert prod_in_exp to the new modulus
 
-			placeholder = conv<long>(prod_in_exp);
-			prod_in_expq = conv<ZZ_p>(placeholder);
+			// placeholder = conv<ZZ>(prod_in_exp);
+			// prod_in_expq = conv<ZZ_p>(placeholder);
+
 			
 			// switch modulus for shares
 			for (int x=0 ; x<size ; x++)
 			{
-				placeholder = conv<long>(sharesp[x].id);
-				converted[x] = conv<ZZ_p>(placeholder);
+				// placeholder = conv<ZZ>(sharesp[x].id);
+				// converted[x] = conv<ZZ_p>(placeholder);
+				conv(converted[x], sharesp[x].id);
 			}
 
 			for(int j=0; j<size; j++)
@@ -116,24 +121,28 @@ ZZ_p reconScheme2(Share sharesp[], int size, int mac)
 					prod_in_expq *= converted[j] / (converted[j] - converted[i]);  //perform the product in the exponent
 				}
 			}
+			// cout << prod_in_expq.modulus() << endl;
+			placeholder = conv<ZZ>(prod_in_expq);
+			// prod_in_exp = conv<ZZ_p>(placeholder);
+
 		}
 		
-		placeholder = conv<long>(prod_in_expq);
-		prod_in_exp = conv<ZZ_p>(placeholder);
 
 		if(mac == 1)
 		{
-			placeholder = conv<long>(prod_in_exp);
-			exponent = power(sharesp[i].SS_mac, placeholder);
-			prod_in_plain *= exponent;
+			// placeholder = conv<ZZ>(prod_in_exp);
+			// cout << sharesp[i].SS_mac << endl;
+			__term = NTL::power(sharesp[i].SS_mac, placeholder);
+			prod_in_plain *= __term;
 		}
 		else
 		{
-			placeholder = conv<long>(prod_in_exp);
-			exponent = power(sharesp[i].SS, placeholder);
-			prod_in_plain *= exponent;
+			// placeholder = conv<ZZ>(prod_in_exp);
+			// cout << placeholder << endl;
+			__term = NTL::power(sharesp[i].SS, placeholder);
+			prod_in_plain *= __term;
 		}
-		prod_in_exp = 1;
+		// prod_in_exp = 1;
 	}
 
 	return prod_in_plain;
@@ -141,7 +150,7 @@ ZZ_p reconScheme2(Share sharesp[], int size, int mac)
 
 int in_intersection(Share shares[], int t, long k2) //returns true/false if reconstructed succesfully
 {
-	ZZ_p secret, secret_mac, k2_secret;
+	ZZ_p secret, secret_mac, k2_secret, k2_mac;
 	if(SCHEME == 1)
 	{
 		secret=reconScheme1(shares,t,0);
@@ -152,6 +161,8 @@ int in_intersection(Share shares[], int t, long k2) //returns true/false if reco
 		secret=reconScheme2(shares,t,0);
 		secret_mac = reconScheme2(shares,t,1);
 	}
+
+	cout << secret << endl;
 
 	k2_secret = power(secret,k2);
 

@@ -78,20 +78,25 @@ def ShareGen_1(context, id, X, t, key, key_mac, randoms, randoms_mac):
     }
 
 
-def ShareGen_2(context, id, X, t, key, key_mac, randoms, randoms_mac):
+def ShareGen_2(context, id, X, t, key, key_mac, randoms, randoms_mac, alpha=None):
     if len(randoms) + 1 != t:
         print("Insufficient Randomness")
         return None
 
     ############## Element Holder ##############
+    if alpha != None:
+        h_x = Mod(context.h(X), context.p)
+        h_x = h_x * h_x
+        # h_x = Mod(2, context.p) # For testing, set this value
 
-    h_x = Mod(context.h(X), context.p)
-    # h_x = Mod(2, context.p) # For testing, set this value
+        alpha = random.randint(1, context.q).__int__()  # relatively prime to q
+        alpha_inv = (1 // Mod(alpha, context.q)).__int__()
 
-    alpha = random.randint(1, context.q).__int__()  # relatively prime to q
-    alpha_inv = (1 // Mod(alpha, context.q)).__int__()
+        h_x_alpha = h_x ** alpha.__int__()
+    
+    else:
+        h_x_alpha = Mod(context.h(X), context.p)
 
-    h_x_alpha = h_x ** alpha.__int__()
 
     ############## Key Holder ##############
 
@@ -109,8 +114,13 @@ def ShareGen_2(context, id, X, t, key, key_mac, randoms, randoms_mac):
 
     ############## Element Holder ##############
 
-    secret = (secret_alpha ** alpha_inv).__int__()
-    secret_mac = (secret_mac_alpha ** alpha_inv).__int__()
+    if alpha != None:
+        secret = (secret_alpha ** alpha_inv).__int__()
+        secret_mac = (secret_mac_alpha ** alpha_inv).__int__()
+
+    else:
+        secret = secret_alpha
+        secret_mac = secret_mac_alpha
 
     return {
         "id": id,
