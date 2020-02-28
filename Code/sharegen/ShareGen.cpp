@@ -5,12 +5,16 @@ using namespace NTL;
 using namespace std;
 using json = nlohmann::json;
 
+string ZZ_to_str(ZZ zz){
+	std::stringstream ssa;
+	ssa << zz;
+	return ssa.str();
+}
+
 ZZ_p hash_(ZZ x, ZZ p){
 	ZZ_p::init(p);
 	hash<string> ptr_hash;
-	std::stringstream ssa;
-	ssa << x;
-	return ZZ_p(ptr_hash(ssa.str()));
+	return ZZ_p(ptr_hash(ZZ_to_str(x)));
 }
 
 void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
@@ -158,8 +162,8 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 	Share ans = {
 		.id = id,
 		.bin = ZZ(1),
-		.SS = secret_share,
-		.SS_mac = mac_share
+		.SS = rep(secret_share),
+		.SS_mac = rep(mac_share)
 	};
 	return ans;
 }
@@ -215,62 +219,8 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 	Share ans = {
 		.id = id,
 		.bin = ZZ(1),
-		.SS = secret,
-		.SS_mac = mac,
+		.SS = rep(secret),
+		.SS_mac = rep(mac),
 	};
 	return ans;
-}
-
-
-int main()
-{
-	int p = 1000000007;
-	int q = 500000003;
-	int g = 3;
-	int id, X=7, Y=8, t=10, key=4, key_mac=5;
-	ZZ_p::init(ZZ(p));
-	json j;
-	Share ans;
-	ZZ r1[t-1], r2[t-1];
-	stringstream ssa;
-	ofstream o1("../test_cases/ss1_match.json");
-	ofstream o2("../test_cases/ss2_match.json");
-	
-	for (int i = 0; i < t-1; i++){
-		r1[i] = rand() % 1000 +1;
-		r2[i] = rand() % 1000 +1;
-	}
-	o1 << "[" << endl;
-	o2 << "[" << endl;
-	for (int i = 0; i < t; i++){
-		id = rand() % 100 + 1;
-		ans = ShareGen_1(ZZ(p), ZZ_p(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
-		j["id"] = id;
-		ssa << ans.bin;
-		j["bin"] = ssa.str().c_str(); ssa.str("");
-		ssa << ans.SS;
-		j["SS"] = ssa.str().c_str(); ssa.str("");
-		ssa << ans.SS_mac;
-		j["SS_MAC"] = ssa.str().c_str(); ssa.str("");
-		o1 << j;
-		if (i != t-1){o1 << ",";}
-		o1 << endl;
-
-		ans = ShareGen_2(ZZ(p), ZZ(q), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
-		j["id"] = id;
-		ssa << ans.bin;
-		j["bin"] = ssa.str().c_str(); ssa.str("");
-		ssa << ans.SS;
-		j["SS"] = ssa.str().c_str(); ssa.str("");
-		ssa << ans.SS_mac;
-		j["SS_MAC"] = ssa.str().c_str(); ssa.str("");
-		cout << j << endl;
-		o2 << j;
-		if (i != t-1){o2 << ",";}
-		o2 << endl;
-
-	}
-	o1 << "]";
-	o2 << "]";
-
 }
