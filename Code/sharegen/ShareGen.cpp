@@ -5,6 +5,21 @@ using namespace NTL;
 using namespace std;
 using json = nlohmann::json;
 
+Share::Share(ZZ id_in, ZZ bin_in, ZZ SS_in, ZZ SS_mac_in){
+	id = id_in;
+	bin = bin_in;
+	SS = SS_in;
+	SS_mac = SS_mac_in;
+}
+
+Share::Share(ZZ id_in, ZZ bin_in, ZZ p){
+	id = id_in;
+	bin = bin_in;
+	ZZ_p::init(p);
+	SS = rep(random_ZZ_p());
+	SS_mac = rep(random_ZZ_p());
+}
+
 string ZZ_to_str(ZZ zz){
 	std::stringstream ssa;
 	ssa << zz;
@@ -161,13 +176,7 @@ Share ShareGen_1(ZZ p, ZZ g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 	mpz_t_to_ZZ_p(secret_share, __mpz_secret);
 	mpz_t_to_ZZ_p(mac_share, __mpz_mac);
 
-	Share ans = {
-		.id = id,
-		.bin = rep(hash_(X, ZZ(num_bins))),
-		.SS = rep(secret_share),
-		.SS_mac = rep(mac_share)
-	};
-	return ans;
+	return Share(id,rep(hash_(X, ZZ(num_bins))),rep(secret_share),rep(mac_share));
 }
 
 Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[], int num_bins){
@@ -218,11 +227,5 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 	secret = NTL::power(secret, alpha_inv);
 	mac = NTL::power(mac, alpha_inv);
 
-	Share ans = {
-		.id = id,
-		.bin = rep(hash_(X, ZZ(num_bins))),
-		.SS = rep(secret),
-		.SS_mac = rep(mac),
-	};
-	return ans;
+	return Share(id,rep(hash_(X, ZZ(num_bins))),rep(secret),rep(mac));
 }

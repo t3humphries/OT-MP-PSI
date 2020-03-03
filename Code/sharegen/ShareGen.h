@@ -7,11 +7,15 @@
 #include <string>
 
 // class Share;
-struct Share {
+class Share {
+    public:
 	NTL::ZZ id;
 	NTL::ZZ bin;
 	NTL::ZZ SS;
 	NTL::ZZ SS_mac;
+    Share(){}
+    Share(NTL::ZZ id_in, NTL::ZZ bin_in, NTL::ZZ SS_in, NTL::ZZ SS_mac_in);
+    Share(NTL::ZZ id_in, NTL::ZZ bin_in, NTL::ZZ p); //For generating random nonsense shares for padding
 };
 
 std::string ZZ_to_str(NTL::ZZ zz);
