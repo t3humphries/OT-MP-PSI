@@ -35,9 +35,11 @@ void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 	conv(__out, __temp_ZZ);
 }
 
-Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
+Share ShareGen_1(ZZ p, ZZ g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[], int num_bins){
 
 	ZZ_p::init(p);
+	ZZ_p g_p;
+	conv(g_p, g);
 	//////////////////// Element Holder ////////////////////
 
 	ZZ_p h_x = hash_(X, p);
@@ -54,7 +56,7 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 	}
 
 	ZZ_p h_x_alpha = NTL::power(h_x, alpha);
-	ZZ_p g_alpha = NTL::power(g, alpha);
+	ZZ_p g_alpha = NTL::power(g_p, alpha);
 	
 	//////////////////// Key Holder ////////////////////
 
@@ -66,7 +68,7 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 		r = rep(__temp);
 	}
 
-	R = NTL::power(g, r);
+	R = NTL::power(g_p, r);
 	// R_inverse = NTL::power(g, -r);
 	R_inverse = 1 / R;
 	R_alpha = NTL::power(g_alpha, r);
@@ -161,14 +163,14 @@ Share ShareGen_1(ZZ p, ZZ_p g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ random
 
 	Share ans = {
 		.id = id,
-		.bin = ZZ(1),
+		.bin = rep(hash_(X, ZZ(num_bins))),
 		.SS = rep(secret_share),
 		.SS_mac = rep(mac_share)
 	};
 	return ans;
 }
 
-Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[]){
+Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[], int num_bins){
 
 	//////////////////// Element Holder ////////////////////
 	ZZ_p::init(p);
@@ -218,7 +220,7 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 
 	Share ans = {
 		.id = id,
-		.bin = ZZ(1),
+		.bin = rep(hash_(X, ZZ(num_bins))),
 		.SS = rep(secret),
 		.SS_mac = rep(mac),
 	};

@@ -19,14 +19,14 @@ NTL::ZZ_p hash_(NTL::ZZ_p x, NTL::ZZ p);
 void ZZ_p_to_mpz_t(mpz_t __out, NTL::ZZ_p& num);
 void mpz_t_to_ZZ_p(NTL::ZZ_p& __out, mpz_t num);
 Share ShareGen_1(
-    NTL::ZZ p, NTL::ZZ_p g,
+    NTL::ZZ p, NTL::ZZ g,
     NTL::ZZ id, NTL::ZZ X, int t,
     NTL::ZZ key, NTL::ZZ key_mac,
-    NTL::ZZ randoms[], NTL::ZZ randoms_mac[]
+    NTL::ZZ randoms[], NTL::ZZ randoms_mac[], int num_bins
 );
 Share ShareGen_2(
     NTL::ZZ p, NTL::ZZ q,
     NTL::ZZ id, NTL::ZZ X, int t,
     NTL::ZZ key, NTL::ZZ key_mac,
-    NTL::ZZ randoms[], NTL::ZZ randoms_mac[]
+    NTL::ZZ randoms[], NTL::ZZ randoms_mac[], int num_bins
 );

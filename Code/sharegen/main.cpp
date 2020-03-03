@@ -27,15 +27,15 @@ int main()
 	for (int i = 0; i < t; i++){
 		id = rand() % 100 + 1;
 
-		ans = ShareGen_1(ZZ(p), ZZ_p(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
+		ans = ShareGen_1(ZZ(p), ZZ(g), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2, 10);
 		jsons_1[i]["id"] = id;
-		jsons_1[i]["bin"] = ZZ_to_str(ans.bin);
+		jsons_1[i]["bin"] = atol(ZZ_to_str(ans.bin).c_str());
 		jsons_1[i]["SS"] = ZZ_to_str(ans.SS);
 		jsons_1[i]["SS_MAC"] = ZZ_to_str(ans.SS_mac);
 
-		ans = ShareGen_2(ZZ(p), ZZ(q), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2);
+		ans = ShareGen_2(ZZ(p), ZZ(q), ZZ(id), ZZ(X), t, ZZ(key), ZZ(key_mac), r1, r2, 10);
 		jsons_2[i]["id"] = id;
-		jsons_2[i]["bin"] = ZZ_to_str(ans.bin);
+		jsons_2[i]["bin"] = atol(ZZ_to_str(ans.bin).c_str());
 		jsons_2[i]["SS"] = ZZ_to_str(ans.SS);
 		jsons_2[i]["SS_MAC"] = ZZ_to_str(ans.SS_mac);
 
