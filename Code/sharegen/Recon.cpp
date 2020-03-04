@@ -7,6 +7,7 @@ Very simple test file that takes in a single json of shares and attempts to reco
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace NTL;
@@ -28,6 +29,56 @@ class Share
 	ZZ_p SS_mac;
 	Share(){}
 };
+
+class Combinations {
+public:
+    Combinations(std::vector<int> elems, long n, long r)
+        : elements{elems}
+        , n{n}
+        , r{r}
+    {}
+
+    bool next() {
+        int lastNotEqualOffset = r - 1;
+        while (elements[lastNotEqualOffset] == n - r + (lastNotEqualOffset + 1)) {
+            --lastNotEqualOffset;
+        }
+        if (lastNotEqualOffset < 0) {
+            return false;
+        }
+        ++elements[lastNotEqualOffset];
+        for (int i = lastNotEqualOffset + 1; i < r; ++i) {
+            elements[i] = elements[lastNotEqualOffset] + (i - lastNotEqualOffset);
+        }
+        return true;
+    }
+    std::vector<int> getElements()
+    {
+        return elements;
+    }
+
+private:
+    std::vector<int> elements;
+    int n;
+    int r;
+};
+
+
+void mainLogic(){
+	long m = 10; //TODO replace
+	long t = 5;  //TODO replace
+	std::vector<int> startingPoint(t);
+	for(int i = 0 ; i < t ; i++)
+	{
+		startingPoint[i] = i;
+	} 
+    Combinations comb{startingPoint, m, t};
+    std::vector<int> chosenIndexs;
+    do {
+        chosenIndexs=comb.getElements();
+		//do recon on the users in chosen indexs
+    } while (comb.next());
+}
 
 void readFile(string filename,Share shares[], int size) //Reads a single file and makes an array of Shares out of it
 {	
