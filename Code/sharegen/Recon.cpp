@@ -59,24 +59,48 @@ public:
 
 private:
     std::vector<int> elements;
-    int n;
-    int r;
+    long n;
+    long r;
 };
 
+int incBinIndexs(std::vector<int> binIndexs, long t, long binSize)
+{
+	long i = t;
+	do
+	{
+		if(i == 0)
+		{
+			return 0;
+		}
+		i = i - 1;
+		binIndexs[i] = (binIndexs[i] + 1) % binSize;
+	} while(binIndexs[i] = 0);
+	return 1;
+}
 
 void mainLogic(){
 	long m = 10; //TODO replace
 	long t = 5;  //TODO replace
+	long binSize = 2; //TODO replace
 	std::vector<int> startingPoint(t);
 	for(int i = 0 ; i < t ; i++)
 	{
 		startingPoint[i] = i;
 	} 
     Combinations comb{startingPoint, m, t};
-    std::vector<int> chosenIndexs;
+    std::vector<int> chosenUsers;
     do {
-        chosenIndexs=comb.getElements();
+        chosenUsers=comb.getElements();
 		//do recon on the users in chosen indexs
+		std::vector<int> binIndexs(binSize);
+		for(int i = 0 ; i < binSize ; i++)
+		{
+			binIndexs[i] = 0;
+		} 
+		do{
+			//Do recon on chosen users bins (from chosenUsers) using the an element from each bin (from binIndexs)
+
+		}while(incBinIndexs(binIndexs,t,binSize));
     } while (comb.next());
 }
 
