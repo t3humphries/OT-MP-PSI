@@ -1,3 +1,6 @@
+#ifndef __SHAREGEN__
+#define __SHAREGEN__
+
 #include <NTL/ZZ_p.h>
 #include <iostream>
 #include <gmp.h>    // gmp is included implicitly
@@ -34,3 +37,5 @@ Share ShareGen_2(
     NTL::ZZ key, NTL::ZZ key_mac,
     NTL::ZZ randoms[], NTL::ZZ randoms_mac[], int num_bins
 );
+
+#endif
