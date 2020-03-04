@@ -11,8 +11,15 @@
 #include <time.h>
 #include <vector>
 
-// class Share;
-class Share {
+class Config{
+    public:
+    int m;
+    int num_bins;
+    int max_bin_size;
+    int t;
+};
+
+class Share{
     public:
 	NTL::ZZ id;
 	NTL::ZZ bin;
@@ -46,15 +53,26 @@ class ContextScheme2{
         q = NTL::ZZ((p-1)/2);
         t = tt;
     }
+    ContextScheme2(int pp, int qq, int tt){
+        p = NTL::ZZ(pp);
+        q = NTL::ZZ(qq);
+        t = tt;
+    }
 };
 
 class KeyholderContext{
     public:
     NTL::ZZ key;
     NTL::ZZ key_mac;
-    NTL::ZZ randoms[];
-    NTL::ZZ randoms_mac[];
+    NTL::ZZ* randoms;
+    NTL::ZZ* randoms_mac;
     KeyholderContext(){}
+    KeyholderContext(int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]){
+        key = NTL::ZZ(__key);
+        key_mac = NTL::ZZ(__key_mac);
+        randoms = __rands;
+        randoms_mac = __rands_mac;
+    }
 
     void initialize_context(NTL::ZZ q){
         NTL::ZZ_p::init(q);

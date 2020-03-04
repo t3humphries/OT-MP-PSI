@@ -50,8 +50,10 @@ void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 	conv(__out, __temp_ZZ);
 }
 
-Share ShareGen_1(ZZ p, ZZ g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[], int num_bins){
-
+Share ShareGen_1(
+    ContextScheme1 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins){
+	ZZ p = public_context.p, g = public_context.g;
+	int t = public_context.t;
 	ZZ_p::init(p);
 	ZZ_p g_p;
 	conv(g_p, g);
@@ -88,16 +90,16 @@ Share ShareGen_1(ZZ p, ZZ g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 	R_inverse = 1 / R;
 	R_alpha = NTL::power(g_alpha, r);
 
-    ZZ_p masked_secret_alpha = R_alpha * NTL::power(h_x_alpha, key);
+    ZZ_p masked_secret_alpha = R_alpha * NTL::power(h_x_alpha, keyholder_context.key);
     ZZ_p masked_coefficients_alpha[t-1];
 	for (int i = 0; i < t-1; i++){
-		masked_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, randoms[i]);
+		masked_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, keyholder_context.randoms[i]);
 	}
 
-    ZZ_p masked_mac_alpha = R_alpha * NTL::power(h_x_alpha, key * key_mac);
+    ZZ_p masked_mac_alpha = R_alpha * NTL::power(h_x_alpha, keyholder_context.key * keyholder_context.key_mac);
     ZZ_p masked_mac_coefficients_alpha[t-1];
 	for (int i = 0; i < t-1; i++){
-		masked_mac_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, randoms_mac[i]);
+		masked_mac_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, keyholder_context.randoms_mac[i]);
 	}
 
 	//////////////////// Element Holder ////////////////////
@@ -138,7 +140,7 @@ Share ShareGen_1(ZZ p, ZZ g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
     hcs_random *hr = hcs_init_random();
 
     // Generate a key pair with modulus of size 2048 bits
-    pcs_generate_key_pair(pk, vk, hr, 2048 + 80);
+    pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
 
     pcs_encrypt(pk, hr, __mpz_secret, __mpz_secret);
 	pcs_encrypt(pk, hr, __mpz_mac, __mpz_mac);
@@ -179,12 +181,14 @@ Share ShareGen_1(ZZ p, ZZ g, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 	return Share(id,rep(hash_(X, ZZ(num_bins))),rep(secret_share),rep(mac_share));
 }
 
-Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[], ZZ randoms_mac[], int num_bins){
-
+Share ShareGen_2(
+    ContextScheme2 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
+){
 	//////////////////// Element Holder ////////////////////
+	ZZ p = public_context.p, q = public_context.q;
+	int t = public_context.t;
 	ZZ_p::init(p);
 	ZZ_p h_x = hash_(X, p);
-	// h_x = h_x * h_x;
 	ZZ alpha, alpha_inv;
 	{
 		ZZ_pPush push(p-1);
@@ -204,13 +208,13 @@ Share ShareGen_2(ZZ p, ZZ q, ZZ id, ZZ X, int t, ZZ key, ZZ key_mac, ZZ randoms[
 		ZZ_pPush push(p-1);
 		// ZZ_p::init(q);
 		ZZ_p __secret_exp, __mac_exp, id_pows, __temp;
-		conv(__secret_exp, key);
-		conv(__mac_exp, key * key_mac);
+		conv(__secret_exp, keyholder_context.key);
+		conv(__mac_exp, keyholder_context.key * keyholder_context.key_mac);
 		conv(id_pows, id);
 		for (int i = 0; i < t-1; i++){
-			conv(__temp, randoms[i]);
+			conv(__temp, keyholder_context.randoms[i]);
 			__secret_exp += id_pows * __temp;
-			conv(__temp, randoms_mac[i]);
+			conv(__temp, keyholder_context.randoms_mac[i]);
 			__mac_exp += id_pows * __temp;
 			conv(__temp, id);
 			id_pows *= __temp;

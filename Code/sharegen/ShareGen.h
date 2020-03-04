@@ -11,20 +11,12 @@
 #include "psi_utils.h"
 
 std::string ZZ_to_str(NTL::ZZ zz);
-NTL::ZZ_p hash_(NTL::ZZ_p x, NTL::ZZ p);
-void ZZ_p_to_mpz_t(mpz_t __out, NTL::ZZ_p& num);
-void mpz_t_to_ZZ_p(NTL::ZZ_p& __out, mpz_t num);
+NTL::ZZ_p hash_(NTL::ZZ x, NTL::ZZ p);
 Share ShareGen_1(
-    NTL::ZZ p, NTL::ZZ g,
-    NTL::ZZ id, NTL::ZZ X, int t,
-    NTL::ZZ key, NTL::ZZ key_mac,
-    NTL::ZZ randoms[], NTL::ZZ randoms_mac[], int num_bins
+    ContextScheme1 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
 );
 Share ShareGen_2(
-    NTL::ZZ p, NTL::ZZ q,
-    NTL::ZZ id, NTL::ZZ X, int t,
-    NTL::ZZ key, NTL::ZZ key_mac,
-    NTL::ZZ randoms[], NTL::ZZ randoms_mac[], int num_bins
+    ContextScheme2 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
 );
 
 #endif
