@@ -7,7 +7,7 @@
 #include <sstream>
 #include <time.h>
 #include <vector>
-#include "../sharegen/utils.h"
+#include "../sharegen/psi_utils.h"
 #include "../sharegen/ShareGen.h"
 
 using namespace NTL;
@@ -63,15 +63,7 @@ vector<Share>* generate_shares_1(
         shares_bins[i] = vector<Share>(0);
     }
     for (int i = 0; i< size_of_set; i++){
-        share_x = ShareGen_1(
-            public_context.p,
-            public_context.g,
-            ZZ(idd),
-            ZZ(elements_list[i]),
-            public_context.t,
-            keyholder_context.key, keyholder_context.key_mac,
-            keyholder_context.randoms, keyholder_context.randoms_mac, num_bins
-        );
+        share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
     }
     //padding the bins
     for (int i=0;i<num_bins;i++){
