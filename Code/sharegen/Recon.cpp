@@ -188,12 +188,17 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 			{
 				toRecon[i] = shares[chosenUsers[i]][binIndexs[i]];
 			}
-
 			secret = reconScheme1(toRecon, context, 0);
 			mac = reconScheme1(toRecon, context, 1);
-			if(power(secret,k2) == mac) //If recontructs add to the list toReturn
+			if(NTL::power(secret,k2) == mac) //If recontructs add to the list toReturn
 			{
-				toReturn.push_back(rep(secret));
+				bool alreadyFound = false;
+				for (int k=0;k<toReturn.size();k++){
+					if (toReturn[k] == rep(secret)){
+						alreadyFound=true; break;
+					}
+				}
+				if (!alreadyFound) toReturn.push_back(rep(secret));
 			}
 
 		}while(incBinIndexs(binIndexs,context.t,max_bin_size));

@@ -61,8 +61,11 @@ vector<vector<Share>> generate_shares_1(
     for (int i=0;i<num_bins;i++){
         shares_bins.push_back(vector<Share>(0));
     }
+    int __index;
     for (int i = 0; i< size_of_set; i++){
         share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
+        conv(__index, share_x.bin);
+        shares_bins[__index].push_back(share_x);
     }
     //padding the bins
     for (int i=0;i<num_bins;i++){
@@ -75,16 +78,16 @@ vector<vector<Share>> generate_shares_1(
 
 vector<int> read_elements_to_vector(string filename){
     //TODO:return the vector of elements in the file
-    vector<int> ans = vector<int>(7);
-    for (int i=0;i<7;i++) ans[i]=i;
+    vector<int> ans = vector<int>(10);
+    for (int i=0;i<10;i++) ans[i]=i+1;
     // rand()%10000;
     return ans;
 }
 
 void run_benchmark(string dirname){
 
-    int p = 1000000007, g=3, m=10, n=100, t=2;
-    generate_benchmark_context(m,n,t,"benchmark_0000");
+    int p = 1000000007, g=3, m=10, n=10, t=2, num_bins=5, max_bin_size=4, k2=5;
+    // generate_benchmark_context(m,n,t,"benchmark_0000");
 
     ContextScheme1 c1(p, g, t);
 
@@ -102,38 +105,36 @@ void run_benchmark(string dirname){
     vector<vector<Share>> __bin_1_shares(0);
     vector<vector<Share>> __bin_2_shares(0);
     vector<vector<Share>> __bin_3_shares(0);
+    vector<vector<Share>> __bin_4_shares(0);
+
     for (int i=0;i<m;i++){
         cout << "generating for person " << i << endl;
         current_time = time(NULL);
         //read the elements of this person
-        bins_shares = generate_shares_1(xx, rand()%1000+1, 4, 7, c1, keyholder_context);
-        // for (int j=0;j<7;j++){
-        //     cout << bins_shares[0][j].SS << endl;
-        // }
+        bins_shares = generate_shares_1(xx, i+1, num_bins, max_bin_size, c1, keyholder_context);
         __bin_0_shares.push_back(bins_shares[0]);
         __bin_1_shares.push_back(bins_shares[1]);
         __bin_2_shares.push_back(bins_shares[2]);
         __bin_3_shares.push_back(bins_shares[3]);
+        __bin_4_shares.push_back(bins_shares[4]);
         //TODO: generate the shares for this person, put then in a list of lists
         share_gen_time = difftime(time(NULL), current_time);
         cout << share_gen_time << endl;
         //distribute the elements into bins
     }
 
-    for(int i = 0;i<7;i++){
-        cout << __bin_0_shares[0][i].SS << endl;
-    }
-
     cout << "generating complete" << endl;
 
     vector<ZZ> ans;
-    ans = recon1_in_bin_x(__bin_0_shares, c1, 5, m, 7);
+    ans = recon1_in_bin_x(__bin_0_shares, c1, k2, m, max_bin_size);
         cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_1_shares, c1, 5, m, 7);
+    ans = recon1_in_bin_x(__bin_1_shares, c1, k2, m, max_bin_size);
         cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_2_shares, c1, 5, m, 7);
+    ans = recon1_in_bin_x(__bin_2_shares, c1, k2, m, max_bin_size);
         cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_3_shares, c1, 5, m, 7);
+    ans = recon1_in_bin_x(__bin_3_shares, c1, k2, m, max_bin_size);
+        cout << ans.size() << endl;
+    ans = recon1_in_bin_x(__bin_4_shares, c1, k2, m, max_bin_size);
         cout << ans.size() << endl;
 
     //cout<<recon1_in_bin_x(__bin_0_shares, c1, 5, m, 7).size()<<endl;
