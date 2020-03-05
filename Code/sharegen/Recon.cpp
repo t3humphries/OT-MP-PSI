@@ -12,6 +12,14 @@
 using namespace std;
 using namespace NTL;
 
+Share::Share(ZZ id_in, ZZ bin_in, ZZ p){
+	id = id_in;
+	bin = bin_in;
+	ZZ_p::init(p);
+	SS = rep(random_ZZ_p());
+	SS_mac = rep(random_ZZ_p());
+}
+
 class Combinations {
 public:
     Combinations(vector<int> elems, int n, int r)
@@ -45,7 +53,7 @@ private:
     int r;
 };
 
-int incBinIndexs(vector<int> binIndexs, int t, int binSize)
+int incBinIndexs(vector<int> &binIndexs, int t, int binSize)
 {
 	int i = t;
 	do
@@ -56,7 +64,7 @@ int incBinIndexs(vector<int> binIndexs, int t, int binSize)
 		}
 		i = i - 1;
 		binIndexs[i] = (binIndexs[i] + 1) % binSize;
-	} while(binIndexs[i] = 0);
+	} while(binIndexs[i] == 0);
 	return 1;
 }
 
@@ -157,16 +165,17 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 	{
 		startingPoint[i] = i;
 	} 
-    Combinations comb{startingPoint, m, context.t};
+    Combinations comb{startingPoint, m-1, context.t};
     vector<int> chosenUsers;
-
+    vector<int> binIndexs(max_bin_size);
+ 
     //For each combinations of users do recon on the users in chosen indexs
     do {
 
         chosenUsers=comb.getElements();
-
+  
 		//Initialize the bin indexs for this combination of users
-		vector<int> binIndexs(max_bin_size);
+		
 		for(int i = 0 ; i < max_bin_size ; i++)
 		{
 			binIndexs[i] = 0;
@@ -176,12 +185,9 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 
 			//Do recon on chosen users bins (from chosenUsers) using the an element from each bin (from binIndexs)
 			vector<Share> toRecon(context.t);
-			for(int user ; user < context.t ; user++ )
+			for(int i = 0 ; i < context.t ; i++ )
 			{
-				for(int element ; element < context.t ; element++)
-				{
-					toRecon.push_back(shares[chosenUsers[user]][binIndexs[element]]);
-				}
+				toRecon[i] = shares[chosenUsers[i]][binIndexs[i]];
 			}
 
 			secret = reconScheme1(toRecon, context, 0);
@@ -194,10 +200,21 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 		}while(incBinIndexs(binIndexs,context.t,max_bin_size));
 
     } while (comb.next());
+
 }
 
  int main()
  {
+ 	int p = 1000000007;
+ 	ContextScheme1 c(p,3,2);
+ 	vector<vector<Share>> shares;
+ 	for (int i =0;i<10;i++){
+ 		shares.push_back(vector<Share>(0));
+ 		for (int j=0;j<10;j++){
+ 			shares[i].push_back(Share(ZZ(i+1),ZZ(1),ZZ(p)));
+ 		}
+ 	}
+ 	recon1_in_bin_x(shares, c, 5, 10, 10);
  	return 0;
  }
 
