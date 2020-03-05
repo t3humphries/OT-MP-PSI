@@ -1,8 +1,16 @@
-output: benchmark.o 
-	g++ -std=c++11 -pthread  benchmark.o -o output -lntl -lgmp -lhcs
+output: benchmark.o ShareGen.o Recon.o
+	g++ -std=c++11 -pthread  benchmark.o ShareGen.o Recon.o -o output -lntl -lgmp -lhcs
 
-benchmark.o: benchmark.cpp ../sharegen/ShareGen.h
-	g++ -c -std=c++11 -pthread ../sharegen/ShareGen.cpp ../sharegen/Recon.cpp benchmark.cpp  -lntl -lgmp -lhcs
+benchmark.o: benchmark.cpp 
+	g++ -c -std=c++11 -pthread benchmark.cpp  -lntl -lgmp -lhcs
+
+ShareGen.o: ../sharegen/ShareGen.h ../sharegen/ShareGen.cpp
+	g++ -c -std=c++11 -pthread ../sharegen/ShareGen.cpp  -lntl -lgmp -lhcs
+
+Recon.o: ../sharegen/Recon.cpp
+	g++ -c -std=c++11 -pthread ../sharegen/Recon.cpp -lntl -lgmp -lhcs
+
+
 
 clean:
 	rm *.o output
