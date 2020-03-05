@@ -11,13 +11,13 @@
 #include <time.h>
 #include <vector>
 
-class Config{
-    public:
-    int m;
-    int num_bins;
-    int max_bin_size;
-    int t;
-};
+// class Config{
+//     public:
+//     int m;
+//     int num_bins;
+//     int max_bin_size;
+//     int t;
+// };
 
 class Share{
     public:
@@ -40,6 +40,10 @@ class ContextScheme1{
         p = NTL::ZZ(pp);
         g = NTL::ZZ(gg);
         t = tt;
+    }
+
+    void write_to_file(std::string filename){
+        //write this to file
     }
 };
 
@@ -74,9 +78,18 @@ class KeyholderContext{
         randoms_mac = __rands_mac;
     }
 
-    void initialize_context(NTL::ZZ q){
+    void initialize_context(NTL::ZZ q, int t){
         NTL::ZZ_p::init(q);
+        key = NTL::ZZ(4);//TODO
+        key_mac = NTL::ZZ(5);//TODO
+        randoms = new NTL::ZZ[t];
+        randoms_mac = new NTL::ZZ[t];
+        for (int i=0;i<t;i++){
+            randoms[i] = NTL::rep(NTL::random_ZZ_p());
+            randoms_mac[i] = NTL::rep(NTL::random_ZZ_p());
+        }
         //TODO: generate a random context mod a prime modulus
+
     }
 
     void initialize_from_file(std::string filename){
