@@ -7,18 +7,18 @@
 #include <sstream>
 #include <time.h>
 #include <vector>
-#include "psi_utils.h"
+#include "Recon.h"
 
 using namespace std;
 using namespace NTL;
 
-Share::Share(ZZ id_in, ZZ bin_in, ZZ p){
-	id = id_in;
-	bin = bin_in;
-	ZZ_p::init(p);
-	SS = rep(random_ZZ_p());
-	SS_mac = rep(random_ZZ_p());
-}
+// Share::Share(ZZ id_in, ZZ bin_in, ZZ p){
+// 	id = id_in;
+// 	bin = bin_in;
+// 	ZZ_p::init(p);
+// 	SS = rep(random_ZZ_p());
+// 	SS_mac = rep(random_ZZ_p());
+// }
 
 class Combinations {
 public:
@@ -158,17 +158,16 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;
 	ZZ_p secret, mac;
-
 	//Initialize first combination (first t bins)
 	vector<int> startingPoint(context.t);
 	for(int i = 0 ; i < context.t ; i++)
 	{
 		startingPoint[i] = i;
 	} 
+
     Combinations comb{startingPoint, m-1, context.t};
     vector<int> chosenUsers;
     vector<int> binIndexs(max_bin_size);
- 
     //For each combinations of users do recon on the users in chosen indexs
     do {
 
@@ -201,22 +200,24 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 
     } while (comb.next());
 
+	return toReturn;
+
 }
 
- int main()
- {
- 	int p = 1000000007;
- 	ContextScheme1 c(p,3,2);
- 	vector<vector<Share>> shares;
- 	for (int i =0;i<10;i++){
- 		shares.push_back(vector<Share>(0));
- 		for (int j=0;j<10;j++){
- 			shares[i].push_back(Share(ZZ(i+1),ZZ(1),ZZ(p)));
- 		}
- 	}
- 	recon1_in_bin_x(shares, c, 5, 10, 10);
- 	return 0;
- }
+ // int main()
+ // {
+ // 	int p = 1000000007;
+ // 	ContextScheme1 c(p,3,2);
+ // 	vector<vector<Share>> shares;
+ // 	for (int i =0;i<10;i++){
+ // 		shares.push_back(vector<Share>(0));
+ // 		for (int j=0;j<10;j++){
+ // 			shares[i].push_back(Share(ZZ(i+1),ZZ(1),ZZ(p)));
+ // 		}
+ // 	}
+ // 	recon1_in_bin_x(shares, c, 5, 10, 10);
+ // 	return 0;
+ // }
 
 
  //-----------------------OLD CODE------------------------------------------

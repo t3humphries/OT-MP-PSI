@@ -83,7 +83,7 @@ vector<int> read_elements_to_vector(string filename){
 
 void run_benchmark(string dirname){
 
-    int p = 1000000007, g=3, m=10, n=100, t=5;
+    int p = 1000000007, g=3, m=10, n=100, t=2;
     generate_benchmark_context(m,n,t,"benchmark_0000");
 
     ContextScheme1 c1(p, g, t);
@@ -99,21 +99,44 @@ void run_benchmark(string dirname){
     vector<int> xx = read_elements_to_vector("fake"); //TODO
 
     vector<vector<Share>> __bin_0_shares(0);
+    vector<vector<Share>> __bin_1_shares(0);
+    vector<vector<Share>> __bin_2_shares(0);
+    vector<vector<Share>> __bin_3_shares(0);
     for (int i=0;i<m;i++){
         cout << "generating for person " << i << endl;
         current_time = time(NULL);
         //read the elements of this person
         bins_shares = generate_shares_1(xx, rand()%1000+1, 4, 7, c1, keyholder_context);
+        // for (int j=0;j<7;j++){
+        //     cout << bins_shares[0][j].SS << endl;
+        // }
         __bin_0_shares.push_back(bins_shares[0]);
+        __bin_1_shares.push_back(bins_shares[1]);
+        __bin_2_shares.push_back(bins_shares[2]);
+        __bin_3_shares.push_back(bins_shares[3]);
         //TODO: generate the shares for this person, put then in a list of lists
         share_gen_time = difftime(time(NULL), current_time);
         cout << share_gen_time << endl;
         //distribute the elements into bins
     }
 
+    for(int i = 0;i<7;i++){
+        cout << __bin_0_shares[0][i].SS << endl;
+    }
+
     cout << "generating complete" << endl;
 
-    recon1_in_bin_x(__bin_0_shares, c1, 5, m, 7);
+    vector<ZZ> ans;
+    ans = recon1_in_bin_x(__bin_0_shares, c1, 5, m, 7);
+        cout << ans.size() << endl;
+    ans = recon1_in_bin_x(__bin_1_shares, c1, 5, m, 7);
+        cout << ans.size() << endl;
+    ans = recon1_in_bin_x(__bin_2_shares, c1, 5, m, 7);
+        cout << ans.size() << endl;
+    ans = recon1_in_bin_x(__bin_3_shares, c1, 5, m, 7);
+        cout << ans.size() << endl;
+
+    //cout<<recon1_in_bin_x(__bin_0_shares, c1, 5, m, 7).size()<<endl;
 
     //Reconstruct
 
