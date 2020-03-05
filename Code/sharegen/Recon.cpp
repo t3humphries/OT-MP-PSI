@@ -209,7 +209,7 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
  	ContextScheme1 c(p,3,2);
  	vector<vector<Share>> shares;
  	for (int i =0;i<10;i++){
- 		shares.push_back(vector<Share>(1));
+ 		shares.push_back(vector<Share>(0));
  		for (int j=0;j<10;j++){
  			shares[i].push_back(Share(ZZ(i+1),ZZ(1),ZZ(p)));
  		}
