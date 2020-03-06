@@ -11,13 +11,9 @@
 #include <time.h>
 #include <vector>
 
-// class Config{
-//     public:
-//     int m;
-//     int num_bins;
-//     int max_bin_size;
-//     int t;
-// };
+
+
+std::string ZZ_to_str(NTL::ZZ zz);
 
 class Share{
     public:
@@ -66,37 +62,19 @@ class ContextScheme2{
 
 class KeyholderContext{
     public:
+    int t;
     NTL::ZZ key;
     NTL::ZZ key_mac;
     NTL::ZZ* randoms;
     NTL::ZZ* randoms_mac;
     KeyholderContext(){}
-    KeyholderContext(int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]){
-        key = NTL::ZZ(__key);
-        key_mac = NTL::ZZ(__key_mac);
-        randoms = __rands;
-        randoms_mac = __rands_mac;
-    }
+    KeyholderContext(int __t, int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]);
 
-    void initialize_context(NTL::ZZ q, int t){
-        NTL::ZZ_p::init(q);
-        key = NTL::rep(NTL::random_ZZ_p());
-        key_mac = NTL::rep(NTL::random_ZZ_p());
-        randoms = new NTL::ZZ[t];
-        randoms_mac = new NTL::ZZ[t];
-        for (int i=0;i<t;i++){
-            randoms[i] = NTL::rep(NTL::random_ZZ_p());
-            randoms_mac[i] = NTL::rep(NTL::random_ZZ_p());
-        }
-    }
+    void initialize_context(NTL::ZZ q, int __t);
 
-    void initialize_from_file(std::string filename){
-        //TODO: initialize the values from a file, json formats
-    }
+    void initialize_from_file(std::string filename);
 
-    void write_to_file(std::string filename){
-        //TODO: write the values to a file, json format
-    }
+    void write_to_file(std::string filename);
 };
 
 #endif
