@@ -121,12 +121,16 @@ vector<int> read_elements_to_vector(string filename){
     return toReturn;
 }
 
-void run_benchmark(string dirname){
+void run_benchmark(int m, int n, int t, int bitsize, bool force=false){
 
-    int p = 1000000007, g=3, m=10, n=10, t=2, num_bins=5, max_bin_size=4, k2=5;
-    generate_benchmark_context(m,n,t,"benchmark_0000");
+    
+
+    int p = 1000000007, g=3;
+    string dirname = "benchmark_0000";//TODO
+    generate_benchmark_context(m,n,t,"benchmark_0000"); //TODO
     //TODO: Read the config from the file which is named benchmark_0000/benchmark_config.json
-
+    
+    int num_bins, max_bin_size; //Read these from file
     ContextScheme1 c1(p, g, t);
 
     KeyholderContext keyholder_context;
@@ -163,7 +167,6 @@ void run_benchmark(string dirname){
     for (int i=0;i<m;i++){
         //Read the elements of person i from file    
         idd=config["id_list"][i];     
-       // idd = i+1; //TODO: read the id from the config
         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
         cout << "generating shares for party " << idd << endl;
         auto begin = chrono::high_resolution_clock::now();    
@@ -201,5 +204,6 @@ void run_benchmark(string dirname){
 }
 
 int main(){
-    run_benchmark("benchmark_0000");
+    int m=10, n=10, t=2;
+    run_benchmark(m,n,t,80);
 }
