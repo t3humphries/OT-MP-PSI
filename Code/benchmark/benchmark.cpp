@@ -1,3 +1,6 @@
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cstdio>
 #include <math.h>
 #include <NTL/ZZ_p.h>
 #include <NTL/ZZ.h>
@@ -11,43 +14,64 @@
 #include "../sharegen/psi_utils.h"
 #include "../sharegen/ShareGen.h"
 #include "../sharegen/Recon.h"
+#include <chrono>
 
 using namespace NTL;
 using namespace std;
 using json = nlohmann::json;
 
-void generate_benchmark_context(int m, int n, int t, string dirname){
-    ofstream config_file(dirname + "/benchmark_config.json");
+inline bool exists(const std::string& name) {
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
+}
+
+void generate_benchmark_context(int m, int n, int t, string dirname, bool force=false){
+    if (!force && exists(dirname + "/benchmark_config.json")){
+        cout << "Benchmark config exist, proceeding..." << endl;
+        return;
+    } else if (force){
+
+        if (exists(dirname + "//benchmark_config.json")){
+            remove((dirname + "//benchmark_config.json").c_str());
+        }
+        if (exists(dirname + "//elements")){
+            // rmdir((dirname + "//elements").c_str());
+            system(("rm -r " + dirname + "//elements").c_str());
+        }
+    }
+    
+    ofstream config_file(dirname + "//benchmark_config.json");
     json config;
     config["m"] = m;
     config["n"] = n;
-    config["num_bins"] = n / log(n);
-    config["max_bin_size"] = 4 * log(n);
+    config["num_bins"] = n / (int)log(n);
+    config["max_bin_size"] = 4 * (int)log(n);
     config["t"] = t;
     int id_list[m];
-    for (int i = 0;i < m;i++) config["id_list"][i] = rand()%1000+1;
+    for (int i = 0;i < m;i++){
+        id_list[i] = rand()%1000+1;
+        config["id_list"][i] = id_list[i];
+    }
 
     config_file << config;
 
     // generate elements
+    system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
     int __num_elements__;
     ofstream element_file;
     for (int i =0; i< m; i++){
         __num_elements__ = rand() % (n+1);
-        element_file.open(dirname + "//elements//" + to_string(i+1) + ".txt");
+        element_file.open(dirname + "//elements//" + to_string(id_list[i]) + ".txt");
         if (!element_file.is_open()){
-            cout << "Something wrong for party " + to_string(i) << endl;
+            cout << "Something wrong for party " + to_string(id_list[i]) << endl;
         } else{
             for (int j =0;j<__num_elements__;j++){
-                // cout << rep(random_ZZ_p()) << endl;
-                // element_file << rep(random_ZZ_p()) << endl;
-                element_file << rand() % 10000000 << endl;
-                //TODO: generate the elements accordingly
+                element_file << rand() % 10000000 << endl; //TODO: generate the elements accordingly
             }
         }
         element_file.close();
     }
-
+    cout << "Benchmark config created successfully" << endl;
 }
 
 //generally needed
@@ -64,8 +88,7 @@ vector<vector<Share>> generate_shares_1(
     int __index;
     for (int i = 0; i< size_of_set; i++){
         share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
-        conv(__index, share_x.bin);
-        shares_bins[__index].push_back(share_x);
+        shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
     //padding the bins
     for (int i=0;i<num_bins;i++){
@@ -79,15 +102,15 @@ vector<vector<Share>> generate_shares_1(
 vector<int> read_elements_to_vector(string filename){
     //TODO:return the vector of elements in the file
     vector<int> ans = vector<int>(10);
-    for (int i=0;i<10;i++) ans[i]=i+1;
-    // rand()%10000;
+    for (int i=0;i<10;i++) ans[i]=rand()%10000;
     return ans;
 }
 
 void run_benchmark(string dirname){
 
     int p = 1000000007, g=3, m=10, n=10, t=2, num_bins=5, max_bin_size=4, k2=5;
-    // generate_benchmark_context(m,n,t,"benchmark_0000");
+    generate_benchmark_context(m,n,t,"benchmark_0000");
+    //TODO: Read the config from the file which is named benchmark_0000/benchmark_config.json
 
     ContextScheme1 c1(p, g, t);
 
@@ -96,50 +119,39 @@ void run_benchmark(string dirname){
     keyholder_context.write_to_file(dirname + "/keyholder_context.json");
 
     //ShareGen
-    time_t current_time;
-    double share_gen_time;
     vector<vector<Share>> bins_shares;
-    vector<int> xx = read_elements_to_vector("fake"); //TODO
-
-    vector<vector<Share>> __bin_0_shares(0);
-    vector<vector<Share>> __bin_1_shares(0);
-    vector<vector<Share>> __bin_2_shares(0);
-    vector<vector<Share>> __bin_3_shares(0);
-    vector<vector<Share>> __bin_4_shares(0);
-
+    vector<vector<Share>> bins_people_shares[num_bins];
+    for (int i=0;i<num_bins;i++){
+        bins_people_shares[i] = vector<vector<Share>>();
+    }
+    vector<int> elements;
+    int idd;
     for (int i=0;i<m;i++){
-        cout << "generating for person " << i << endl;
-        current_time = time(NULL);
+        //Read the elements of person i from file            
+        idd = i+1; //TODO: read the id from the config
+        elements = read_elements_to_vector(dirname + to_string(idd));
+        cout << "generating shares for party " << idd << endl;
+        auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
-        bins_shares = generate_shares_1(xx, i+1, num_bins, max_bin_size, c1, keyholder_context);
-        __bin_0_shares.push_back(bins_shares[0]);
-        __bin_1_shares.push_back(bins_shares[1]);
-        __bin_2_shares.push_back(bins_shares[2]);
-        __bin_3_shares.push_back(bins_shares[3]);
-        __bin_4_shares.push_back(bins_shares[4]);
-        //TODO: generate the shares for this person, put then in a list of lists
-        share_gen_time = difftime(time(NULL), current_time);
-        cout << share_gen_time << endl;
-        //distribute the elements into bins
+        bins_shares = generate_shares_1(elements, i+1, num_bins, max_bin_size, c1, keyholder_context);
+        auto end = chrono::high_resolution_clock::now();    
+        auto dur = end - begin;
+        auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+        cout << ms << " miliseconds" << endl;for (int j=0; j<num_bins;j++){
+            bins_people_shares[j].push_back(bins_shares[j]);
+        }
     }
 
     cout << "generating complete" << endl;
 
     vector<ZZ> ans;
-    ans = recon1_in_bin_x(__bin_0_shares, c1, k2, m, max_bin_size);
-        cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_1_shares, c1, k2, m, max_bin_size);
-        cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_2_shares, c1, k2, m, max_bin_size);
-        cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_3_shares, c1, k2, m, max_bin_size);
-        cout << ans.size() << endl;
-    ans = recon1_in_bin_x(__bin_4_shares, c1, k2, m, max_bin_size);
-        cout << ans.size() << endl;
+    int sum = 0;
+    for (int i=0;i<num_bins;i++){
+        ans = recon1_in_bin_x(bins_people_shares[i], c1, keyholder_context.key_mac, m, max_bin_size);
+        sum += ans.size();
+    }
 
-    //cout<<recon1_in_bin_x(__bin_0_shares, c1, 5, m, 7).size()<<endl;
-
-    //Reconstruct
+    cout << "Found " << sum << " elements in t-threshold intersection" << endl;
 
     //write results to file
 
