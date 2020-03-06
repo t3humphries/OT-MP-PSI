@@ -102,7 +102,7 @@ vector<vector<Share>> generate_shares_1(
 vector<int> read_elements_to_vector(string filename){
     //TODO:return the vector of elements in the file
     vector<int> ans = vector<int>(10);
-    for (int i=0;i<10;i++) ans[i]=rand()%10000;
+    for (int i=0;i<rand()%10+1;i++) ans[i]=rand()%15;
     return ans;
 }
 
