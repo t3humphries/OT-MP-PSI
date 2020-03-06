@@ -102,11 +102,23 @@ vector<vector<Share>> generate_shares_1(
 }
 
 vector<int> read_elements_to_vector(string filename){
-    //TODO:return the vector of elements in the file
-    srand(time(0));
-    vector<int> ans = vector<int>(10);
-    for (int i=0;i<rand()%10+1;i++) ans[i]=rand()%15;
-    return ans;
+
+    fstream inputFile(filename, std::ios_base::in);
+    if(!inputFile.good())
+    {
+        cout<<"Could not open file: "<<filename<<endl;
+    }
+
+    vector<int> toReturn = vector<int>(0);
+    int currentLine = 0;
+
+    while(inputFile >> currentLine)
+    {
+        toReturn.push_back(currentLine);
+    }
+
+    inputFile.close();
+    return toReturn;
 }
 
 void run_benchmark(string dirname){
@@ -133,7 +145,7 @@ void run_benchmark(string dirname){
     for (int i=0;i<m;i++){
         //Read the elements of person i from file            
         idd = i+1; //TODO: read the id from the config
-        elements = read_elements_to_vector(dirname + to_string(idd));
+        elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
         cout << "generating shares for party " << idd << endl;
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
