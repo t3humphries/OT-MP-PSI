@@ -209,6 +209,62 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 
 }
 
+vector<ZZ> recon2_in_bin_x(vector<vector<Share>> shares, ContextScheme2 context, ZZ k2, int m, int max_bin_size){
+
+	ZZ_p::init(ZZ(context.p));
+	vector<ZZ> toReturn;
+	ZZ_p secret, mac;
+	//Initialize first combination (first t bins)
+	vector<int> startingPoint(context.t);
+	for(int i = 0 ; i < context.t ; i++)
+	{
+		startingPoint[i] = i;
+	} 
+
+    Combinations comb{startingPoint, m-1, context.t};
+    vector<int> chosenUsers;
+    vector<int> binIndexs(max_bin_size);
+    //For each combinations of users do recon on the users in chosen indexs
+    do {
+
+        chosenUsers=comb.getElements();
+  
+		//Initialize the bin indexs for this combination of users
+		
+		for(int i = 0 ; i < max_bin_size ; i++)
+		{
+			binIndexs[i] = 0;
+		} 
+
+		do{
+
+			//Do recon on chosen users bins (from chosenUsers) using the an element from each bin (from binIndexs)
+			vector<Share> toRecon(context.t);
+			for(int i = 0 ; i < context.t ; i++ )
+			{
+				toRecon[i] = shares[chosenUsers[i]][binIndexs[i]];
+			}
+			secret = reconScheme2(toRecon, context, 0);
+			mac = reconScheme2(toRecon, context, 1);
+			if(NTL::power(secret,k2) == mac) //If recontructs add to the list toReturn
+			{
+				bool alreadyFound = false;
+				for (int k=0;k<toReturn.size();k++){
+					if (toReturn[k] == rep(secret)){
+						alreadyFound=true; break;
+					}
+				}
+				if (!alreadyFound) toReturn.push_back(rep(secret));
+			}
+
+		}while(incBinIndexs(binIndexs,context.t,max_bin_size));
+
+    } while (comb.next());
+
+	return toReturn;
+
+}
+
  // int main()
  // {
  // 	int p = 1000000007;
