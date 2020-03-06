@@ -1,0 +1,4 @@
+*.o
+venv/
+.vscode/
+Code/benchmark/output
