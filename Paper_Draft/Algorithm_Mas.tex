@@ -225,7 +225,7 @@ As shown in Figure \ref{fig:S1_ShareGen}, the key holder and the party communica
 The computation complexity of Scheme 1 is $O(b m^t (\log{n})^t)$; where $b$ is the number of bins, $m$ is the number of parties, and $t$ is the threshold value in the over-threshold set intersection scheme.
 \end{theorem}
 \begin{proof}
-As described in Algorithm \ref{alg:S1_Recon}, the reconstructor $\mathcal{R}$ forms all possible combinations of $t$ shares from distinct parties in each bin. There are $m \choose t$ ways for choosing a set of $t$ distinct parties out of $m$ of them. Moreover, each of these parties have $\log{n}$ shares in each bin. Hence, forming a set of $t$ shares from distinct parties in a bin takes $m^t (\log{n})^m$ combinations. This procedure iterates $b$ times to cover all the bins.  
+As described in Algorithm \ref{alg:S1_Recon}, the reconstructor $\mathcal{R}$ forms all possible combinations of $t$ shares from distinct parties in each bin. There are $m \choose t$ ways for choosing a set of $t$ distinct parties out of $m$ of them. Moreover, each of these parties have $\log{n}$ shares in each bin. Hence, forming a set of $t$ shares from distinct parties in a bin takes $m^t (\log{n})^t$ combinations. This procedure iterates $b$ times to cover all the bins.  
 \end{proof}
 
 \subsection{Scheme 2}
@@ -331,7 +331,7 @@ The computation complexity of Scheme 2 is $O(b m^t (\log{n})^t)$; where $b$ is t
 \end{theorem}
 \begin{proof}
 The proof follows the same reasoning as the proof of Theorem \ref{S1_ComputationComplexity}. 
-As described in Algorithm \ref{alg:S2_Recon}, the reconstructor $\mathcal{R}$ forms all possible combinations of $t$ shares from distinct parties in each bin. There are $m \choose t$ options for choosing a set of $t$ distinct parties out of $m$ of them. Moreover, each of these parties have $\log{n}$ shares in each bin. Hence, forming a set of $t$ shares from distinct parties in a bin takes $m^t (\log{n})^m$ combinations. This procedure iterates $b$ times to cover all the bins.  
+As described in Algorithm \ref{alg:S2_Recon}, the reconstructor $\mathcal{R}$ forms all possible combinations of $t$ shares from distinct parties in each bin. There are $m \choose t$ options for choosing a set of $t$ distinct parties out of $m$ of them. Moreover, each of these parties have $\log{n}$ shares in each bin. Hence, forming a set of $t$ shares from distinct parties in a bin takes $m^t (\log{n})^t$ combinations. This procedure iterates $b$ times to cover all the bins.  
 \end{proof}
 
 \subsection{Additional Notes}
