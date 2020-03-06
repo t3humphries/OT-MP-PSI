@@ -39,6 +39,8 @@ void generate_benchmark_context(int m, int n, int t, string dirname, bool force=
             system(("rm -r " + dirname + "//elements").c_str());
         }
     }
+
+    srand(time(0));
     
     ofstream config_file(dirname + "//benchmark_config.json");
     json config;
@@ -101,6 +103,7 @@ vector<vector<Share>> generate_shares_1(
 
 vector<int> read_elements_to_vector(string filename){
     //TODO:return the vector of elements in the file
+    srand(time(0));
     vector<int> ans = vector<int>(10);
     for (int i=0;i<rand()%10+1;i++) ans[i]=rand()%15;
     return ans;
