@@ -142,9 +142,28 @@ void run_benchmark(string dirname){
     vector<int> elements;
     int idd;
     int sum_sharegen = 0;
+
+    //reading the config from file
+
+    ifstream config_file(dirname + "//benchmark_config.json");
+    json config;
+    config_file >> config;
+
+    // for(int i = 0;i<size;i++)
+    // {
+    //     shares[i].id=temp[i]["id"];
+    //     std::string str = temp[i]["SS"];
+    //     shares[i].SS= atol(str.c_str());
+    //     str = temp[i]["SS_MAC"];
+    //     shares[i].SS_mac= atol(str.c_str());
+    // }
+
+
+
     for (int i=0;i<m;i++){
-        //Read the elements of person i from file            
-        idd = i+1; //TODO: read the id from the config
+        //Read the elements of person i from file    
+        idd=config["id_list"][i];     
+       // idd = i+1; //TODO: read the id from the config
         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
         cout << "generating shares for party " << idd << endl;
         auto begin = chrono::high_resolution_clock::now();    
