@@ -148,11 +148,42 @@ vector<int> read_elements_to_vector(string filename){
 void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
 
     int p = 1000000007, g=3;
-    string dirname = "benchmark_0000";//TODO
-    generate_benchmark_context(m,n,t,"benchmark_0000"); //TODO
-    //TODO: Read the config from the file which is named benchmark_0000/benchmark_config.json
+    string dirname = "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
+
+
+
+
+   
+
+    if(force)
+    {
+        if (exists(dirname))
+        {
+                rmdir((dirname).c_str());
+        }
+        system(("mkdir " + dirname).c_str());        
+        generate_benchmark_context(m,n,t,dirname);         
+
+    }
+    else
+    {
+        if (exists(dirname)){
+                ;
+                }
+                else{        
+                cout<<"\n\n\nwe arrived here\n";  
+                system(("mkdir " + dirname).c_str());      
+                generate_benchmark_context(m,n,t,dirname);
+        }
+
+    }
+    //Read the config from the file which is named benchmark_0000/benchmark_config.json
+
+     ifstream config_file(dirname + "//benchmark_config.json");
+    json config;
+    config_file >> config;
     
-    int num_bins=5, max_bin_size=8; //Read these from file
+    int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"]; //Read these from file
     ContextScheme1 c1(p, g, t);
 
     KeyholderContext keyholder_context;
@@ -171,23 +202,12 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
 
     //reading the config from file
 
-    ifstream config_file(dirname + "//benchmark_config.json");
-    json config;
-    config_file >> config;
-
-    // for(int i = 0;i<size;i++)
-    // {
-    //     shares[i].id=temp[i]["id"];
-    //     std::string str = temp[i]["SS"];
-    //     shares[i].SS= atol(str.c_str());
-    //     str = temp[i]["SS_MAC"];
-    //     shares[i].SS_mac= atol(str.c_str());
-    // }
+   
 
 
     cout << "generating shares for party "; 
     for (int i=0;i<m;i++){
-        //Read the elements of person i from file    
+        
         idd=config["id_list"][i];     
         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
         cout << idd << ",";
@@ -221,7 +241,7 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
 
     cout << "Found " << sum << " elements in t-threshold intersection" << endl;
 
-    //write results to file
+   //write results to file
 
 }
 
@@ -306,8 +326,8 @@ void run_benchmark_2(int m, int n, int t, int bitsize, bool force=false){
 
 int main(){
     int m=10, n=10, t=2;
-    run_benchmark_1(m,n,t,80);
+    run_benchmark_1(m,n,t,80, false);
     cout << endl;
-    run_benchmark_2(m,n,t,80);
+    //run_benchmark_2(m,n,t,80);
 
 }
