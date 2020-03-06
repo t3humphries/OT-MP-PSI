@@ -129,6 +129,7 @@ void run_benchmark(string dirname){
     }
     vector<int> elements;
     int idd;
+    int sum_sharegen = 0;
     for (int i=0;i<m;i++){
         //Read the elements of person i from file            
         idd = i+1; //TODO: read the id from the config
@@ -140,19 +141,27 @@ void run_benchmark(string dirname){
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-        cout << ms << " miliseconds" << endl;for (int j=0; j<num_bins;j++){
+        // cout << ms << " miliseconds" << endl;
+        sum_sharegen += ms;
+        for (int j=0; j<num_bins;j++){
             bins_people_shares[j].push_back(bins_shares[j]);
         }
     }
 
-    cout << "generating complete" << endl;
+    cout << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average" << endl;
 
     vector<ZZ> ans;
     int sum = 0;
+    auto begin = chrono::high_resolution_clock::now();    
     for (int i=0;i<num_bins;i++){
         ans = recon1_in_bin_x(bins_people_shares[i], c1, keyholder_context.key_mac, m, max_bin_size);
         sum += ans.size();
     }
+    auto end = chrono::high_resolution_clock::now();    
+    auto dur = end - begin;
+    auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+
+    cout << "Reconstruction complete in " << ms << " miliseconds" << endl; 
 
     cout << "Found " << sum << " elements in t-threshold intersection" << endl;
 
