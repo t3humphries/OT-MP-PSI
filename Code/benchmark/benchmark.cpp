@@ -130,7 +130,7 @@ void run_benchmark(int m, int n, int t, int bitsize, bool force=false){
     generate_benchmark_context(m,n,t,"benchmark_0000"); //TODO
     //TODO: Read the config from the file which is named benchmark_0000/benchmark_config.json
     
-    int num_bins, max_bin_size; //Read these from file
+    int num_bins=5, max_bin_size=8; //Read these from file
     ContextScheme1 c1(p, g, t);
 
     KeyholderContext keyholder_context;
