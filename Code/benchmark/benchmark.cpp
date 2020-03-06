@@ -148,7 +148,7 @@ void run_benchmark(string dirname){
         }
     }
 
-    cout << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average" << endl;
+    cout << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
 
     vector<ZZ> ans;
     int sum = 0;
