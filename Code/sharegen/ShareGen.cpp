@@ -5,26 +5,13 @@ using namespace NTL;
 using namespace std;
 using json = nlohmann::json;
 
-Share::Share(ZZ id_in, ZZ bin_in, ZZ SS_in, ZZ SS_mac_in){
-	id = id_in;
-	bin = bin_in;
-	SS = SS_in;
-	SS_mac = SS_mac_in;
-}
 
-Share::Share(ZZ id_in, ZZ bin_in, ZZ p){
-	id = id_in;
-	bin = bin_in;
-	ZZ_p::init(p);
-	SS = rep(random_ZZ_p());
-	SS_mac = rep(random_ZZ_p());
-}
 
-string ZZ_to_str(ZZ zz){
-	std::stringstream ssa;
-	ssa << zz;
-	return ssa.str();
-}
+// string ZZ_to_str(ZZ zz){
+// 	std::stringstream ssa;
+// 	ssa << zz;
+// 	return ssa.str();
+// }
 
 ZZ_p hash_(ZZ x, ZZ p){
 	ZZ_p::init(p);

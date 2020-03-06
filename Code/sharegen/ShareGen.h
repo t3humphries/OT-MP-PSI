@@ -10,7 +10,7 @@
 #include <string>
 #include "psi_utils.h"
 
-std::string ZZ_to_str(NTL::ZZ zz);
+
 NTL::ZZ_p hash_(NTL::ZZ x, NTL::ZZ p);
 Share ShareGen_1(
     ContextScheme1 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
