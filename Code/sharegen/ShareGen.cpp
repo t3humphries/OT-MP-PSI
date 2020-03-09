@@ -5,14 +5,6 @@ using namespace NTL;
 using namespace std;
 using json = nlohmann::json;
 
-
-
-// string ZZ_to_str(ZZ zz){
-// 	std::stringstream ssa;
-// 	ssa << zz;
-// 	return ssa.str();
-// }
-
 ZZ_p hash_(ZZ x, ZZ p){
 	ZZ_p::init(p);
 	hash<string> ptr_hash;

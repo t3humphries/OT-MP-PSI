@@ -51,6 +51,10 @@ void KeyholderContext::initialize_from_file(std::string filename){
     std::ifstream inputFile(filename);
     json jsonFile;
     inputFile >> jsonFile;
+    if(!inputFile.good())
+    {
+        cout<< "Could not open:"<<filename<<endl;
+    }
     inputFile.close();
 
     t = jsonFile["t"] ;
