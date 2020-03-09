@@ -48,7 +48,26 @@ void KeyholderContext::initialize_context(NTL::ZZ q, int __t){
 }
 
 void KeyholderContext::initialize_from_file(std::string filename){
-    //TODO: initialize the values from a file, json formats
+    std::ifstream inputFile(filename);
+    json jsonFile;
+    inputFile >> jsonFile;
+    if(!inputFile.good())
+    {
+        cout<< "Could not open:"<<filename<<endl;
+    }
+    inputFile.close();
+
+    t = jsonFile["t"] ;
+    key = ZZ(jsonFile["key"]);
+    key_mac = ZZ(jsonFile["key_mac"]);
+
+    randoms = new NTL::ZZ[t];
+    randoms_mac = new NTL::ZZ[t];
+    for(int i = 0 ; i < t ; i++)
+    {
+        randoms[i] = ZZ(jsonFile["randoms"][i]);
+        randoms_mac[i] = ZZ(jsonFile["randoms_mac"][i]);
+    }
 }
 
 void KeyholderContext::write_to_file(std::string filename){
