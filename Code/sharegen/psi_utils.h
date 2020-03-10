@@ -14,6 +14,8 @@
 
 
 std::string ZZ_to_str(NTL::ZZ zz);
+NTL::ZZ read_prime(int bitsize);
+NTL::ZZ read_generator(int bitsize);
 
 class Share{
     public:
@@ -38,6 +40,13 @@ class ContextScheme1{
         t = tt;
     }
 
+    ContextScheme1(NTL::ZZ pp, NTL::ZZ gg, int tt){
+        p = NTL::ZZ(pp);
+        g = NTL::ZZ(gg);
+        t = tt;
+    }
+
+
     void write_to_file(std::string filename){
         //write this to file
     }
@@ -54,6 +63,11 @@ class ContextScheme2{
         t = tt;
     }
     ContextScheme2(int pp, int qq, int tt){
+        p = NTL::ZZ(pp);
+        q = NTL::ZZ(qq);
+        t = tt;
+    }
+    ContextScheme2(NTL::ZZ pp, NTL::ZZ qq, int tt){
         p = NTL::ZZ(pp);
         q = NTL::ZZ(qq);
         t = tt;

@@ -5,6 +5,38 @@ using namespace NTL;
 using json = nlohmann::json;
 
 
+ZZ read_prime(int bitsize){
+    ifstream prime_file("../sharegen/primes.json");
+    json j;
+    prime_file >> j;
+    prime_file.close();
+    string key = to_string(bitsize);
+    string prime_str;
+    if (j.find(key)==j.end()) {
+        cout << "No prime for chosen bitsize, working with bitsize 1024" << endl;
+        prime_str = j["1024"];
+    } else {
+        prime_str = j[key];
+    }
+    return conv<ZZ>(prime_str.c_str());
+}
+
+ZZ read_generator(int bitsize){
+    ifstream prime_file("../sharegen/generators.json");
+    json j;
+    prime_file >> j;
+    prime_file.close();
+    string key = to_string(bitsize);
+    string prime_str;
+    if (j.find(key)==j.end()) {
+        cout << "No generator for chosen prime bitsize, working with bitsize 1024" << endl;
+        prime_str = j["1024"];
+    } else {
+        prime_str = j[key];
+    }
+    return conv<ZZ>(prime_str.c_str());
+}
+
 Share::Share(ZZ id_in, ZZ bin_in, ZZ SS_in, ZZ SS_mac_in){
 	id = id_in;
 	bin = bin_in;
