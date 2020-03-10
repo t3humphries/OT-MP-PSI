@@ -17,7 +17,7 @@
 \algrenewcommand\algorithmicprocedure{\textbf{algorithm}}
 \algnewcommand\algorithmicforeach{\textbf{for each}}
 \algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
-
+\usepackage{enumitem}
 \usepackage[n ,advantage, operators, sets , adversary, landau, probability, notions, logic, ff , mm, primitives, events, complexity, asymptotics, keys]{cryptocode}
 \usepackage{booktabs} % For formal tables
 %\usepackage{color,soul}
@@ -56,7 +56,7 @@ Use case: collaborating network operations centers under different legislations
 
 Brief problem intro
 
-Comparison to Kissner, Song protocol: \\
+Comparison to Kissner, Song protocol \cite{Kissner}: \\
 - $O(1)$ rounds vs. $O(m)$
 - problem-adaptive communication complexity $O(nmk)$ vs. $O(nm^3)$ \\
 
@@ -96,10 +96,14 @@ OPRF that outputs secret share of PRF
 
 Note that the ss polynomial needs to be different for every message
 
-\subsection{Paillier and Damgard Jurik Crytposystems}
+\subsection{Paillier \cite{Paillier} and Damgard Jurik \cite{Damgard} Crytposystems}
 
+\pagebreak
 \section{Protocol Overview}
 \input{Algorithm_Mas}
+
+\pagebreak
+
 
 \section{SS-OPRF}
 
