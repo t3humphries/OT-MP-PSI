@@ -2,3 +2,5 @@
 venv/
 .vscode/
 Code/benchmark/output
+Code/benchmark/benchmark_*/
+
