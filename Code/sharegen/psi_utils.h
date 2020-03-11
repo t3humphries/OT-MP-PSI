@@ -34,6 +34,7 @@ class ContextScheme1{
     NTL::ZZ p;
     NTL::ZZ g;
     int t;
+    ContextScheme1(){}
     ContextScheme1(int pp, int gg, int tt){
         p = NTL::ZZ(pp);
         g = NTL::ZZ(gg);
@@ -57,6 +58,7 @@ class ContextScheme2{
     NTL::ZZ p;
     NTL::ZZ q;
     int t;
+    ContextScheme2(){}
     ContextScheme2(int pp, int tt){
         p = NTL::ZZ(pp);
         q = NTL::ZZ((p-1)/2);
