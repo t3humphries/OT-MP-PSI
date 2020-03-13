@@ -1,93 +1,40 @@
-#include <NTL/ZZ_p.h>
-#include <iostream>
-#include <gmp.h>    // gmp is included implicitly
-#include <libhcs.h> // master header includes everything
-#include<fstream>
-#include <sstream>
-#include <string>
-#include "psi_utils.h"
+#include "Keyholder.h"
 
 using namespace std;
 using namespace NTL;
 
-void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ){
-	std::stringstream ssa;
-	ssa << __temp_ZZ;
-	mpz_set_str( __out, ssa.str().c_str(), 10);
-}
+// void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ){
+// 	std::stringstream ssa;
+// 	ssa << __temp_ZZ;
+// 	mpz_set_str( __out, ssa.str().c_str(), 10);
+// }
 
-void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
-	ZZ __temp_ZZ;
-	__temp_ZZ = rep(num);
-	std::stringstream ssa;
-	ssa << __temp_ZZ;
-	mpz_set_str( __out, ssa.str().c_str(), 10);
-}
+// void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
+// 	ZZ __temp_ZZ;
+// 	__temp_ZZ = rep(num);
+// 	std::stringstream ssa;
+// 	ssa << __temp_ZZ;
+// 	mpz_set_str( __out, ssa.str().c_str(), 10);
+// }
 
+// void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
+// 	// ZZ __temp_ZZ;
+// 	std::stringstream __ssa;
+// 	char __temp[1000];
+// 	mpz_get_str(__temp, 10, num);
+// 	__ssa << __temp;
+// 	__ssa >> __out;
+// }
 
-void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
-	ZZ __temp_ZZ;
-	std::stringstream __ssa;
-	char __temp[1000];
-	mpz_get_str(__temp, 10, num);
-	__ssa << __temp;
-	__ssa >> __temp_ZZ;
-	conv(__out, __temp_ZZ);
-}
-
-class Scheme1_Round1_output{
-    public:
-    ZZ_p masked_secret_alpha;
-    ZZ_p* masked_coefficients_alpha;
-    ZZ_p masked_mac_alpha;
-    ZZ_p* masked_mac_coefficients_alpha;
-    Scheme1_Round1_output(
-        ZZ_p __masked_secret_alpha,
-        ZZ_p* __masked_coefficients_alpha,
-        ZZ_p __masked_mac_alpha,
-        ZZ_p* __masked_mac_coefficients_alpha
-    ){
-        masked_secret_alpha=__masked_secret_alpha;
-        masked_coefficients_alpha=__masked_coefficients_alpha;
-        masked_mac_alpha=__masked_mac_alpha;
-        masked_mac_coefficients_alpha=__masked_mac_coefficients_alpha;
-    }
-};
-
-// class Scheme1_Round2_output{
-//     public:
-//     mpz_t encrypted_secret;
-//     mpz_t encrypted_mac;
-//     Scheme1_Round2_output(
-//         mpz_t __encrypted_secret,
-//         mpz_t __encrypted_mac
-//         ){
-//             encrypted_secret=__encrypted_secret;
-//             encrypted_mac=__encrypted_mac;
-//         }
-// };
-
-class Keyholder{
-	public:
-	ContextScheme1 public_context;
-	ZZ key;
-	ZZ key_mac;
-	ZZ* randoms;
-	ZZ* randoms_mac;
-	ZZ r, __R, __R_inverse;
-
-    // Keyholder(){}
-    Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]);
-	void initialize_context(ContextScheme1 __c1);
-	Scheme1_Round1_output Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha);
-	void Scheme1_Round2(
-        pcs_public_key *pk, int id,
-        mpz_t __mpz_secret,
-        mpz_t __mpz_mac,
-        mpz_t* __mpz_coefficients,
-        mpz_t* __mpz_mac_coefficients
-    );
-};
+// void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
+// 	ZZ __temp_ZZ;
+// 	std::stringstream __ssa;
+// 	char __temp[1000];
+// 	mpz_get_str(__temp, 10, num);
+// 	__ssa << __temp;
+// 	__ssa >> __temp_ZZ;
+// 	conv(__out, __temp_ZZ);
+// }
 
 Keyholder::Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]){
     public_context = __c1;
@@ -95,6 +42,18 @@ Keyholder::Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[]
     key_mac = ZZ(__key_mac);
     randoms = __rands;
     randoms_mac = __rands_mac;
+}
+
+Keyholder::Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
+    public_context = __c1;
+    key = __key;
+    key_mac = __key_mac;
+    randoms = __rands;
+    randoms_mac = __rands_mac;
+}
+
+Keyholder::Keyholder(ContextScheme1 __c1){
+    initialize_context(__c1);
 }
 
 void Keyholder::initialize_context(ContextScheme1 __c1){
@@ -114,6 +73,7 @@ Scheme1_Round1_output Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
 	
     ZZ p = public_context.p, g = public_context.g;
 	int t = public_context.t;
+    Scheme1_Round1_output output;
 	ZZ_p::init(p);
 	ZZ_p g_p, h_x_alpha, g_alpha;
 	conv(g_p, g);
@@ -124,6 +84,9 @@ Scheme1_Round1_output Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
     {
 		ZZ_pPush push(p-1);
 		ZZ_p __temp = random_ZZ_p();
+        while  (GCD(rep(__temp), public_context.p-1) > 1) {
+            __temp = random_ZZ_p();
+        }
 		r = rep(__temp);
 	}
 
@@ -138,25 +101,27 @@ Scheme1_Round1_output Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
     // conv(R_inverse, __R_inverse);
 
 	R_alpha = NTL::power(g_alpha, r);
-
-    ZZ_p masked_secret_alpha = R_alpha * NTL::power(h_x_alpha, key);
-    ZZ_p masked_coefficients_alpha[t-1];
+    output.masked_secret_alpha = rep(R_alpha * NTL::power(h_x_alpha, key));
+    // ZZ_p masked_coefficients_alpha[t-1];
 	for (int i = 0; i < t-1; i++){
-		masked_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, randoms[i]);
+        // cout << "1: " << R_alpha * NTL::power(h_x_alpha, randoms[i]) << endl;
+        // cout << "2: " << R_alpha * NTL::power(h_x_alpha, randoms[i]) << endl;
+		output.masked_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms[i])));
 	}
 
-    ZZ_p masked_mac_alpha = R_alpha * NTL::power(h_x_alpha, key * key_mac);
-    ZZ_p masked_mac_coefficients_alpha[t-1];
+    output.masked_mac_alpha = rep(R_alpha * NTL::power(h_x_alpha, key * key_mac));
+    // ZZ_p masked_mac_coefficients_alpha[t-1];
 	for (int i = 0; i < t-1; i++){
-		masked_mac_coefficients_alpha[i] = R_alpha * NTL::power(h_x_alpha, randoms_mac[i]);
+		output.masked_mac_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms_mac[i])));
 	}
 
-    return Scheme1_Round1_output(
-        masked_secret_alpha,
-        masked_coefficients_alpha,
-        masked_mac_alpha,
-        masked_mac_coefficients_alpha
-    );
+    return output;
+    // return Scheme1_Round1_output(
+    //     masked_secret_alpha,
+    //     masked_coefficients_alpha,
+    //     masked_mac_alpha,
+    //     masked_mac_coefficients_alpha
+    // );
 }
 
 void Keyholder::Scheme1_Round2(
