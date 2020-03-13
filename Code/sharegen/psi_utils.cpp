@@ -1,5 +1,5 @@
 #include "psi_utils.h"
-
+#include <typeinfo>
 using namespace std;
 using namespace NTL;
 using json = nlohmann::json;
@@ -118,25 +118,24 @@ void KeyholderContext::initialize_context(NTL::ZZ q, int __t){
 }
 
 void KeyholderContext::initialize_from_file(std::string filename){
+    cout << filename << endl;
     std::ifstream inputFile(filename);
     json jsonFile;
     inputFile >> jsonFile;
     if(!inputFile.good())
-    {
+{
         cout<< "Could not open:"<<filename<<endl;
     }
     inputFile.close();
-
     t = jsonFile["t"] ;
-    key = ZZ(jsonFile["key"]);
-    key_mac = ZZ(jsonFile["key_mac"]);
-
+    key = ZZ(INIT_VAL, jsonFile["key"].get<string>().c_str());
+    key_mac = ZZ(INIT_VAL, jsonFile["key_mac"].get<string>().c_str());
     randoms = new NTL::ZZ[t];
     randoms_mac = new NTL::ZZ[t];
     for(int i = 0 ; i < t ; i++)
     {
-        randoms[i] = ZZ(jsonFile["randoms"][i]);
-        randoms_mac[i] = ZZ(jsonFile["randoms_mac"][i]);
+        randoms[i] = ZZ(INIT_VAL, jsonFile["randoms"][i].get<string>().c_str());
+        randoms_mac[i] = ZZ(INIT_VAL, jsonFile["randoms_mac"][i].get<string>().c_str());
     }
 }
 
