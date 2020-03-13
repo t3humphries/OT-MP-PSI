@@ -14,11 +14,6 @@
 using namespace std;
 using namespace NTL;
 
-void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ);
-void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num);
-void mpz_t_to_ZZ(ZZ& __out, mpz_t num);
-void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num);
-
 class Scheme1_Round1_output{ //TODO: try to pass ZZ_p
     public:
     ZZ masked_secret_alpha;
@@ -30,6 +25,7 @@ class Scheme1_Round1_output{ //TODO: try to pass ZZ_p
 class Keyholder{
 	public:
 	ContextScheme1 public_context;
+    ContextScheme2 context2;
 	ZZ key;
 	ZZ key_mac;
 	ZZ* randoms;
@@ -37,10 +33,13 @@ class Keyholder{
 	ZZ r, __R, __R_inverse;
 
     // Keyholder(){}
-    Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]);
+    // Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]);
     Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]);
+    Keyholder(ContextScheme2 __c2, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]);
 	Keyholder(ContextScheme1 __c1);
+	Keyholder(ContextScheme2 __c2);
     void initialize_context(ContextScheme1 __c1);
+    void initialize_context(ContextScheme2 __c2);
 	Scheme1_Round1_output Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha);
 	void Scheme1_Round2(
         pcs_public_key *pk, int id,
@@ -49,6 +48,9 @@ class Keyholder{
         mpz_t* __mpz_coefficients,
         mpz_t* __mpz_mac_coefficients
     );
+
+    void Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, ContextScheme2 context, ZZ h_x_alpha, int idd);
+
 };
 
 #endif

@@ -3,49 +3,24 @@
 using namespace std;
 using namespace NTL;
 
-// void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ){
-// 	std::stringstream ssa;
-// 	ssa << __temp_ZZ;
-// 	mpz_set_str( __out, ssa.str().c_str(), 10);
+// Keyholder::Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]){
+//     public_context = __c1;
+//     key = ZZ(__key);
+//     key_mac = ZZ(__key_mac);
+//     randoms = __rands;
+//     randoms_mac = __rands_mac;
 // }
 
-// void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
-// 	ZZ __temp_ZZ;
-// 	__temp_ZZ = rep(num);
-// 	std::stringstream ssa;
-// 	ssa << __temp_ZZ;
-// 	mpz_set_str( __out, ssa.str().c_str(), 10);
-// }
-
-// void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
-// 	// ZZ __temp_ZZ;
-// 	std::stringstream __ssa;
-// 	char __temp[1000];
-// 	mpz_get_str(__temp, 10, num);
-// 	__ssa << __temp;
-// 	__ssa >> __out;
-// }
-
-// void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
-// 	ZZ __temp_ZZ;
-// 	std::stringstream __ssa;
-// 	char __temp[1000];
-// 	mpz_get_str(__temp, 10, num);
-// 	__ssa << __temp;
-// 	__ssa >> __temp_ZZ;
-// 	conv(__out, __temp_ZZ);
-// }
-
-Keyholder::Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]){
+Keyholder::Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
     public_context = __c1;
-    key = ZZ(__key);
-    key_mac = ZZ(__key_mac);
+    key = __key;
+    key_mac = __key_mac;
     randoms = __rands;
     randoms_mac = __rands_mac;
 }
 
-Keyholder::Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
-    public_context = __c1;
+Keyholder::Keyholder(ContextScheme2 __c2, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
+    context2 = __c2;
     key = __key;
     key_mac = __key_mac;
     randoms = __rands;
@@ -56,6 +31,10 @@ Keyholder::Keyholder(ContextScheme1 __c1){
     initialize_context(__c1);
 }
 
+Keyholder::Keyholder(ContextScheme2 __c2){
+    initialize_context(__c2);
+}
+
 void Keyholder::initialize_context(ContextScheme1 __c1){
     public_context = __c1;
     ZZ_p::init(public_context.p-1);
@@ -64,6 +43,19 @@ void Keyholder::initialize_context(ContextScheme1 __c1){
     randoms = new ZZ[public_context.t];
     randoms_mac = new ZZ[public_context.t];
     for (int i=0;i<public_context.t;i++){
+        randoms[i] = rep(random_ZZ_p());
+        randoms_mac[i] = rep(random_ZZ_p());
+    }
+}
+
+void Keyholder::initialize_context(ContextScheme2 __c2){
+    context2 = __c2;
+    ZZ_p::init(context2.p-1);
+    key = rep(random_ZZ_p());
+    key_mac = rep(random_ZZ_p());
+    randoms = new ZZ[context2.t];
+    randoms_mac = new ZZ[context2.t];
+    for (int i=0;i<context2.t;i++){
         randoms[i] = rep(random_ZZ_p());
         randoms_mac[i] = rep(random_ZZ_p());
     }
@@ -149,4 +141,32 @@ void Keyholder::Scheme1_Round2(
 		pcs_ee_add(pk, __mpz_mac, __mpz_mac, __mpz_mac_coefficients[i]);
 	}
 
+}
+
+void Keyholder::Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, ContextScheme2 context, ZZ h_x_alpha, int idd){
+    ZZ p = context.p;
+    int t = context.t;
+    ZZ secret_exp, mac_exp;
+    ZZ_p::init(p);
+	{
+		ZZ_pPush push(p-1);
+		// ZZ_p::init(q);
+		ZZ_p __secret_exp, __mac_exp, id_pows, __temp;
+		conv(__secret_exp, key);
+		conv(__mac_exp, key * key_mac);
+		conv(id_pows, idd);
+		for (int i = 0; i < t-1; i++){
+			conv(__temp, randoms[i]);
+			__secret_exp += id_pows * __temp;
+			conv(__temp, randoms_mac[i]);
+			__mac_exp += id_pows * __temp;
+			conv(__temp, idd);
+			id_pows *= __temp;
+		}
+		secret_exp = rep(__secret_exp);
+		mac_exp = rep(__mac_exp);
+	}
+
+	*secret_share_alpha = rep(NTL::power(conv<ZZ_p>(h_x_alpha), secret_exp));
+	*mac_share_alpha= rep(NTL::power(conv<ZZ_p>(h_x_alpha), mac_exp));
 }

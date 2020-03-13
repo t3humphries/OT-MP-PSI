@@ -6,19 +6,20 @@ using namespace NTL;
 ZZ_p hash_XX(ZZ x, ZZ p){
 	ZZ_p::init(p);
 	hash<std::string> ptr_hash;
-	return ZZ_p(ptr_hash(ZZ_to_str(x)));
+	ZZ_p __temp__ = ZZ_p(ptr_hash(ZZ_to_str(x)));
+    return __temp__ * __temp__;
 }
 
 Scheme1_Round2_output::Scheme1_Round2_output(int t){
-        mpz_init(mpz_secret);
-        mpz_init(mpz_mac);
-        mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-        mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-        for (int i=0;i<t-1;i++){
-            mpz_init(mpz_coefficients[i]);
-            mpz_init(mpz_mac_coefficients[i]);
-        }
+    mpz_init(mpz_secret);
+    mpz_init(mpz_mac);
+    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    for (int i=0;i<t-1;i++){
+        mpz_init(mpz_coefficients[i]);
+        mpz_init(mpz_mac_coefficients[i]);
     }
+}
 
 Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
     id=__id;
@@ -91,12 +92,14 @@ void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_s
     mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
-Share Elementholder::get_share(ContextScheme1 context, int __X, Keyholder k, int num_bins){
+Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, int num_bins){
     ZZ_p::init(context.p);
     ZZ h_x_alpha, g_alpha;
     Scheme1_Round1(&h_x_alpha, &g_alpha, context, __X);
 
-    Scheme1_Round1_output out = k.Scheme1_Round1(h_x_alpha, g_alpha);
+    Scheme1_Round1_output out = k.Scheme1_Round1(h_x_alpha, g_alpha); // 
+
+
     Scheme1_Round2_output out2 = Scheme1_Round2(context, out);
     k.Scheme1_Round2(
         pk, id,
@@ -114,6 +117,52 @@ Share Elementholder::get_share(ContextScheme1 context, int __X, Keyholder k, int
         ZZ(mac_share)
     );
 }
+
+void Elementholder::Scheme2_Round1(ZZ *h_x_alpha, ContextScheme2 public_context, int __X){
+    ZZ p = public_context.p, q = public_context.q;
+	int t = public_context.t;
+	ZZ_p::init(p);
+	ZZ_p h_x = hash_(ZZ(__X), p);
+	// ZZ alpha, alpha_inv;
+	{
+		ZZ_pPush push(p-1);
+		// ZZ_p __temp = random_ZZ_p(); //REVERT
+        ZZ_p __temp = ZZ_p(1);
+		while  (GCD(rep(__temp), ZZ(p-1)) > 1) {
+			__temp = random_ZZ_p();
+		}
+		alpha = rep(__temp);
+		__temp = 1 / __temp;
+		alpha_inv = rep(__temp);
+	}
+	*h_x_alpha = rep(NTL::power(h_x, alpha));
+}
+
+void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, ContextScheme2 public_context, ZZ secret_share_alpha, ZZ mac_share_alpha){
+	*secret_share = rep(NTL::power(conv<ZZ_p>(secret_share_alpha), alpha_inv));
+	*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
+}
+
+Share Elementholder::get_share_2(ContextScheme2 context, int __X, Keyholder k, int num_bins){
+    
+    ZZ_p::init(context.p);
+    ZZ h_x_alpha;
+    Scheme2_Round1(&h_x_alpha, context, __X);
+    ZZ secret_share_alpha, mac_share_alpha;
+    k.Scheme2_Round1(&secret_share_alpha, &mac_share_alpha, context, h_x_alpha, id);
+    // cout << secret_share_alpha << endl << mac_share_alpha << endl;
+    ZZ secret_share, mac_share;
+    Scheme2_Final(&secret_share, &mac_share, context, secret_share_alpha, mac_share_alpha);
+    return Share(
+        ZZ(id),
+        rep(hash_XX(ZZ(__X), ZZ(num_bins))),
+        ZZ(secret_share),
+        ZZ(mac_share)
+    );
+}
+
+
+
 
 // int main(){
 //     int elems[] = {1,2,3};
