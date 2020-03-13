@@ -4,6 +4,44 @@ using namespace std;
 using namespace NTL;
 using json = nlohmann::json;
 
+ZZ_p hash_(ZZ x, ZZ p){
+	ZZ_p::init(p);
+	hash<std::string> ptr_hash;
+	return ZZ_p(ptr_hash(ZZ_to_str(x)));
+}
+
+void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ){
+	std::stringstream ssa;
+	ssa << __temp_ZZ;
+	mpz_set_str( __out, ssa.str().c_str(), 10);
+}
+
+void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
+	ZZ __temp_ZZ;
+	__temp_ZZ = rep(num);
+	std::stringstream ssa;
+	ssa << __temp_ZZ;
+	mpz_set_str( __out, ssa.str().c_str(), 10);
+}
+
+void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
+	// ZZ __temp_ZZ;
+	std::stringstream __ssa;
+	char __temp[1000];
+	mpz_get_str(__temp, 10, num);
+	__ssa << __temp;
+	__ssa >> __out;
+}
+
+void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
+	ZZ __temp_ZZ;
+	std::stringstream __ssa;
+	char __temp[1000];
+	mpz_get_str(__temp, 10, num);
+	__ssa << __temp;
+	__ssa >> __temp_ZZ;
+	conv(__out, __temp_ZZ);
+}
 
 ZZ read_prime(int bitsize){
     ifstream prime_file("../sharegen/primes.json");
