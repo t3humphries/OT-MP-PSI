@@ -111,14 +111,13 @@ void KeyholderContext::initialize_context(NTL::ZZ q, int __t){
     key_mac = NTL::rep(NTL::random_ZZ_p());
     randoms = new NTL::ZZ[t];
     randoms_mac = new NTL::ZZ[t];
-    for (int i=0;i<t;i++){
+    for (int i=0;i<t-1;i++){
         randoms[i] = NTL::rep(NTL::random_ZZ_p());
         randoms_mac[i] = NTL::rep(NTL::random_ZZ_p());
     }
 }
 
 void KeyholderContext::initialize_from_file(std::string filename){
-    cout << filename << endl;
     std::ifstream inputFile(filename);
     json jsonFile;
     inputFile >> jsonFile;
@@ -130,9 +129,9 @@ void KeyholderContext::initialize_from_file(std::string filename){
     t = jsonFile["t"] ;
     key = ZZ(INIT_VAL, jsonFile["key"].get<string>().c_str());
     key_mac = ZZ(INIT_VAL, jsonFile["key_mac"].get<string>().c_str());
-    randoms = new NTL::ZZ[t];
-    randoms_mac = new NTL::ZZ[t];
-    for(int i = 0 ; i < t ; i++)
+    randoms = new NTL::ZZ[t-1];
+    randoms_mac = new NTL::ZZ[t-1];
+    for(int i = 0 ; i < t-1 ; i++)
     {
         randoms[i] = ZZ(INIT_VAL, jsonFile["randoms"][i].get<string>().c_str());
         randoms_mac[i] = ZZ(INIT_VAL, jsonFile["randoms_mac"][i].get<string>().c_str());
