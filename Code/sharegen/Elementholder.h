@@ -41,7 +41,7 @@ class Elementholder{
 
     void Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, ContextScheme1 public_context, int __X);
     Scheme1_Round2_output Scheme1_Round2(ContextScheme1 context, Scheme1_Round1_output out);
-    void Scheme1_Final(ZZ secret_share, ZZ mac_share, mpz_t __mpz_secret, mpz_t __mpz_mac);
+    void Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_secret, mpz_t __mpz_mac);
 
     Share get_share(ContextScheme1 context, int __X, Keyholder k, int num_bins);
 

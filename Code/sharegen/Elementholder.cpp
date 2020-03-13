@@ -84,7 +84,7 @@ Scheme1_Round2_output Elementholder::Scheme1_Round2(ContextScheme1 context, Sche
     return output;
 }
 
-void Elementholder::Scheme1_Final(ZZ secret_share, ZZ mac_share, mpz_t __mpz_secret, mpz_t __mpz_mac){
+void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_secret, mpz_t __mpz_mac){
     pcs_decrypt(vk, __mpz_secret, __mpz_secret);	
     pcs_decrypt(vk, __mpz_mac, __mpz_mac);
     mpz_t_to_ZZ(secret_share, __mpz_secret);
@@ -147,19 +147,20 @@ Share Elementholder::get_share(ContextScheme1 context, int __X, Keyholder k, int
 // }
 
 
-int main(){
-    int elems[] = {1,2,3};
-    int bitsize = 1024, t = 2, id = 2, n=10;
-    int num_bins = n / (int)log(n);
-    ZZ p = read_prime(bitsize);
-    ZZ g = read_generator(bitsize);
-    ContextScheme1 context(p,g,t);
-    Elementholder e(id, elems, 3);
-    int x = e.elements[0];
+// int main(){
+//     int elems[] = {1,2,3};
+//     int bitsize = 1024, t = 2, id = 2, n=10;
+//     int num_bins = n / (int)log(n);
+//     ZZ p = read_prime(bitsize);
+//     ZZ g = read_generator(bitsize);
+//     ContextScheme1 context(p,g,t);
+//     Elementholder e(id, elems, 3);
+//     int x = e.elements[0];
 
-    ZZ_p::init(context.p);
+//     ZZ_p::init(context.p);
 
-    Keyholder k(context);
-    Share s = e.get_share(context, x, k, num_bins);
-    cout << (NTL::power(conv<ZZ_p>(s.SS), k.key_mac) == conv<ZZ_p>(s.SS_mac)) << endl;
-}
+//     Keyholder k(context);
+//     Share s = e.get_share(context, x, k, num_bins);
+//     cout << s.SS << endl << s.SS_mac << endl;
+//     cout << (NTL::power(conv<ZZ_p>(s.SS), k.key_mac) == conv<ZZ_p>(s.SS_mac)) << endl;
+// }
