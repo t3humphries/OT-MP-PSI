@@ -14,6 +14,7 @@
 #include "../sharegen/psi_utils.h"
 #include "../sharegen/ShareGen.h"
 #include "../sharegen/Recon.h"
+#include "../sharegen/Elementholder.h"
 #include <chrono>
 
 using namespace NTL;
@@ -76,6 +77,31 @@ void generate_benchmark_context(int m, int n, int t, string dirname, bool force=
     cout << "Benchmark config created successfully" << endl;
 }
 
+// //generally needed
+// vector<vector<Share>> generate_shares_1(
+//     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
+//     ContextScheme1 public_context, KeyholderContext keyholder_context
+//     ){
+//     vector<vector<Share>> shares_bins;
+//     int size_of_set = elements_list.size();
+//     Share share_x;
+//     for (int i=0;i<num_bins;i++){
+//         shares_bins.push_back(vector<Share>(0));
+//     }
+//     int __index;
+//     for (int i = 0; i< size_of_set; i++){
+//         share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
+//         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
+//     }
+//     //padding the bins
+//     for (int i=0;i<num_bins;i++){
+//         while(shares_bins[i].size() < max_bin_size){
+//             shares_bins[i].push_back(Share(ZZ(idd), ZZ(i), public_context.p));
+//         }
+//     }
+//     return shares_bins;
+// }
+
 //generally needed
 vector<vector<Share>> generate_shares_1(
     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
@@ -88,8 +114,18 @@ vector<vector<Share>> generate_shares_1(
         shares_bins.push_back(vector<Share>(0));
     }
     int __index;
+    int dummy_elements[] = {1,2, 3};
+    Elementholder e(idd, dummy_elements, 3);
+    Keyholder keyholder(
+        public_context,
+        keyholder_context.key,
+        keyholder_context.key_mac,
+        keyholder_context.randoms,
+        keyholder_context.randoms_mac
+    );
     for (int i = 0; i< size_of_set; i++){
-        share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
+        share_x = e.get_share(public_context, elements_list[i], keyholder, num_bins); 
+        // share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
     //padding the bins

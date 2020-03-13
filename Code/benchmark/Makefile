@@ -1,8 +1,14 @@
-output: benchmark.o ShareGen.o Recon.o psi_utils.o
-	g++ -std=c++11 -pthread  benchmark.o ShareGen.o Recon.o psi_utils.o -o output -lntl -lgmp -lhcs
+output: benchmark.o Elementholder.o Keyholder.o ShareGen.o Recon.o psi_utils.o
+	g++ -std=c++11 -pthread  benchmark.o Elementholder.o Keyholder.o ShareGen.o Recon.o psi_utils.o -o output -lntl -lgmp -lhcs
 
 benchmark.o: benchmark.cpp 
 	g++ -c -std=c++11 -pthread benchmark.cpp  -lntl -lgmp -lhcs
+
+Elementholder.o: ../sharegen/Elementholder.h ../sharegen/Elementholder.cpp ../sharegen/Keyholder.h ../sharegen/Keyholder.cpp ../sharegen/psi_utils.cpp ../sharegen/psi_utils.h 
+	g++ -c -std=c++11 -pthread ../sharegen/Elementholder.cpp  -lntl -lgmp -lhcs
+
+Keyholder.o: ../sharegen/Keyholder.h ../sharegen/Keyholder.cpp
+	g++ -c -std=c++11 -pthread ../sharegen/Keyholder.cpp  -lntl -lgmp -lhcs
 
 ShareGen.o: ../sharegen/ShareGen.h ../sharegen/ShareGen.cpp ../sharegen/psi_utils.cpp ../sharegen/psi_utils.h
 	g++ -c -std=c++11 -pthread ../sharegen/ShareGen.cpp  -lntl -lgmp -lhcs
