@@ -63,7 +63,7 @@ void generate_benchmark_context(int m, int n, int t, string dirname, bool force=
     int __num_elements__;
     ofstream element_file;
     for (int i =0; i< m; i++){
-        __num_elements__ = rand() % (n+1);
+        __num_elements__ = 1 + rand() % n;
         element_file.open(dirname + "//elements//" + to_string(id_list[i]) + ".txt");
         if (!element_file.is_open()){
             cout << "Something wrong for party " + to_string(id_list[i]) << endl;
@@ -124,7 +124,7 @@ vector<vector<Share>> generate_shares_1(
         keyholder_context.randoms_mac
     );
     for (int i = 0; i< size_of_set; i++){
-        share_x = e.get_share(public_context, elements_list[i], keyholder, num_bins); 
+        share_x = e.get_share_1(public_context, elements_list[i], keyholder, num_bins); 
         // share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
@@ -148,8 +148,18 @@ vector<vector<Share>> generate_shares_2(
         shares_bins.push_back(vector<Share>(0));
     }
     int __index;
+    int dummy_elements[] = {1,2, 3};
+    Elementholder e(idd, dummy_elements, 3);
+    Keyholder keyholder(
+        public_context,
+        keyholder_context.key,
+        keyholder_context.key_mac,
+        keyholder_context.randoms,
+        keyholder_context.randoms_mac
+    );
     for (int i = 0; i< size_of_set; i++){
-        share_x = ShareGen_2(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
+        share_x = e.get_share_2(public_context, elements_list[i], keyholder, num_bins);
+        // share_x = ShareGen_2(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
     //padding the bins
@@ -182,19 +192,24 @@ vector<int> read_elements_to_vector(string filename){
 }
 
 void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
-
     ZZ p = read_prime(bitsize), g=read_generator(bitsize);
     string dirname = "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
+    KeyholderContext keyholder_context;
     if(force){
         if (exists(dirname)){
-            rmdir((dirname).c_str());
+            // rmdir((dirname).c_str());
+            system(("rm -r " + dirname).c_str());        
         }
         system(("mkdir " + dirname).c_str());        
-        generate_benchmark_context(m,n,t,dirname);         
+        generate_benchmark_context(m,n,t,dirname);
+        keyholder_context.initialize_context(ZZ(p)-1, t);
+        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
     }
     else if (!force && !exists(dirname)){
         system(("mkdir " + dirname).c_str());
         generate_benchmark_context(m,n,t,dirname);
+        keyholder_context.initialize_context(ZZ(p)-1, t);
+        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
     }
 
     ifstream config_file(dirname + "//benchmark_config.json");
@@ -204,9 +219,10 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
     int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"];
     ContextScheme1 c1(p, g, t);
 
-    KeyholderContext keyholder_context;
-    keyholder_context.initialize_context(ZZ(p)-1, t);
-    keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    // KeyholderContext keyholder_context;
+    // keyholder_context.initialize_context(ZZ(p)-1, t);
+    // keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
 
     //ShareGen
     vector<vector<Share>> bins_shares;
@@ -264,17 +280,22 @@ void run_benchmark_2(int m, int n, int t, int bitsize, bool force=false){
     ZZ p = read_prime(bitsize), q;
     q = (p-1)/2;
     string dirname = "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
+    KeyholderContext keyholder_context;
     if(force){
         if (exists(dirname)){
-            rmdir((dirname).c_str());
+            // rmdir((dirname).c_str());
+            system(("rm -r " + dirname).c_str());        
         }
         system(("mkdir " + dirname).c_str());        
-        generate_benchmark_context(m,n,t,dirname);         
+        generate_benchmark_context(m,n,t,dirname);
+        keyholder_context.initialize_context(ZZ(p)-1, t);
+        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
     }
     else if (!force && !exists(dirname)){
-        // cout<<"\n\n\nwe arrived here\n";
         system(("mkdir " + dirname).c_str());
         generate_benchmark_context(m,n,t,dirname);
+        keyholder_context.initialize_context(ZZ(p)-1, t);
+        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
     }
     //Read the config from the file which is named benchmark_0000/benchmark_config.json
 
@@ -285,9 +306,10 @@ void run_benchmark_2(int m, int n, int t, int bitsize, bool force=false){
     int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"]; //Read these from file
     ContextScheme2 c2(p, q, t);
 
-    KeyholderContext keyholder_context;
-    keyholder_context.initialize_context(ZZ(p)-1, t);
-    keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    // KeyholderContext keyholder_context;
+    // keyholder_context.initialize_context(ZZ(p)-1, t);
+    // keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
 
     //ShareGen
     vector<vector<Share>> bins_shares;
@@ -386,7 +408,7 @@ int main(int argc, char *argv[])
         printf("extra arguments: %s\n", argv[optind]);  
     } 
 
-    run_benchmark_1(m,n,t,bitsize,false);
+    run_benchmark_1(m,n,t,bitsize,force);
     cout << endl;
     run_benchmark_2(m,n,t,bitsize,false);
 
