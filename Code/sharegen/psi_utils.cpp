@@ -96,6 +96,14 @@ string ZZ_to_str(ZZ zz){
     return ssa.str();
 }
 
+ZZ str_to_ZZ(string str){
+    std::stringstream ssa;
+    ssa << str;
+    ZZ zz;
+    ssa >> zz;
+    return zz;
+}
+
 KeyholderContext::KeyholderContext(int __t, int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]){
     t = __t;
     key = NTL::ZZ(__key);

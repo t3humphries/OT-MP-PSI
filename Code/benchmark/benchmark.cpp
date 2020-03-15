@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
     // int m, n, t, bitsize=1024;
     bool force=false;
     int opt; 
-      
+
     // put ':' in the starting of the 
     // string so that program can  
     //distinguish between '?' and ':'  
@@ -408,9 +408,9 @@ int main(int argc, char *argv[])
         printf("extra arguments: %s\n", argv[optind]);  
     } 
 
-    run_benchmark_1(m,n,t,bitsize,force);
-    cout << endl;
-    run_benchmark_2(m,n,t,bitsize,false);
+    // run_benchmark_1(m,n,t,bitsize,force);
+    // cout << endl;
+    // run_benchmark_2(m,n,t,bitsize,false);
 
       
     return 0; 

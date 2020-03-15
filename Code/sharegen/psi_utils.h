@@ -17,6 +17,7 @@ using namespace NTL;
 using json = nlohmann::json;
 
 std::string ZZ_to_str(NTL::ZZ zz);
+NTL::ZZ str_to_ZZ(std::string str);
 NTL::ZZ read_prime(int bitsize);
 NTL::ZZ read_generator(int bitsize);
 
