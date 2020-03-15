@@ -105,6 +105,7 @@ ZZ str_to_ZZ(string str){
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
     pk=__pk;
     id=__id;
@@ -117,6 +118,8 @@ Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
         mpz_init(mpz_mac_coefficients[i]);
     }
 =======
+=======
+>>>>>>> Stashed changes
 string pcs_to_str(pcs_public_key pk)
 {
     char *temp = pcs_export_public_key(pk);
@@ -130,6 +133,9 @@ pcs_public_key str_to_pcs(string str)
     char *temp = str.c_str();
     pcs_import_public_key(toReturn, temp);
     return toReturn;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
 
