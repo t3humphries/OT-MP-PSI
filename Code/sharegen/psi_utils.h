@@ -6,11 +6,13 @@
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <sstream>
 #include <time.h>
 #include <vector>
 #include <gmp.h>
+#include <libhcs.h> // master header includes everything
+#include <string>
+#include <stdlib.h>
 
 using namespace std;
 using namespace NTL;
@@ -113,12 +115,15 @@ class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
 
 class Scheme1_Round2_send{
     public:
+    pcs_public_key *pk;
+    int id;
     mpz_t mpz_secret;
     mpz_t mpz_mac;
     mpz_t* mpz_coefficients;
     mpz_t* mpz_mac_coefficients;
     Scheme1_Round2_send(){}
     Scheme1_Round2_send(int t);
+    Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id);
 };
 
 #endif

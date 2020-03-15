@@ -47,7 +47,7 @@ Scheme1_Round2_send Elementholder::Scheme1_Round2(ContextScheme1 context, Scheme
 
     ZZ_p::init(context.p);
     int t = context.t;
-    Scheme1_Round2_send output(t);
+    Scheme1_Round2_send output(t, pk, id);
     ZZ_p masked_secret = NTL::power(conv<ZZ_p>(out.masked_secret_alpha), alpha_inv);
     ZZ_p masked_mac = NTL::power(conv<ZZ_p>(out.masked_mac_alpha), alpha_inv);
 
@@ -88,13 +88,13 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
 
     Scheme1_Round1_receive out = k.Scheme1_Round1(h_x_alpha, g_alpha); // 
 
-
     Scheme1_Round2_send out2 = Scheme1_Round2(context, out);
-    k.Scheme1_Round2(
-        pk, id,
-        out2.mpz_secret, out2.mpz_mac,
-        out2.mpz_coefficients, out2.mpz_mac_coefficients
-    );
+    // k.Scheme1_Round2(
+    //     pk, id,
+    //     out2.mpz_secret, out2.mpz_mac,
+    //     out2.mpz_coefficients, out2.mpz_mac_coefficients
+    // );
+    k.Scheme1_Round2(out2);
 
     ZZ secret_share, mac_share;
     Scheme1_Final(secret_share, mac_share, out2.mpz_secret, out2.mpz_mac);

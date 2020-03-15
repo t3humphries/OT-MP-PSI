@@ -116,29 +116,51 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
     // );
 }
 
-void Keyholder::Scheme1_Round2(
-    pcs_public_key *pk, int id,
-    mpz_t __mpz_secret, mpz_t __mpz_mac,
-    mpz_t* __mpz_coefficients, mpz_t* __mpz_mac_coefficients
-){
+// void Keyholder::Scheme1_Round2(
+//     pcs_public_key *pk, int id,
+//     mpz_t __mpz_secret, mpz_t __mpz_mac,
+//     mpz_t* __mpz_coefficients, mpz_t* __mpz_mac_coefficients
+// ){
+// 	mpz_t __mpz_temp;
+// 	mpz_init(__mpz_temp);
+	
+// 	ZZ_to_mpz_t(__mpz_temp, __R_inverse);
+// 	pcs_ep_mul(pk, __mpz_secret, __mpz_secret, __mpz_temp);
+// 	pcs_ep_mul(pk, __mpz_mac, __mpz_mac, __mpz_temp);
+	
+//     ZZ_p::init(public_context.p);
+
+// 	ZZ_p R_inv_id_pows = to_ZZ_p(id) * conv<ZZ_p>(__R_inverse);
+// 	for (int i=0;i<public_context.t-1;i++){
+// 		ZZ_p_to_mpz_t(__mpz_temp, R_inv_id_pows);
+// 		pcs_ep_mul(pk, __mpz_coefficients[i], __mpz_coefficients[i], __mpz_temp);
+// 		pcs_ep_mul(pk, __mpz_mac_coefficients[i], __mpz_mac_coefficients[i], __mpz_temp);
+// 		R_inv_id_pows = R_inv_id_pows * to_ZZ_p(id);
+
+// 		pcs_ee_add(pk, __mpz_secret, __mpz_secret, __mpz_coefficients[i]);
+// 		pcs_ee_add(pk, __mpz_mac, __mpz_mac, __mpz_mac_coefficients[i]);
+// 	}
+
+// }
+
+void Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
 	mpz_t __mpz_temp;
 	mpz_init(__mpz_temp);
 	
 	ZZ_to_mpz_t(__mpz_temp, __R_inverse);
-	pcs_ep_mul(pk, __mpz_secret, __mpz_secret, __mpz_temp);
-	pcs_ep_mul(pk, __mpz_mac, __mpz_mac, __mpz_temp);
+	pcs_ep_mul(payload.pk, payload.mpz_secret, payload.mpz_secret, __mpz_temp);
+	pcs_ep_mul(payload.pk, payload.mpz_mac, payload.mpz_mac, __mpz_temp);
 	
     ZZ_p::init(public_context.p);
-
-	ZZ_p R_inv_id_pows = to_ZZ_p(id) * conv<ZZ_p>(__R_inverse);
+	ZZ_p R_inv_id_pows = to_ZZ_p(payload.id) * conv<ZZ_p>(__R_inverse);
 	for (int i=0;i<public_context.t-1;i++){
 		ZZ_p_to_mpz_t(__mpz_temp, R_inv_id_pows);
-		pcs_ep_mul(pk, __mpz_coefficients[i], __mpz_coefficients[i], __mpz_temp);
-		pcs_ep_mul(pk, __mpz_mac_coefficients[i], __mpz_mac_coefficients[i], __mpz_temp);
-		R_inv_id_pows = R_inv_id_pows * to_ZZ_p(id);
+		pcs_ep_mul(payload.pk, payload.mpz_coefficients[i], payload.mpz_coefficients[i], __mpz_temp);
+		pcs_ep_mul(payload.pk, payload.mpz_mac_coefficients[i], payload.mpz_mac_coefficients[i], __mpz_temp);
+		R_inv_id_pows = R_inv_id_pows * to_ZZ_p(payload.id);
 
-		pcs_ee_add(pk, __mpz_secret, __mpz_secret, __mpz_coefficients[i]);
-		pcs_ee_add(pk, __mpz_mac, __mpz_mac, __mpz_mac_coefficients[i]);
+		pcs_ee_add(payload.pk, payload.mpz_secret, payload.mpz_secret, payload.mpz_coefficients[i]);
+		pcs_ee_add(payload.pk, payload.mpz_mac, payload.mpz_mac, payload.mpz_mac_coefficients[i]);
 	}
 
 }

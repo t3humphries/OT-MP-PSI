@@ -1,14 +1,6 @@
 #ifndef __KEYHOLDER_H__
 #define __KEYHOLDER_H__
 
-#include <NTL/ZZ_p.h>
-#include <iostream>
-#include <gmp.h>    // gmp is included implicitly
-#include <libhcs.h> // master header includes everything
-#include<fstream>
-#include <sstream>
-#include <string>
-#include <vector>
 #include "psi_utils.h"
 
 using namespace std;
@@ -40,6 +32,7 @@ class Keyholder{
         mpz_t* __mpz_coefficients,
         mpz_t* __mpz_mac_coefficients
     );
+    void Scheme1_Round2(Scheme1_Round2_send payload);
 
     void Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, ContextScheme2 context, ZZ h_x_alpha, int idd);
 

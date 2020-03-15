@@ -104,6 +104,19 @@ ZZ str_to_ZZ(string str){
     return zz;
 }
 
+Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
+    pk=__pk;
+    id=__id;
+    mpz_init(mpz_secret);
+    mpz_init(mpz_mac);
+    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    for (int i=0;i<t-1;i++){
+        mpz_init(mpz_coefficients[i]);
+        mpz_init(mpz_mac_coefficients[i]);
+    }
+}
+
 Scheme1_Round2_send::Scheme1_Round2_send(int t){
     mpz_init(mpz_secret);
     mpz_init(mpz_mac);
