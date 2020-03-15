@@ -10,17 +10,6 @@ ZZ_p hash_XX(ZZ x, ZZ p){
     return __temp__ * __temp__;
 }
 
-Scheme1_Round2_output::Scheme1_Round2_output(int t){
-    mpz_init(mpz_secret);
-    mpz_init(mpz_mac);
-    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-    for (int i=0;i<t-1;i++){
-        mpz_init(mpz_coefficients[i]);
-        mpz_init(mpz_mac_coefficients[i]);
-    }
-}
-
 Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
     id=__id;
     elements=__elements;
@@ -54,11 +43,11 @@ void Elementholder::Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, ContextScheme1 pu
     return;
 }
 
-Scheme1_Round2_output Elementholder::Scheme1_Round2(ContextScheme1 context, Scheme1_Round1_output out){
+Scheme1_Round2_send Elementholder::Scheme1_Round2(ContextScheme1 context, Scheme1_Round1_receive out){
 
     ZZ_p::init(context.p);
     int t = context.t;
-    Scheme1_Round2_output output(t);
+    Scheme1_Round2_send output(t);
     ZZ_p masked_secret = NTL::power(conv<ZZ_p>(out.masked_secret_alpha), alpha_inv);
     ZZ_p masked_mac = NTL::power(conv<ZZ_p>(out.masked_mac_alpha), alpha_inv);
 
@@ -97,10 +86,10 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     ZZ h_x_alpha, g_alpha;
     Scheme1_Round1(&h_x_alpha, &g_alpha, context, __X);
 
-    Scheme1_Round1_output out = k.Scheme1_Round1(h_x_alpha, g_alpha); // 
+    Scheme1_Round1_receive out = k.Scheme1_Round1(h_x_alpha, g_alpha); // 
 
 
-    Scheme1_Round2_output out2 = Scheme1_Round2(context, out);
+    Scheme1_Round2_send out2 = Scheme1_Round2(context, out);
     k.Scheme1_Round2(
         pk, id,
         out2.mpz_secret, out2.mpz_mac,
@@ -180,8 +169,8 @@ Share Elementholder::get_share_2(ContextScheme2 context, int __X, Keyholder k, i
 //     e.Scheme1_Round1(&h_x_alpha, &g_alpha, context, x);
 //     Keyholder k(context);
 
-//     Scheme1_Round1_output out = k.Scheme1_Round1(h_x_alpha, g_alpha);
-//     Scheme1_Round2_output out2 = e.Scheme1_Round2(context, out);
+//     Scheme1_Round1_receive out = k.Scheme1_Round1(h_x_alpha, g_alpha);
+//     Scheme1_Round2_send out2 = e.Scheme1_Round2(context, out);
 //     k.Scheme1_Round2(
 //         e.pk, e.id,
 //         out2.mpz_secret, out2.mpz_mac,

@@ -103,4 +103,22 @@ class KeyholderContext{
     void write_to_file(std::string filename);
 };
 
+class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
+    public:
+    ZZ masked_secret_alpha;
+    vector<ZZ> masked_coefficients_alpha;
+    ZZ masked_mac_alpha;
+    vector<ZZ> masked_mac_coefficients_alpha;
+};
+
+class Scheme1_Round2_send{
+    public:
+    mpz_t mpz_secret;
+    mpz_t mpz_mac;
+    mpz_t* mpz_coefficients;
+    mpz_t* mpz_mac_coefficients;
+    Scheme1_Round2_send(){}
+    Scheme1_Round2_send(int t);
+};
+
 #endif

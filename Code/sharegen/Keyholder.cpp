@@ -61,11 +61,11 @@ void Keyholder::initialize_context(ContextScheme2 __c2){
     }
 }
 
-Scheme1_Round1_output Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
+Scheme1_Round1_receive Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
 	
     ZZ p = public_context.p, g = public_context.g;
 	int t = public_context.t;
-    Scheme1_Round1_output output;
+    Scheme1_Round1_receive output;
 	ZZ_p::init(p);
 	ZZ_p g_p, h_x_alpha, g_alpha;
 	conv(g_p, g);
@@ -108,7 +108,7 @@ Scheme1_Round1_output Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
 	}
 
     return output;
-    // return Scheme1_Round1_output(
+    // return Scheme1_Round1_receive(
     //     masked_secret_alpha,
     //     masked_coefficients_alpha,
     //     masked_mac_alpha,

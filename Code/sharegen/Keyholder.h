@@ -14,14 +14,6 @@
 using namespace std;
 using namespace NTL;
 
-class Scheme1_Round1_output{ //TODO: try to pass ZZ_p
-    public:
-    ZZ masked_secret_alpha;
-    vector<ZZ> masked_coefficients_alpha;
-    ZZ masked_mac_alpha;
-    vector<ZZ> masked_mac_coefficients_alpha;
-};
-
 class Keyholder{
 	public:
 	ContextScheme1 public_context;
@@ -40,7 +32,7 @@ class Keyholder{
 	Keyholder(ContextScheme2 __c2);
     void initialize_context(ContextScheme1 __c1);
     void initialize_context(ContextScheme2 __c2);
-	Scheme1_Round1_output Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha);
+	Scheme1_Round1_receive Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha);
 	void Scheme1_Round2(
         pcs_public_key *pk, int id,
         mpz_t __mpz_secret,
