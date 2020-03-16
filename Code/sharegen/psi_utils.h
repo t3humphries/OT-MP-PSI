@@ -143,4 +143,11 @@ class Scheme1_Round2_send{
     string toString();
 };
 
+class Scheme1_Round2_receive{
+    public:
+    mpz_t mpz_secret;
+    mpz_t mpz_mac;
+    Scheme1_Round2_receive();
+};
+
 #endif

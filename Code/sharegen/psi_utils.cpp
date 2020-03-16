@@ -118,6 +118,11 @@ Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
 
 }
 
+Scheme1_Round2_receive::Scheme1_Round2_receive(){
+    mpz_init(mpz_secret);
+    mpz_init(mpz_mac);
+}
+
 string pcs_to_str(pcs_public_key* pk)
 {
     char *temp = pcs_export_public_key(pk);

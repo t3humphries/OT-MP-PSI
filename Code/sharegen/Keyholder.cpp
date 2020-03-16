@@ -143,25 +143,29 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 
 // }
 
-void Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
+Scheme1_Round2_receive Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
 	mpz_t __mpz_temp;
 	mpz_init(__mpz_temp);
+
+    Scheme1_Round2_receive output;
 	
 	ZZ_to_mpz_t(__mpz_temp, __R_inverse);
-	pcs_ep_mul(payload.pk, payload.mpz_secret, payload.mpz_secret, __mpz_temp);
-	pcs_ep_mul(payload.pk, payload.mpz_mac, payload.mpz_mac, __mpz_temp);
+	pcs_ep_mul(payload.pk, output.mpz_secret, payload.mpz_secret, __mpz_temp);
+	pcs_ep_mul(payload.pk, output.mpz_mac, payload.mpz_mac, __mpz_temp);
 	
     ZZ_p::init(public_context.p);
 	ZZ_p R_inv_id_pows = to_ZZ_p(payload.id) * conv<ZZ_p>(__R_inverse);
 	for (int i=0;i<public_context.t-1;i++){
 		ZZ_p_to_mpz_t(__mpz_temp, R_inv_id_pows);
-		pcs_ep_mul(payload.pk, payload.mpz_coefficients[i], payload.mpz_coefficients[i], __mpz_temp);
-		pcs_ep_mul(payload.pk, payload.mpz_mac_coefficients[i], payload.mpz_mac_coefficients[i], __mpz_temp);
+		pcs_ep_mul(payload.pk, (payload.mpz_coefficients)[i], (payload.mpz_coefficients)[i], __mpz_temp);
+		pcs_ep_mul(payload.pk, (payload.mpz_mac_coefficients)[i], (payload.mpz_mac_coefficients)[i], __mpz_temp);
 		R_inv_id_pows = R_inv_id_pows * to_ZZ_p(payload.id);
 
-		pcs_ee_add(payload.pk, payload.mpz_secret, payload.mpz_secret, payload.mpz_coefficients[i]);
-		pcs_ee_add(payload.pk, payload.mpz_mac, payload.mpz_mac, payload.mpz_mac_coefficients[i]);
+		pcs_ee_add(payload.pk, output.mpz_secret, output.mpz_secret, (payload.mpz_coefficients)[i]);
+		pcs_ee_add(payload.pk, output.mpz_mac, output.mpz_mac, (payload.mpz_mac_coefficients)[i]);
 	}
+
+    return output;
 
 }
 
