@@ -411,7 +411,6 @@ int main(int argc, char *argv[])
     run_benchmark_1(m,n,t,bitsize,force);
     cout << endl;
     run_benchmark_2(m,n,t,bitsize,false);
-
       
     return 0; 
 } 
