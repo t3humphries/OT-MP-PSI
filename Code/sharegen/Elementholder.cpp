@@ -85,8 +85,13 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     ZZ_p::init(context.p);
     ZZ h_x_alpha, g_alpha;
     Scheme1_Round1(&h_x_alpha, &g_alpha, context, __X);
-
-    Scheme1_Round1_receive out = k.Scheme1_Round1(h_x_alpha, g_alpha); // 
+    Scheme1_Round1_send toSend1;
+    toSend1.h_x_alpha = h_x_alpha;
+    toSend1.g_alpha = g_alpha;
+    Scheme1_Round1_receive outt = k.Scheme1_Round1(toSend1); // 
+    // Testing serialization
+    string str = outt.toString(); // string to send to server
+    Scheme1_Round1_receive out = Scheme1_Round1_receive(str); //this will be done on server side
 
     Scheme1_Round2_send out2 = Scheme1_Round2(context, out);
     // k.Scheme1_Round2(
@@ -94,10 +99,10 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     //     out2.mpz_secret, out2.mpz_mac,
     //     out2.mpz_coefficients, out2.mpz_mac_coefficients
     // );
-    k.Scheme1_Round2(out2);
+    Scheme1_Round2_receive out3 = k.Scheme1_Round2(out2);
 
     ZZ secret_share, mac_share;
-    Scheme1_Final(secret_share, mac_share, out2.mpz_secret, out2.mpz_mac);
+    Scheme1_Final(secret_share, mac_share, out3.mpz_secret, out3.mpz_mac);
 
     return Share(
         ZZ(id),
