@@ -27,7 +27,7 @@ void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
 void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
 	// ZZ __temp_ZZ;
 	std::stringstream __ssa;
-	char __temp[1000];
+	char __temp[2000];//TODO remove this somehow
 	mpz_get_str(__temp, 10, num);
 	__ssa << __temp;
 	__ssa >> __out;
@@ -36,7 +36,7 @@ void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
 void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 	ZZ __temp_ZZ;
 	std::stringstream __ssa;
-	char __temp[1000];
+	char __temp[2000];//TODO remove this somehow
 	mpz_get_str(__temp, 10, num);
 	__ssa << __temp;
 	__ssa >> __temp_ZZ;
@@ -132,6 +132,20 @@ pcs_public_key* str_to_pcs(string str)
     pcs_import_public_key(toReturn, temp);
     return toReturn;
 
+}
+
+void str_to_mpz_t(mpz_t toReturn, string str)
+{
+    mpz_set_str( toReturn, str.c_str(), 10);
+}
+
+string mpz_t_to_str(mpz_t num)
+{
+    std::stringstream ssa;
+    char __temp[2000];//TODO remove this somehow
+    mpz_get_str(__temp, 10, num);
+    ssa << __temp;
+    return ssa.str();
 }
 
 Scheme1_Round2_send::Scheme1_Round2_send(int t){
