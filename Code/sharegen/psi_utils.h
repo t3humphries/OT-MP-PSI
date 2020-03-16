@@ -115,6 +115,8 @@ class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
     vector<ZZ> masked_coefficients_alpha;
     ZZ masked_mac_alpha;
     vector<ZZ> masked_mac_coefficients_alpha;
+    Scheme1_Round1_receive(string str);
+    string toString();
 };
 
 class Scheme1_Round2_send{
@@ -126,8 +128,9 @@ class Scheme1_Round2_send{
     mpz_t* mpz_coefficients;
     mpz_t* mpz_mac_coefficients;
     Scheme1_Round2_send(){}
-    Scheme1_Round2_send(int t);
     Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id);
+    Scheme1_Round2_send(string str);
+    string toString();
 };
 
 #endif

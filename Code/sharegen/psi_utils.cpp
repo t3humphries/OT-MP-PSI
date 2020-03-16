@@ -148,18 +148,6 @@ string mpz_t_to_str(mpz_t num)
     return ssa.str();
 }
 
-Scheme1_Round2_send::Scheme1_Round2_send(int t){
-    mpz_init(mpz_secret);
-    mpz_init(mpz_mac);
-    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-    for (int i=0;i<t-1;i++){
-        mpz_init(mpz_coefficients[i]);
-        mpz_init(mpz_mac_coefficients[i]);
-    }
-}
-
-
 KeyholderContext::KeyholderContext(int __t, int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]){
     t = __t;
     key = NTL::ZZ(__key);
@@ -216,3 +204,54 @@ void KeyholderContext::write_to_file(std::string filename){
     outputFile << jsonFile;
     outputFile.close();
  }
+
+string Scheme1_Round1_receive::toString()
+{
+    string comma = ",";
+    string toReturn = "";
+    toReturn += ZZ_to_str(masked_secret_alpha);
+    toReturn += comma;
+    int size = masked_coefficients_alpha.size();
+    toReturn += to_string(size);
+    toReturn += comma;
+    for(int i = 0 ; i<size ; i++)
+    {
+        toReturn += ZZ_to_str(masked_coefficients_alpha[i]);
+        toReturn += comma;
+    }
+    size = masked_mac_coefficients_alpha.size();
+    toReturn += to_string(size);
+    toReturn += comma;
+    for(int i = 0 ; i<size ; i++)
+    {
+        toReturn += ZZ_to_str(masked_mac_coefficients_alpha[i]);
+        toReturn += comma;
+    }
+    toReturn += ZZ_to_str(masked_mac_alpha);
+    return toReturn;
+}
+
+Scheme1_Round1_receive::Scheme1_Round1_receive(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = ',';
+    std::getline(ss, token, delim);
+    masked_secret_alpha = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    int size = stoi(token);
+    for(int i = 0 ; i<size ; i++)
+    {
+        std::getline(ss, token, delim); 
+        masked_coefficients_alpha.push_back(str_to_ZZ(token));
+    }
+    std::getline(ss, token, delim);
+    size = stoi(token);
+    for(int i = 0 ; i<size ; i++)
+    {
+        std::getline(ss, token, delim); 
+        masked_mac_coefficients_alpha.push_back(str_to_ZZ(token));
+    }
+    std::getline(ss, token, delim);
+    masked_mac_alpha = str_to_ZZ(token);
+}
