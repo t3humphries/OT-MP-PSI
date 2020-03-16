@@ -93,7 +93,11 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     string str = outt.toString(); // string to send to server
     Scheme1_Round1_receive out = Scheme1_Round1_receive(str); //this will be done on server side
 
-    Scheme1_Round2_send out2 = Scheme1_Round2(context, out);
+    Scheme1_Round2_send outt2 = Scheme1_Round2(context, out);
+    //More testing
+    str = outt2.toString();
+    Scheme1_Round2_send out2 = Scheme1_Round2_send(str);
+
     // k.Scheme1_Round2(
     //     pk, id,
     //     out2.mpz_secret, out2.mpz_mac,
