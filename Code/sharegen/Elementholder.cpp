@@ -94,10 +94,10 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     //     out2.mpz_secret, out2.mpz_mac,
     //     out2.mpz_coefficients, out2.mpz_mac_coefficients
     // );
-    k.Scheme1_Round2(out2);
+    Scheme1_Round2_receive out3 = k.Scheme1_Round2(out2);
 
     ZZ secret_share, mac_share;
-    Scheme1_Final(secret_share, mac_share, out2.mpz_secret, out2.mpz_mac);
+    Scheme1_Final(secret_share, mac_share, out3.mpz_secret, out3.mpz_mac);
 
     return Share(
         ZZ(id),

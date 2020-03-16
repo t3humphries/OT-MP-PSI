@@ -126,4 +126,11 @@ class Scheme1_Round2_send{
     Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id);
 };
 
+class Scheme1_Round2_receive{
+    public:
+    mpz_t mpz_secret;
+    mpz_t mpz_mac;
+    Scheme1_Round2_receive();
+};
+
 #endif
