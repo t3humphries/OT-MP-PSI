@@ -255,3 +255,24 @@ Scheme1_Round1_receive::Scheme1_Round1_receive(string str)
     std::getline(ss, token, delim);
     masked_mac_alpha = str_to_ZZ(token);
 }
+
+string Scheme1_Round1_send::toString()
+{
+    string comma = ",";
+    string toReturn = "";
+    toReturn += ZZ_to_str(h_x_alpha);
+    toReturn += comma;
+    toReturn += ZZ_to_str(g_alpha);
+    return toReturn;
+}
+
+Scheme1_Round1_send::Scheme1_Round1_send(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = ',';
+    std::getline(ss, token, delim);
+    h_x_alpha = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    g_alpha = str_to_ZZ(token);
+}

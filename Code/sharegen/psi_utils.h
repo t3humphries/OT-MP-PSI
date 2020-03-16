@@ -119,6 +119,14 @@ class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
     string toString();
 };
 
+class Scheme1_Round1_send{
+    public:
+    ZZ h_x_alpha; 
+    ZZ g_alpha;
+    Scheme1_Round1_send(string str);
+    string toString();
+};
+
 class Scheme1_Round2_send{
     public:
     pcs_public_key *pk;
