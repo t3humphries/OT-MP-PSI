@@ -24,7 +24,7 @@ class Keyholder{
 	Keyholder(ContextScheme2 __c2);
     void initialize_context(ContextScheme1 __c1);
     void initialize_context(ContextScheme2 __c2);
-	Scheme1_Round1_receive Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha);
+	Scheme1_Round1_receive Scheme1_Round1(Scheme1_Round1_send payload);
 	void Scheme1_Round2(
         pcs_public_key *pk, int id,
         mpz_t __mpz_secret,

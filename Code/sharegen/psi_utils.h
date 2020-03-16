@@ -115,6 +115,7 @@ class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
     vector<ZZ> masked_coefficients_alpha;
     ZZ masked_mac_alpha;
     vector<ZZ> masked_mac_coefficients_alpha;
+    Scheme1_Round1_receive(){}
     Scheme1_Round1_receive(string str);
     string toString();
 };
@@ -123,6 +124,7 @@ class Scheme1_Round1_send{
     public:
     ZZ h_x_alpha; 
     ZZ g_alpha;
+    Scheme1_Round1_send(){}
     Scheme1_Round1_send(string str);
     string toString();
 };
