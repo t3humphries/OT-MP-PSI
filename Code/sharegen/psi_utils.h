@@ -22,12 +22,16 @@ std::string ZZ_to_str(NTL::ZZ zz);
 NTL::ZZ str_to_ZZ(std::string str);
 NTL::ZZ read_prime(int bitsize);
 NTL::ZZ read_generator(int bitsize);
-
+string pcs_to_str(pcs_public_key* pk);
 ZZ_p hash_(ZZ x, ZZ p);
 void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ);
 void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num);
 void mpz_t_to_ZZ(ZZ& __out, mpz_t num);
 void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num);
+
+pcs_public_key* str_to_pcs(string str);
+void str_to_mpz_t(mpz_t toReturn, string str);
+string mpz_t_to_str(mpz_t num);
 
 class Share{
     public:
@@ -111,6 +115,18 @@ class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
     vector<ZZ> masked_coefficients_alpha;
     ZZ masked_mac_alpha;
     vector<ZZ> masked_mac_coefficients_alpha;
+    Scheme1_Round1_receive(){}
+    Scheme1_Round1_receive(string str);
+    string toString();
+};
+
+class Scheme1_Round1_send{
+    public:
+    ZZ h_x_alpha; 
+    ZZ g_alpha;
+    Scheme1_Round1_send(){}
+    Scheme1_Round1_send(string str);
+    string toString();
 };
 
 class Scheme1_Round2_send{
@@ -122,8 +138,9 @@ class Scheme1_Round2_send{
     mpz_t* mpz_coefficients;
     mpz_t* mpz_mac_coefficients;
     Scheme1_Round2_send(){}
-    Scheme1_Round2_send(int t);
     Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id);
+    Scheme1_Round2_send(string str);
+    string toString();
 };
 
 class Scheme1_Round2_receive{

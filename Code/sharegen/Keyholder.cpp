@@ -61,7 +61,7 @@ void Keyholder::initialize_context(ContextScheme2 __c2){
     }
 }
 
-Scheme1_Round1_receive Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
+Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 	
     ZZ p = public_context.p, g = public_context.g;
 	int t = public_context.t;
@@ -69,8 +69,8 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(ZZ __h_x_alpha, ZZ __g_alpha){
 	ZZ_p::init(p);
 	ZZ_p g_p, h_x_alpha, g_alpha;
 	conv(g_p, g);
-    conv(h_x_alpha, __h_x_alpha);
-    conv(g_alpha, __g_alpha);        
+    conv(h_x_alpha, payload.h_x_alpha);
+    conv(g_alpha, payload.g_alpha);        
 
 	ZZ_p R, R_inverse, R_alpha;
     {
