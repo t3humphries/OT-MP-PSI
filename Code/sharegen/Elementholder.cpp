@@ -88,18 +88,29 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     Scheme1_Round1_send toSend1;
     toSend1.h_x_alpha = h_x_alpha;
     toSend1.g_alpha = g_alpha;
-    Scheme1_Round1_receive outt = k.Scheme1_Round1(toSend1); // 
+
+    string str = toSend1.toString();
+    Scheme1_Round1_send toSend = Scheme1_Round1_send(str);
+
+    Scheme1_Round1_receive outt = k.Scheme1_Round1(toSend); // 
     // Testing serialization
-    string str = outt.toString(); // string to send to server
+    str = outt.toString(); // string to send to server
     Scheme1_Round1_receive out = Scheme1_Round1_receive(str); //this will be done on server side
 
-    Scheme1_Round2_send out2 = Scheme1_Round2(context, out);
+    Scheme1_Round2_send outt2 = Scheme1_Round2(context, out);
+    //More testing
+    str = outt2.toString();
+    Scheme1_Round2_send out2 = Scheme1_Round2_send(str);
+
     // k.Scheme1_Round2(
     //     pk, id,
     //     out2.mpz_secret, out2.mpz_mac,
     //     out2.mpz_coefficients, out2.mpz_mac_coefficients
     // );
-    Scheme1_Round2_receive out3 = k.Scheme1_Round2(out2);
+    Scheme1_Round2_receive outt3 = k.Scheme1_Round2(out2);
+
+    str = outt3.toString();
+    Scheme1_Round2_receive out3 = Scheme1_Round2_receive(str);
 
     ZZ secret_share, mac_share;
     Scheme1_Final(secret_share, mac_share, out3.mpz_secret, out3.mpz_mac);

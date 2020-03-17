@@ -104,9 +104,10 @@ ZZ str_to_ZZ(string str){
     return zz;
 }
 
-Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
+Scheme1_Round2_send::Scheme1_Round2_send(int __t, pcs_public_key *__pk, int __id){
     pk=__pk;
     id=__id;
+    t=__t;
     mpz_init(mpz_secret);
     mpz_init(mpz_mac);
     mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
@@ -280,4 +281,93 @@ Scheme1_Round1_send::Scheme1_Round1_send(string str)
     h_x_alpha = str_to_ZZ(token);
     std::getline(ss, token, delim);
     g_alpha = str_to_ZZ(token);
+}
+
+string Scheme1_Round2_send::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+    toReturn += pcs_to_str(pk);
+    toReturn += delim;
+    toReturn += to_string(id);
+    toReturn += delim;
+    toReturn += to_string(t);
+    toReturn += delim;
+    for(int i = 0 ; i < t-1 ; i++)
+    {
+        toReturn += mpz_t_to_str(mpz_coefficients[i]);
+        toReturn += delim;
+    }
+    for(int i = 0 ; i < t-1 ; i++)
+    {
+        toReturn += mpz_t_to_str(mpz_mac_coefficients[i]);
+        toReturn += delim;
+    }
+    toReturn += mpz_t_to_str(mpz_secret);
+    toReturn += delim;
+    toReturn += mpz_t_to_str(mpz_mac);
+    return toReturn;
+}
+
+Scheme1_Round2_send::Scheme1_Round2_send(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+    std::getline(ss, token, delim);
+    pk = str_to_pcs(token);
+
+    std::getline(ss, token, delim);
+    id = stoi(token);
+    std::getline(ss, token, delim);
+    t = stoi(token);
+
+    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    for(int i = 0 ; i<t-1 ; i++)
+    {
+        std::getline(ss, token, delim); 
+        mpz_init(mpz_coefficients[i]);
+        str_to_mpz_t(mpz_coefficients[i], token);
+    }
+
+    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    for(int i = 0 ; i<t-1 ; i++)
+    {
+        std::getline(ss, token, delim); 
+        mpz_init(mpz_mac_coefficients[i]);
+        str_to_mpz_t(mpz_mac_coefficients[i], token);
+    }
+    
+    std::getline(ss, token, delim);
+    mpz_init(mpz_secret);
+    str_to_mpz_t(mpz_secret,token);
+    std::getline(ss, token, delim);
+    mpz_init(mpz_mac);
+    str_to_mpz_t(mpz_mac,token);
+
+}
+string Scheme1_Round2_receive::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+    
+    toReturn += mpz_t_to_str(mpz_secret);
+    toReturn += delim;
+    toReturn += mpz_t_to_str(mpz_mac);
+    return toReturn;
+}
+
+Scheme1_Round2_receive::Scheme1_Round2_receive(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+
+    std::getline(ss, token, delim);
+    mpz_init(mpz_secret);
+    str_to_mpz_t(mpz_secret,token);
+    std::getline(ss, token, delim);
+    mpz_init(mpz_mac);
+    str_to_mpz_t(mpz_mac,token);
+
 }

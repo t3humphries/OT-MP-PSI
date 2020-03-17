@@ -133,11 +133,11 @@ class Scheme1_Round2_send{
     public:
     pcs_public_key *pk;
     int id;
+    int t;
     mpz_t mpz_secret;
     mpz_t mpz_mac;
     mpz_t* mpz_coefficients;
     mpz_t* mpz_mac_coefficients;
-    Scheme1_Round2_send(){}
     Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id);
     Scheme1_Round2_send(string str);
     string toString();
@@ -148,6 +148,9 @@ class Scheme1_Round2_receive{
     mpz_t mpz_secret;
     mpz_t mpz_mac;
     Scheme1_Round2_receive();
+    Scheme1_Round2_receive(string str);
+    string toString();
 };
 
 #endif
+
