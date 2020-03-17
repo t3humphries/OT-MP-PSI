@@ -346,3 +346,28 @@ Scheme1_Round2_send::Scheme1_Round2_send(string str)
     str_to_mpz_t(mpz_mac,token);
 
 }
+string Scheme1_Round2_receive::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+    
+    toReturn += mpz_t_to_str(mpz_secret);
+    toReturn += delim;
+    toReturn += mpz_t_to_str(mpz_mac);
+    return toReturn;
+}
+
+Scheme1_Round2_receive::Scheme1_Round2_receive(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+
+    std::getline(ss, token, delim);
+    mpz_init(mpz_secret);
+    str_to_mpz_t(mpz_secret,token);
+    std::getline(ss, token, delim);
+    mpz_init(mpz_mac);
+    str_to_mpz_t(mpz_mac,token);
+
+}
