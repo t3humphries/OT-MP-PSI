@@ -363,6 +363,10 @@ void run_benchmark_2(int m, int n, int t, int bitsize, bool force=false){
 
 }
 
+class cls{
+    mpz_t a;
+    mpz_t b;
+};
 
 int main(int argc, char *argv[])  
 { 
@@ -412,6 +416,5 @@ int main(int argc, char *argv[])
     cout << endl;
     run_benchmark_2(m,n,t,bitsize,false);
 
-      
     return 0; 
 } 

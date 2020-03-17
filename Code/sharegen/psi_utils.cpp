@@ -27,7 +27,7 @@ void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
 void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
 	// ZZ __temp_ZZ;
 	std::stringstream __ssa;
-	char __temp[1000];
+	char __temp[2000];//TODO remove this somehow
 	mpz_get_str(__temp, 10, num);
 	__ssa << __temp;
 	__ssa >> __out;
@@ -36,7 +36,7 @@ void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
 void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 	ZZ __temp_ZZ;
 	std::stringstream __ssa;
-	char __temp[1000];
+	char __temp[2000];//TODO remove this somehow
 	mpz_get_str(__temp, 10, num);
 	__ssa << __temp;
 	__ssa >> __temp_ZZ;
@@ -104,9 +104,10 @@ ZZ str_to_ZZ(string str){
     return zz;
 }
 
-Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
+Scheme1_Round2_send::Scheme1_Round2_send(int __t, pcs_public_key *__pk, int __id){
     pk=__pk;
     id=__id;
+    t=__t;
     mpz_init(mpz_secret);
     mpz_init(mpz_mac);
     mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
@@ -116,6 +117,11 @@ Scheme1_Round2_send::Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id){
         mpz_init(mpz_mac_coefficients[i]);
     }
 
+}
+
+Scheme1_Round2_receive::Scheme1_Round2_receive(){
+    mpz_init(mpz_secret);
+    mpz_init(mpz_mac);
 }
 
 string pcs_to_str(pcs_public_key* pk)
@@ -134,17 +140,19 @@ pcs_public_key* str_to_pcs(string str)
 
 }
 
-Scheme1_Round2_send::Scheme1_Round2_send(int t){
-    mpz_init(mpz_secret);
-    mpz_init(mpz_mac);
-    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
-    for (int i=0;i<t-1;i++){
-        mpz_init(mpz_coefficients[i]);
-        mpz_init(mpz_mac_coefficients[i]);
-    }
+void str_to_mpz_t(mpz_t toReturn, string str)
+{
+    mpz_set_str( toReturn, str.c_str(), 10);
 }
 
+string mpz_t_to_str(mpz_t num)
+{
+    std::stringstream ssa;
+    char __temp[2000];//TODO remove this somehow
+    mpz_get_str(__temp, 10, num);
+    ssa << __temp;
+    return ssa.str();
+}
 
 KeyholderContext::KeyholderContext(int __t, int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]){
     t = __t;
@@ -202,3 +210,164 @@ void KeyholderContext::write_to_file(std::string filename){
     outputFile << jsonFile;
     outputFile.close();
  }
+
+string Scheme1_Round1_receive::toString()
+{
+    string comma = ",";
+    string toReturn = "";
+    toReturn += ZZ_to_str(masked_secret_alpha);
+    toReturn += comma;
+    int size = masked_coefficients_alpha.size();
+    toReturn += to_string(size);
+    toReturn += comma;
+    for(int i = 0 ; i<size ; i++)
+    {
+        toReturn += ZZ_to_str(masked_coefficients_alpha[i]);
+        toReturn += comma;
+    }
+    size = masked_mac_coefficients_alpha.size();
+    toReturn += to_string(size);
+    toReturn += comma;
+    for(int i = 0 ; i<size ; i++)
+    {
+        toReturn += ZZ_to_str(masked_mac_coefficients_alpha[i]);
+        toReturn += comma;
+    }
+    toReturn += ZZ_to_str(masked_mac_alpha);
+    return toReturn;
+}
+
+Scheme1_Round1_receive::Scheme1_Round1_receive(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = ',';
+    std::getline(ss, token, delim);
+    masked_secret_alpha = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    int size = stoi(token);
+    for(int i = 0 ; i<size ; i++)
+    {
+        std::getline(ss, token, delim); 
+        masked_coefficients_alpha.push_back(str_to_ZZ(token));
+    }
+    std::getline(ss, token, delim);
+    size = stoi(token);
+    for(int i = 0 ; i<size ; i++)
+    {
+        std::getline(ss, token, delim); 
+        masked_mac_coefficients_alpha.push_back(str_to_ZZ(token));
+    }
+    std::getline(ss, token, delim);
+    masked_mac_alpha = str_to_ZZ(token);
+}
+
+string Scheme1_Round1_send::toString()
+{
+    string comma = ",";
+    string toReturn = "";
+    toReturn += ZZ_to_str(h_x_alpha);
+    toReturn += comma;
+    toReturn += ZZ_to_str(g_alpha);
+    return toReturn;
+}
+
+Scheme1_Round1_send::Scheme1_Round1_send(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = ',';
+    std::getline(ss, token, delim);
+    h_x_alpha = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    g_alpha = str_to_ZZ(token);
+}
+
+string Scheme1_Round2_send::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+    toReturn += pcs_to_str(pk);
+    toReturn += delim;
+    toReturn += to_string(id);
+    toReturn += delim;
+    toReturn += to_string(t);
+    toReturn += delim;
+    for(int i = 0 ; i < t-1 ; i++)
+    {
+        toReturn += mpz_t_to_str(mpz_coefficients[i]);
+        toReturn += delim;
+    }
+    for(int i = 0 ; i < t-1 ; i++)
+    {
+        toReturn += mpz_t_to_str(mpz_mac_coefficients[i]);
+        toReturn += delim;
+    }
+    toReturn += mpz_t_to_str(mpz_secret);
+    toReturn += delim;
+    toReturn += mpz_t_to_str(mpz_mac);
+    return toReturn;
+}
+
+Scheme1_Round2_send::Scheme1_Round2_send(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+    std::getline(ss, token, delim);
+    pk = str_to_pcs(token);
+
+    std::getline(ss, token, delim);
+    id = stoi(token);
+    std::getline(ss, token, delim);
+    t = stoi(token);
+
+    mpz_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    for(int i = 0 ; i<t-1 ; i++)
+    {
+        std::getline(ss, token, delim); 
+        mpz_init(mpz_coefficients[i]);
+        str_to_mpz_t(mpz_coefficients[i], token);
+    }
+
+    mpz_mac_coefficients = (mpz_t *) malloc((t-1) * sizeof(mpz_t));
+    for(int i = 0 ; i<t-1 ; i++)
+    {
+        std::getline(ss, token, delim); 
+        mpz_init(mpz_mac_coefficients[i]);
+        str_to_mpz_t(mpz_mac_coefficients[i], token);
+    }
+    
+    std::getline(ss, token, delim);
+    mpz_init(mpz_secret);
+    str_to_mpz_t(mpz_secret,token);
+    std::getline(ss, token, delim);
+    mpz_init(mpz_mac);
+    str_to_mpz_t(mpz_mac,token);
+
+}
+string Scheme1_Round2_receive::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+    
+    toReturn += mpz_t_to_str(mpz_secret);
+    toReturn += delim;
+    toReturn += mpz_t_to_str(mpz_mac);
+    return toReturn;
+}
+
+Scheme1_Round2_receive::Scheme1_Round2_receive(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+
+    std::getline(ss, token, delim);
+    mpz_init(mpz_secret);
+    str_to_mpz_t(mpz_secret,token);
+    std::getline(ss, token, delim);
+    mpz_init(mpz_mac);
+    str_to_mpz_t(mpz_mac,token);
+
+}
