@@ -40,7 +40,7 @@ void Keyholder::initialize_context(ContextScheme1 __c1){
     ZZ_p::init(public_context.p-1);
     key = rep(random_ZZ_p());
     key_mac = rep(random_ZZ_p());
-    randoms = new ZZ[public_context.t];
+    randoms = new ZZ[public_context.t]; //TODO this is wrong should be t-1??
     randoms_mac = new ZZ[public_context.t];
     for (int i=0;i<public_context.t;i++){
         randoms[i] = rep(random_ZZ_p());
@@ -53,7 +53,7 @@ void Keyholder::initialize_context(ContextScheme2 __c2){
     ZZ_p::init(context2.p-1);
     key = rep(random_ZZ_p());
     key_mac = rep(random_ZZ_p());
-    randoms = new ZZ[context2.t];
+    randoms = new ZZ[context2.t]; //TODO this is wrong should be t-1??
     randoms_mac = new ZZ[context2.t];
     for (int i=0;i<context2.t;i++){
         randoms[i] = rep(random_ZZ_p());
@@ -195,4 +195,91 @@ void Keyholder::Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, Cont
 
 	*secret_share_alpha = rep(NTL::power(conv<ZZ_p>(h_x_alpha), secret_exp));
 	*mac_share_alpha= rep(NTL::power(conv<ZZ_p>(h_x_alpha), mac_exp));
+}
+
+string Keyholder::toString()  //TODO these are likely much larger than needed.
+{
+    string delim = ",";
+    string toReturn = "";
+    toReturn += ZZ_to_str(public_context.p);
+    toReturn += delim;
+    toReturn += ZZ_to_str(public_context.g);
+    toReturn += delim;
+    toReturn += to_string(public_context.t);
+    toReturn += delim;
+
+    toReturn += ZZ_to_str(context2.p);
+    toReturn += delim;
+    toReturn += ZZ_to_str(context2.q);
+    toReturn += delim;
+    toReturn += to_string(context2.t);
+    toReturn += delim;
+
+    toReturn += ZZ_to_str(key);
+    toReturn += delim;
+    toReturn += ZZ_to_str(key_mac);
+    toReturn += delim;
+
+    int size = public_context.t-1;
+
+    for(int i = 0 ; i<size ; i++)
+    {
+        toReturn += ZZ_to_str(randoms[i]);
+        toReturn += delim;
+    }
+    for(int i = 0 ; i<size ; i++)
+    {
+        toReturn += ZZ_to_str(randoms_mac[i]);
+        toReturn += delim;
+    }
+
+    toReturn += ZZ_to_str(r);
+    toReturn += delim;
+    toReturn += ZZ_to_str(__R);
+    toReturn += delim;
+    toReturn += ZZ_to_str(__R_inverse);
+    
+    return toReturn;
+}
+
+Keyholder::Keyholder(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = ',';
+    std::getline(ss, token, delim);
+    public_context.p = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    public_context.g = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    public_context.t = stoi(token);
+
+    std::getline(ss, token, delim);
+    context2.p = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    context2.q = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    context2.t = stoi(token);
+
+    int size = public_context.t-1;
+    randoms = new ZZ[size];
+    for(int i = 0 ; i<size ; i++)
+    {
+        std::getline(ss, token, delim); 
+        randoms[i] = str_to_ZZ(token);
+    }
+    randoms_mac = new ZZ[size];
+    for(int i = 0 ; i<size ; i++)
+    {
+        std::getline(ss, token, delim); 
+        randoms_mac[i] = str_to_ZZ(token);
+    }
+
+    std::getline(ss, token, delim);
+    r = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    __R = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    __R_inverse = str_to_ZZ(token);
+
 }

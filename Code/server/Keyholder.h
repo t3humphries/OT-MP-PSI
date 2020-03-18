@@ -22,8 +22,10 @@ class Keyholder{
     Keyholder(ContextScheme2 __c2, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]);
 	Keyholder(ContextScheme1 __c1);
 	Keyholder(ContextScheme2 __c2);
+	Keyholder(string str);
     void initialize_context(ContextScheme1 __c1);
     void initialize_context(ContextScheme2 __c2);
+    string toString();
 
     Scheme1_Round2_receive Scheme1_Round2(Scheme1_Round2_send payload);
 	Scheme1_Round1_receive Scheme1_Round1(Scheme1_Round1_send payload);
