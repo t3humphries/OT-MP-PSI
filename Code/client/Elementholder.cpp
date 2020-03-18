@@ -92,37 +92,19 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, i
     ZZ h_x_alpha, g_alpha;
     Scheme1_Round1(&h_x_alpha, &g_alpha, context, __X);
 
-    Scheme1_Round1_send to_send;
-    to_send.h_x_alpha = h_x_alpha;
-    to_send.g_alpha = g_alpha;
-    result = elem_holder.send_to_server("S1_R1", to_send.toString());
-
-    // string str = toSend1.toString();
-    // Scheme1_Round1_send toSend = Scheme1_Round1_send(str);
-
-    // Scheme1_Round1_receive outt = k.Scheme1_Round1(toSend); // 
-    // // Testing serialization
-    // str = outt.toString(); // string to send to server
-    string str;
-    Scheme1_Round1_receive out = Scheme1_Round1_receive(result); //this will be done on server side
-
-    Scheme1_Round2_send outt2 = Scheme1_Round2(context, out);
-    //More testing
-    str = outt2.toString();
-    Scheme1_Round2_send out2 = Scheme1_Round2_send(str);
-
-    // k.Scheme1_Round2(
-    //     pk, id,
-    //     out2.mpz_secret, out2.mpz_mac,
-    //     out2.mpz_coefficients, out2.mpz_mac_coefficients
-    // );
-    Scheme1_Round2_receive outt3 = k.Scheme1_Round2(out2);
-
-    str = outt3.toString();
-    Scheme1_Round2_receive out3 = Scheme1_Round2_receive(str);
+    Scheme1_Round1_send to_send_round_1;
+    to_send_round_1.h_x_alpha = h_x_alpha;
+    to_send_round_1.g_alpha = g_alpha;
+    result = elem_holder.send_to_server("S1_R1", to_send_round_1.toString());
+    Scheme1_Round1_receive out_round1 = Scheme1_Round1_receive(result); //this will be done on server side
+    
+    //Round 2
+    Scheme1_Round2_send to_send_round_2 = Scheme1_Round2(context, out_round1);
+    result = elem_holder.send_to_server("S1_R2", to_send_round_2.toString());
+    Scheme1_Round2_receive out_round2 = Scheme1_Round2_receive(result);
 
     ZZ secret_share, mac_share;
-    Scheme1_Final(secret_share, mac_share, out3.mpz_secret, out3.mpz_mac);
+    Scheme1_Final(secret_share, mac_share, out_round2.mpz_secret, out_round2.mpz_mac);
 
     return Share(
         ZZ(id),

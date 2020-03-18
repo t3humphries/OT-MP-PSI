@@ -89,10 +89,15 @@ int main()
             result = output.toString();
             cout<<"S1_R1 Complete!"<<endl;
         }
+        
         else if(arg.compare("S1_R2") == 0)
         {
-
+            Scheme1_Round2_send input = Scheme1_Round2_send(message);
+            Scheme1_Round2_receive output = k.Scheme1_Round2(input);
+            result = output.toString();
+            cout<<"S1_R2 Complete!"<<endl;
         }
+
         else if(arg.compare("S2") == 0)
         {
 
