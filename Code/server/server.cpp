@@ -3,16 +3,13 @@
 #define PORT 8080 
 #define TRUE   1 
 
-int server_fd, new_socket, valread; 
+int server_fd, new_socket; 
 struct sockaddr_in address;
-char buffer[1024] = {0}; 
-char *message = "message/ack from server";   //value that you want to send back to client
+unsigned int MAX_BUF_LENGTH = 4096;
 
-int serverInitFunction() 
+void serverInitFunction() 
 { 
-     
     int opt = 1; 
-    int addrlen = sizeof(address); 
     
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
     { 
@@ -41,8 +38,6 @@ int serverInitFunction()
         perror("listen"); 
         exit(EXIT_FAILURE); 
     }
-    
-    return 0; 
 } 
 
 int main()
@@ -51,17 +46,32 @@ int main()
     int addrlen = sizeof(address); 
     
     //The server runs in a loop below. It waits for requests on the file descriptor and accepts the first pending request for the listening socket.
-    
     while(TRUE)
     {    
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address,(socklen_t*)&addrlen))<0) 
         { 
             perror("accept"); 
             exit(EXIT_FAILURE); 
-        } 
-        valread = read( new_socket , buffer, 1024); 
-        printf("%s\n",buffer );                   // this is the value from the client. perform your operations on this
-        send(new_socket , message , strlen(message) , 0 ); 
+        }
+
+        //Get the input from the client
+        vector<char> buffer(MAX_BUF_LENGTH);
+        string input_from_client;   
+        int bytesReceived = 0;
+        do {
+            bytesReceived = read(new_socket, &buffer[0], buffer.size());
+            // append string from buffer.
+            if ( bytesReceived == -1 ) { 
+                // error 
+            } else {
+                input_from_client.append( buffer.cbegin(), buffer.cend() );
+            }
+        } while ( bytesReceived == MAX_BUF_LENGTH );
+
+        cout<<input_from_client<<endl;  
+
+        string message = "Testing response";      
+        send(new_socket , message.c_str() , message.length() , 0 ); 
     } 
 
     return 0;

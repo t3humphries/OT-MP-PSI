@@ -7,20 +7,21 @@
 #include <arpa/inet.h> 
 #include <unistd.h> 
 #include <string.h>
+#include <vector>
+using namespace std;
 
 #define PORT 8080 
-#define size 1024
 
 class client{
 
 public:
 
-    int sock, valread;
+    int sock;
     struct sockaddr_in serv_addr; 
-    char buffer[size];
+    unsigned int MAX_BUF_LENGTH;
 
-    client(char *connection_address);   
-    char* clientfunction(char* message);
+    client(string connection_address);   
+    string send_to_server(string message);
     
 };
 
