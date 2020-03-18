@@ -4,17 +4,17 @@
 #include <math.h>
 #include <NTL/ZZ_p.h>
 #include <NTL/ZZ.h>
-#include "../sharegen/nlohmann/json.hpp"
+#include "../global/nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <time.h>
 #include <vector>
-#include "../sharegen/psi_utils.h"
-#include "../sharegen/ShareGen.h"
-#include "../sharegen/Recon.h"
-#include "../sharegen/Elementholder.h"
+#include "../global/psi_utils.h"
+#include "../client/ShareGen.h"
+#include "../client/Recon.h"
+#include "../client/Elementholder.h"
 #include <chrono>
 
 using namespace NTL;

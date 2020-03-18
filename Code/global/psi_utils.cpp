@@ -44,7 +44,7 @@ void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
 }
 
 ZZ read_prime(int bitsize){
-    ifstream prime_file("../sharegen/primes.json");
+    ifstream prime_file("../client/primes.json");
     json j;
     prime_file >> j;
     prime_file.close();
@@ -60,7 +60,7 @@ ZZ read_prime(int bitsize){
 }
 
 ZZ read_generator(int bitsize){
-    ifstream prime_file("../sharegen/generators.json");
+    ifstream prime_file("../client/generators.json");
     json j;
     prime_file >> j;
     prime_file.close();

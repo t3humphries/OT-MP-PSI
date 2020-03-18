@@ -1,8 +1,8 @@
 #ifndef __ELEMENTHOLDER_H__
 #define __ELEMENTHOLDER_H__
 
-#include "psi_utils.h"
-#include "Keyholder.h"
+#include "../global/psi_utils.h"
+#include "../server/Keyholder.h"
 
 using namespace std;
 using namespace NTL;

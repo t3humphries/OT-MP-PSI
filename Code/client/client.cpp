@@ -1,7 +1,6 @@
 
 
 #include "client.h" 
-
 using namespace std;
 
 
@@ -47,7 +46,8 @@ char* client::clientfunction(char* message)
 int main()
 {
     client object("127.0.0.1");
-	cout<<"first return"<<object.clientfunction("this is the message one")<<"\n";     //These are test messages.
+	cout<<"first return"<<object.clientfunction("this is the message one")<<"\n";    
+    cout<<"first return"<<object.clientfunction("this is the message two")<<"\n";  //These are test messages.
       
 	return 0;
 }

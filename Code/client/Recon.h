@@ -3,11 +3,11 @@
 
 #include <NTL/ZZ_p.h>
 #include <NTL/ZZ.h>
-#include "nlohmann/json.hpp"
+#include "../global/nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "psi_utils.h"
+#include "../global/psi_utils.h"
 
 NTL::ZZ_p reconScheme1(std::vector<Share> shares, ContextScheme1 context, int mac); //mac=1 to recon SS_mac and mac=0 to recon SS
 NTL::ZZ_p reconScheme2(std::vector<Share> shares, ContextScheme2 context, int mac);

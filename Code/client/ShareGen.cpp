@@ -1,5 +1,5 @@
 #include "ShareGen.h"
-#include "nlohmann/json.hpp"
+#include "../global/nlohmann/json.hpp"
 
 using namespace NTL;
 using namespace std;

@@ -8,7 +8,7 @@
 #include<fstream>
 #include <sstream>
 #include <string>
-#include "psi_utils.h"
+#include "../global/psi_utils.h"
 
 
 Share ShareGen_1(
