@@ -23,6 +23,7 @@ class Keyholder{
 	Keyholder(ContextScheme1 __c1);
 	Keyholder(ContextScheme2 __c2);
 	Keyholder(string str);
+	Keyholder(){}
     void initialize_context(ContextScheme1 __c1);
     void initialize_context(ContextScheme2 __c2);
     string toString();

@@ -3,6 +3,7 @@
 
 #include "../global/psi_utils.h"
 #include "../server/Keyholder.h"
+#include "client.h"
 
 using namespace std;
 using namespace NTL;

@@ -6,6 +6,7 @@
 int server_fd, new_socket; 
 struct sockaddr_in address;
 unsigned int MAX_BUF_LENGTH = 4096;
+Keyholder k;
 
 void serverInitFunction() 
 { 
@@ -68,10 +69,35 @@ int main()
             }
         } while ( bytesReceived == MAX_BUF_LENGTH );
 
-        cout<<input_from_client<<endl;  
+        stringstream ss(input_from_client);
+        string arg, message, result;
+  
+        
+        char delim = '|';
+        std::getline(ss, arg, delim);
+        std::getline(ss, message, delim);
+        if(arg.compare("INIT") == 0)
+        {
+            cout<<"Initializing Keyholder"<<endl;
+            k = Keyholder(message);
+            result = "Complete";
+        }
+        else if(arg.compare("S1_R1") == 0)
+        {
+            Scheme1_Round1_send input = Scheme1_Round1_send(message);
+            Scheme1_Round1_receive output = k.Scheme1_Round1(input);
+            result = output.toString();
+            cout<<"S1_R1 Complete!"<<endl;
+        }
+        else if(arg.compare("S1_R2") == 0)
+        {
 
-        string message = "Testing response";      
-        send(new_socket , message.c_str() , message.length() , 0 ); 
+        }
+        else if(arg.compare("S2") == 0)
+        {
+
+        }
+        send(new_socket , result.c_str() , result.length() , 0 ); 
     } 
 
     return 0;

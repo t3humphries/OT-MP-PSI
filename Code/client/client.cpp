@@ -16,8 +16,9 @@ client::client(string connection_address)   // constructor for intiializing
 }
 
        
-string client::send_to_server(string message) 
+string client::send_to_server(string arg, string raw_message) 
 { 
+
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
     { 
         printf("\n Socket creation error \n"); 
@@ -27,6 +28,7 @@ string client::send_to_server(string message)
         return "\nConnection failed"; 
     }
     //Send to server 
+    string message = arg + "|" + raw_message;
     send(sock , message.c_str() , message.length() , 0 ); 
 
     //Get the response from server

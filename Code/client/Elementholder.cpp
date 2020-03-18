@@ -81,25 +81,30 @@ void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_s
     mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
-Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder __k, int num_bins){
+Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, int num_bins){
     ZZ_p::init(context.p);
+    string result;
+    //Initialize connection to server
+    client elem_holder("127.0.0.1");
+    elem_holder.send_to_server("INIT", k.toString()); //TODO move to benchmark abd pass client
 
-    string test = __k.toString();
-    Keyholder k = Keyholder(test);
-
+    //Round 1 
     ZZ h_x_alpha, g_alpha;
     Scheme1_Round1(&h_x_alpha, &g_alpha, context, __X);
-    Scheme1_Round1_send toSend1;
-    toSend1.h_x_alpha = h_x_alpha;
-    toSend1.g_alpha = g_alpha;
 
-    string str = toSend1.toString();
-    Scheme1_Round1_send toSend = Scheme1_Round1_send(str);
+    Scheme1_Round1_send to_send;
+    to_send.h_x_alpha = h_x_alpha;
+    to_send.g_alpha = g_alpha;
+    result = elem_holder.send_to_server("S1_R1", to_send.toString());
 
-    Scheme1_Round1_receive outt = k.Scheme1_Round1(toSend); // 
-    // Testing serialization
-    str = outt.toString(); // string to send to server
-    Scheme1_Round1_receive out = Scheme1_Round1_receive(str); //this will be done on server side
+    // string str = toSend1.toString();
+    // Scheme1_Round1_send toSend = Scheme1_Round1_send(str);
+
+    // Scheme1_Round1_receive outt = k.Scheme1_Round1(toSend); // 
+    // // Testing serialization
+    // str = outt.toString(); // string to send to server
+    string str;
+    Scheme1_Round1_receive out = Scheme1_Round1_receive(result); //this will be done on server side
 
     Scheme1_Round2_send outt2 = Scheme1_Round2(context, out);
     //More testing

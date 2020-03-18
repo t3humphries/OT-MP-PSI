@@ -21,7 +21,7 @@ public:
     unsigned int MAX_BUF_LENGTH;
 
     client(string connection_address);   
-    string send_to_server(string message);
+    string send_to_server(string arg, string message);
     
 };
 
