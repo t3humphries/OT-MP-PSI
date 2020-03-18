@@ -8,6 +8,6 @@
 #include <netinet/in.h> 
 #include <string.h> 
 
-int severfunction();
+int severInitFunction();
 
 #endif
