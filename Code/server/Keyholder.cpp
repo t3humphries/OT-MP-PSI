@@ -261,6 +261,11 @@ Keyholder::Keyholder(string str)
     std::getline(ss, token, delim);
     context2.t = stoi(token);
 
+    std::getline(ss, token, delim);
+    key = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    key_mac = str_to_ZZ(token);
+
     int size = public_context.t-1;
     randoms = new ZZ[size];
     for(int i = 0 ; i<size ; i++)
