@@ -5,7 +5,7 @@
 
 int server_fd, new_socket; 
 struct sockaddr_in address;
-unsigned int MAX_BUF_LENGTH = 6096;
+unsigned int MAX_BUF_LENGTH = 4096;
 
 void serverInitFunction() 
 { 
@@ -61,6 +61,7 @@ int main()
         string input_from_client;   
         int bytesReceived = 0;
         do {
+            buffer = vector<char>(MAX_BUF_LENGTH);
             bytesReceived = read(new_socket, &buffer[0], buffer.size());
             // append string from buffer.
             if ( bytesReceived == -1 ) { 
