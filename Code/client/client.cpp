@@ -6,7 +6,7 @@ using namespace std;
 client::client(string connection_address)   // constructor for intiializing
 {
     sock= 0;  
-    MAX_BUF_LENGTH = 4096;  
+    MAX_BUF_LENGTH = 6096;  
     serv_addr.sin_family = AF_INET; 
     serv_addr.sin_port = htons(PORT);                 
     if(inet_pton(AF_INET, connection_address.c_str(), &serv_addr.sin_addr)<=0)  

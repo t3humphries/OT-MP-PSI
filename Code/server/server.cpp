@@ -5,8 +5,7 @@
 
 int server_fd, new_socket; 
 struct sockaddr_in address;
-unsigned int MAX_BUF_LENGTH = 4096;
-Keyholder k;
+unsigned int MAX_BUF_LENGTH = 6096;
 
 void serverInitFunction() 
 { 
@@ -43,6 +42,8 @@ void serverInitFunction()
 
 int main()
 {
+    Keyholder k;
+    
     serverInitFunction();
     int addrlen = sizeof(address); 
     
@@ -103,6 +104,7 @@ int main()
 
         }
         send(new_socket , result.c_str() , result.length() , 0 ); 
+        //TODO:  close(new_socket);
     } 
 
     return 0;
