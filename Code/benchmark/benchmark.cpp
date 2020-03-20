@@ -104,7 +104,7 @@ void generate_benchmark_context(int m, int n, int t, string dirname, bool force=
 //generally needed
 vector<vector<Share>> generate_shares_1(
     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-    ContextScheme1 public_context, KeyholderContext keyholder_context
+    ContextScheme1 public_context, client elem_holder
     ){
     vector<vector<Share>> shares_bins;
     int size_of_set = elements_list.size();
@@ -115,15 +115,9 @@ vector<vector<Share>> generate_shares_1(
     int __index;
     int dummy_elements[] = {1,2, 3};
     Elementholder e(idd, dummy_elements, 3);
-    Keyholder keyholder(
-        public_context,
-        keyholder_context.key,
-        keyholder_context.key_mac,
-        keyholder_context.randoms,
-        keyholder_context.randoms_mac
-    );
+
     for (int i = 0; i< size_of_set; i++){
-        share_x = e.get_share_1(public_context, elements_list[i], keyholder, num_bins); 
+        share_x = e.get_share_1(public_context, elements_list[i], elem_holder, num_bins); 
         // share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
@@ -233,7 +227,17 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
     int idd;
     int sum_sharegen = 0;
 
-    //reading the config from file
+
+    Keyholder keyholder(
+        c1,
+        keyholder_context.key,
+        keyholder_context.key_mac,
+        keyholder_context.randoms,
+        keyholder_context.randoms_mac
+    );
+    //Initialize connection to server
+    client elem_holder("127.0.0.1");//TODO change this to an arg??
+    elem_holder.send_to_server("INIT", keyholder.toString());
 
     cout << "Generating type1 shares for party "; 
     for (int i=0;i<m;i++){
@@ -243,7 +247,7 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
         cout << idd << ",";
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
-        bins_shares = generate_shares_1(elements, i+1, num_bins, max_bin_size, c1, keyholder_context);
+        bins_shares = generate_shares_1(elements, i+1, num_bins, max_bin_size, c1, elem_holder);
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();

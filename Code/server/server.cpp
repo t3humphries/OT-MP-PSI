@@ -105,7 +105,7 @@ int main()
 
         }
         send(new_socket , result.c_str() , result.length() , 0 ); 
-        //TODO:  close(new_socket);
+        close(new_socket);
     } 
 
     return 0;

@@ -81,13 +81,11 @@ void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_s
     mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
-Share Elementholder::get_share_1(ContextScheme1 context, int __X, Keyholder k, int num_bins){
+Share Elementholder::get_share_1(ContextScheme1 context, int __X, client elem_holder, int num_bins){
+    
     ZZ_p::init(context.p);
     string result;
-    //Initialize connection to server
-    client elem_holder("127.0.0.1");
-    elem_holder.send_to_server("INIT", k.toString()); //TODO move to benchmark abd pass client
-
+    
     //Round 1 
     ZZ h_x_alpha, g_alpha;
     Scheme1_Round1(&h_x_alpha, &g_alpha, context, __X);
