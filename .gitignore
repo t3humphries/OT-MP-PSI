@@ -3,4 +3,4 @@ venv/
 .vscode/
 Code/benchmark/output
 Code/benchmark/benchmark_*/
-
+Code/server/output
