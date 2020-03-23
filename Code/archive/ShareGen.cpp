@@ -5,8 +5,7 @@ using namespace NTL;
 using namespace std;
 using json = nlohmann::json;
 
-Share ShareGen_1(
-    Context public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins){
+Share ShareGen_1(Context public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins){
 	ZZ p = public_context.p, g = public_context.g;
 	int t = public_context.t;
 	ZZ_p::init(p);

@@ -159,32 +159,36 @@ Scheme1_Round2_receive Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
 
 }
 
-void Keyholder::Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, Context context, ZZ h_x_alpha, int idd){
-    ZZ p = context.p;
-    int t = context.t;
+Scheme2_receive Keyholder::Scheme2_Round1(Scheme2_send payload){
+    ZZ p = public_context.p;
+    int t = public_context.t;
     ZZ secret_exp, mac_exp;
     ZZ_p::init(p);
 	{
 		ZZ_pPush push(p-1);
 		// ZZ_p::init(q);
-		ZZ_p __secret_exp, __mac_exp, id_pows, __temp;
+		ZZ_p __secret_exp, __mac_exp, id_pows, __temp, __temp_id;
 		conv(__secret_exp, key);
 		conv(__mac_exp, key);
-		conv(id_pows, idd);
+		conv(id_pows, payload.id);
+        conv(__temp_id, payload.id);
 		for (int i = 0; i < t-1; i++){
 			conv(__temp, randoms[i]);
 			__secret_exp += id_pows * __temp;
 			conv(__temp, randoms_mac[i]);
 			__mac_exp += id_pows * __temp;
-			conv(__temp, idd);
-			id_pows *= __temp;
+			id_pows *= __temp_id;
 		}
 		secret_exp = rep(__secret_exp);
 		mac_exp = rep(__mac_exp);
 	}
 
-	*secret_share_alpha = rep(NTL::power(conv<ZZ_p>(h_x_alpha), secret_exp));
-	*mac_share_alpha= rep(NTL::power(conv<ZZ_p>(h_x_alpha), mac_exp));
+    Scheme2_receive output;
+
+	output.secret_share_alpha = rep(NTL::power(conv<ZZ_p>(payload.h_x_alpha), secret_exp));
+	output.mac_share_alpha= rep(NTL::power(conv<ZZ_p>(payload.h_x_alpha), mac_exp));
+
+    return output;
 }
 
 string Keyholder::toString()  //TODO these are likely much larger than needed.
@@ -192,6 +196,8 @@ string Keyholder::toString()  //TODO these are likely much larger than needed.
     string delim = ",";
     string toReturn = "";
     toReturn += ZZ_to_str(public_context.p);
+    toReturn += delim;
+    toReturn += ZZ_to_str(public_context.q);
     toReturn += delim;
     toReturn += ZZ_to_str(public_context.g);
     toReturn += delim;
@@ -239,6 +245,8 @@ Keyholder::Keyholder(string str)
     char delim = ',';
     std::getline(ss, token, delim);
     public_context.p = str_to_ZZ(token);
+    std::getline(ss, token, delim);
+    public_context.q = str_to_ZZ(token);
     std::getline(ss, token, delim);
     public_context.g = str_to_ZZ(token);
     std::getline(ss, token, delim);

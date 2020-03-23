@@ -3,12 +3,7 @@
 using namespace std;
 using namespace NTL;
 
-ZZ_p hash_XX(ZZ x, ZZ p){
-	ZZ_p::init(p);
-	hash<std::string> ptr_hash;
-	ZZ_p __temp__ = ZZ_p(ptr_hash(ZZ_to_str(x)));
-    return __temp__ * __temp__;
-}
+
 
 Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
     id=__id;
@@ -112,16 +107,15 @@ Share Elementholder::get_share_1(Context context, int __X, client elem_holder, i
     );
 }
 
-void Elementholder::Scheme2_Round1(ZZ *h_x_alpha, Context public_context, int __X){
+Scheme2_send Elementholder::Scheme2_Round1(Context public_context, int __X, int id){
     ZZ p = public_context.p, q = public_context.q;
 	int t = public_context.t;
 	ZZ_p::init(p);
-	ZZ_p h_x = hash_(ZZ(__X), p);
+	ZZ_p h_x = hash_XX(ZZ(__X), p);
 	// ZZ alpha, alpha_inv;
 	{
 		ZZ_pPush push(p-1);
-		// ZZ_p __temp = random_ZZ_p(); //REVERT
-        ZZ_p __temp = ZZ_p(1);
+		ZZ_p __temp = random_ZZ_p();
 		while  (GCD(rep(__temp), ZZ(p-1)) > 1) {
 			__temp = random_ZZ_p();
 		}
@@ -129,7 +123,10 @@ void Elementholder::Scheme2_Round1(ZZ *h_x_alpha, Context public_context, int __
 		__temp = 1 / __temp;
 		alpha_inv = rep(__temp);
 	}
-	*h_x_alpha = rep(NTL::power(h_x, alpha));
+    Scheme2_send output;
+	output.h_x_alpha = rep(NTL::power(h_x, alpha));
+    output.id = id;
+    return output;
 }
 
 void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context public_context, ZZ secret_share_alpha, ZZ mac_share_alpha){
@@ -140,13 +137,11 @@ void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context publi
 Share Elementholder::get_share_2(Context context, int __X, Keyholder k, int num_bins){
     
     ZZ_p::init(context.p);
-    ZZ h_x_alpha;
-    Scheme2_Round1(&h_x_alpha, context, __X);
+    Scheme2_send to_send = Scheme2_Round1(context, __X, id);
     ZZ secret_share_alpha, mac_share_alpha;
-    k.Scheme2_Round1(&secret_share_alpha, &mac_share_alpha, context, h_x_alpha, id);
-    // cout << secret_share_alpha << endl << mac_share_alpha << endl;
+    Scheme2_receive received = k.Scheme2_Round1(to_send);
     ZZ secret_share, mac_share;
-    Scheme2_Final(&secret_share, &mac_share, context, secret_share_alpha, mac_share_alpha);
+    Scheme2_Final(&secret_share, &mac_share, context, received.secret_share_alpha, received.mac_share_alpha);
     return Share(
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
@@ -154,56 +149,3 @@ Share Elementholder::get_share_2(Context context, int __X, Keyholder k, int num_
         ZZ(mac_share)
     );
 }
-
-
-
-
-// int main(){
-//     int elems[] = {1,2,3};
-//     int bitsize = 1024;
-//     int t = 2;
-//     int id = 0;
-//     ZZ p = read_prime(bitsize);
-//     ZZ g = read_generator(bitsize);
-//     ContextScheme1 context(p,g,t);
-//     Elementholder e(id, elems, 3);
-//     int x = e.elements[0];
-    
-//     ZZ_p::init(p);
-//     ZZ h_x_alpha, g_alpha;
-//     e.Scheme1_Round1(&h_x_alpha, &g_alpha, context, x);
-//     Keyholder k(context);
-
-//     Scheme1_Round1_receive out = k.Scheme1_Round1(h_x_alpha, g_alpha);
-//     Scheme1_Round2_send out2 = e.Scheme1_Round2(context, out);
-//     k.Scheme1_Round2(
-//         e.pk, e.id,
-//         out2.mpz_secret, out2.mpz_mac,
-//         out2.mpz_coefficients, out2.mpz_mac_coefficients
-//     );
-
-//     ZZ secret_share, mac_share;
-//     e.Scheme1_Final(secret_share, mac_share, out2.mpz_secret, out2.mpz_mac);
-//     // cout << secret_share << endl << mac_share << endl;
-
-//     cout << (NTL::power(conv<ZZ_p>(secret_share), k.key_mac) == conv<ZZ_p>(mac_share)) << endl;
-// }
-
-
-// int main(){
-//     int elems[] = {1,2,3};
-//     int bitsize = 1024, t = 2, id = 2, n=10;
-//     int num_bins = n / (int)log(n);
-//     ZZ p = read_prime(bitsize);
-//     ZZ g = read_generator(bitsize);
-//     ContextScheme1 context(p,g,t);
-//     Elementholder e(id, elems, 3);
-//     int x = e.elements[0];
-
-//     ZZ_p::init(context.p);
-
-//     Keyholder k(context);
-//     Share s = e.get_share(context, x, k, num_bins);
-//     cout << s.SS << endl << s.SS_mac << endl;
-//     cout << (NTL::power(conv<ZZ_p>(s.SS), k.key_mac) == conv<ZZ_p>(s.SS_mac)) << endl;
-// }

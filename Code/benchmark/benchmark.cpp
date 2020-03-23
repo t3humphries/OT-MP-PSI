@@ -95,6 +95,8 @@ vector<vector<Share>> generate_shares_1(
 
     for (int i = 0; i< size_of_set; i++){
         share_x = e.get_share_1(public_context, elements_list[i], elem_holder, num_bins); 
+        // else
+        //     share_x = e.get_share_2(public_context, elements_list[i], elem_holder, num_bins); 
         // share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
@@ -161,7 +163,7 @@ vector<int> read_elements_to_vector(string filename){
     return toReturn;
 }
 
-void run_benchmark_1(int m, int n, int t, int bitsize, string dirname, int schemetype, bool force=false){
+void run_benchmark(int m, int n, int t, int bitsize, string dirname, int schemetype, bool force=false){
 
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
@@ -242,75 +244,6 @@ void run_benchmark_1(int m, int n, int t, int bitsize, string dirname, int schem
 
 }
 
-// void run_benchmark_2(int m, int n, int t, int bitsize, string dirname, bool force=false){
-
-//     ZZ p = read_prime(bitsize), q;
-//     q = (p-1)/2;
-
-//     //Read the config from the file which is named benchmark_0000/benchmark_config.json
-
-//     ifstream config_file(dirname + "//benchmark_config.json");
-//     json config;
-//     config_file >> config;
-    
-//     int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"]; //Read these from file
-//     ContextScheme2 c2(p, q, t);
-
-//     KeyholderContext keyholder_context;
-//     keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
-
-//     //ShareGen
-//     vector<vector<Share>> bins_shares;
-//     vector<vector<Share>> bins_people_shares[num_bins];
-//     for (int i=0;i<num_bins;i++){
-//         bins_people_shares[i] = vector<vector<Share>>();
-//     }
-//     vector<int> elements;
-//     int idd;
-//     int sum_sharegen = 0;
-
-//     //reading the config from file
-
-//     cout << "Generating type2 shares for party "; 
-//     for (int i=0;i<m;i++){
-        
-//         idd=config["id_list"][i];     
-//         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
-//         cout << idd << ",";
-//         auto begin = chrono::high_resolution_clock::now();    
-//         //read the elements of this person
-//         bins_shares = generate_shares_2(elements, i+1, num_bins, max_bin_size, c2, keyholder_context);
-//         auto end = chrono::high_resolution_clock::now();    
-//         auto dur = end - begin;
-//         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-//         // cout << ms << " miliseconds" << endl;
-//         sum_sharegen += ms;
-//         for (int j=0; j<num_bins;j++){
-//             bins_people_shares[j].push_back(bins_shares[j]);
-//         }
-//     }
-
-//     cout << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
-
-//     vector<ZZ> ans;
-//     int sum = 0;
-//     auto begin = chrono::high_resolution_clock::now();    
-//     for (int i=0;i<num_bins;i++){
-//         ans = recon2_in_bin_x(bins_people_shares[i], c2, keyholder_context.key_mac, m, max_bin_size);
-//         sum += ans.size();
-//     }
-//     auto end = chrono::high_resolution_clock::now();    
-//     auto dur = end - begin;
-//     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-
-//     cout << "Reconstruction complete in " << ms << " miliseconds" << endl; 
-
-//     cout << "Found " << sum << " elements in t-threshold intersection" << endl;
-
-//    //write results to file
-
-// }
-
 int main(int argc, char *argv[])  
 { 
     int m=10, n=10, t=2, bitsize=1024;
@@ -356,9 +289,9 @@ int main(int argc, char *argv[])
     } 
     
     string dirname = generate_benchmark_context(m,n,t,bitsize);
-    run_benchmark_1(m,n,t,bitsize,dirname,1,force);
+    run_benchmark(m,n,t,bitsize,dirname,1,force);
     cout << endl;
-    run_benchmark_1(m,n,t,bitsize,dirname,2,force);
+    run_benchmark(m,n,t,bitsize,dirname,2,force);
     // run_benchmark_2(m,n,t,bitsize,dirname,false);
 
     return 0; 

@@ -10,6 +10,13 @@ ZZ_p hash_(ZZ x, ZZ p){
 	return ZZ_p(ptr_hash(ZZ_to_str(x)));
 }
 
+ZZ_p hash_XX(ZZ x, ZZ p){
+	ZZ_p::init(p);
+	hash<std::string> ptr_hash;
+	ZZ_p __temp__ = ZZ_p(ptr_hash(ZZ_to_str(x)));
+    return __temp__ * __temp__;
+}
+
 void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ){
 	std::stringstream ssa;
 	ssa << __temp_ZZ;
@@ -369,5 +376,4 @@ Scheme1_Round2_receive::Scheme1_Round2_receive(string str)
     std::getline(ss, token, delim);
     mpz_init(mpz_mac);
     str_to_mpz_t(mpz_mac,token);
-
 }

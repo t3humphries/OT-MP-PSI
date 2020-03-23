@@ -24,6 +24,7 @@ NTL::ZZ read_prime(int bitsize);
 NTL::ZZ read_generator(int bitsize);
 string pcs_to_str(pcs_public_key* pk);
 ZZ_p hash_(ZZ x, ZZ p);
+ZZ_p hash_XX(ZZ x, ZZ p);
 void ZZ_to_mpz_t(mpz_t __out, ZZ __temp_ZZ);
 void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num);
 void mpz_t_to_ZZ(ZZ& __out, mpz_t num);
@@ -136,6 +137,24 @@ class Scheme1_Round2_receive{
     mpz_t mpz_mac;
     Scheme1_Round2_receive();
     Scheme1_Round2_receive(string str);
+    string toString();
+};
+
+class Scheme2_send{
+    public:
+    ZZ h_x_alpha;
+    int id;
+    Scheme2_send(){}
+    Scheme2_send(string str);
+    string toString();
+};
+
+class Scheme2_receive{
+    public:
+    ZZ secret_share_alpha;
+    ZZ mac_share_alpha;
+    Scheme2_receive(){}
+    Scheme2_receive(string str);
     string toString();
 };
 
