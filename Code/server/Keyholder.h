@@ -8,8 +8,8 @@ using namespace NTL;
 
 class Keyholder{
 	public:
-	ContextScheme1 public_context;
-    ContextScheme2 context2;
+	Context public_context;
+    // Context context2;
 	ZZ key;
 	ZZ key_mac;
 	ZZ* randoms;
@@ -18,20 +18,17 @@ class Keyholder{
 
     // Keyholder(){}
     // Keyholder(ContextScheme1 __c1, int __key, int __key_mac, ZZ __rands[], ZZ __rands_mac[]);
-    Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]);
-    Keyholder(ContextScheme2 __c2, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]);
-	Keyholder(ContextScheme1 __c1);
-	Keyholder(ContextScheme2 __c2);
+    Keyholder(Context __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]);
+	Keyholder(Context __c1);
 	Keyholder(string str);
 	Keyholder(){}
-    void initialize_context(ContextScheme1 __c1);
-    void initialize_context(ContextScheme2 __c2);
+    void initialize_context(Context __c1);
     string toString();
 
     Scheme1_Round2_receive Scheme1_Round2(Scheme1_Round2_send payload);
 	Scheme1_Round1_receive Scheme1_Round1(Scheme1_Round1_send payload);
 
-    void Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, ContextScheme2 context, ZZ h_x_alpha, int idd);
+    void Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, Context context, ZZ h_x_alpha, int idd);
 
 };
 

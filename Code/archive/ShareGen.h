@@ -12,10 +12,10 @@
 
 
 Share ShareGen_1(
-    ContextScheme1 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
+    Context public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
 );
 Share ShareGen_2(
-    ContextScheme2 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
+    Context public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
 );
 
 #endif

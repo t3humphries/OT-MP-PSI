@@ -45,20 +45,30 @@ class Share{
 };
 
 
-class ContextScheme1{
+class Context{
     public:
     NTL::ZZ p;
+    NTL::ZZ q;
     NTL::ZZ g;
     int t;
-    ContextScheme1(){}
-    ContextScheme1(int pp, int gg, int tt){
+    Context(){}
+    Context(int pp, int tt){
         p = NTL::ZZ(pp);
+        q = NTL::ZZ((p-1)/2);
+        // g = NTL::ZZ(gg);
+        t = tt;
+    }
+    
+    Context(int pp, int gg, int tt){
+        p = NTL::ZZ(pp);
+        q = NTL::ZZ((p-1)/2);
         g = NTL::ZZ(gg);
         t = tt;
     }
 
-    ContextScheme1(NTL::ZZ pp, NTL::ZZ gg, int tt){
+    Context(NTL::ZZ pp, NTL::ZZ qq, NTL::ZZ gg, int tt){
         p = NTL::ZZ(pp);
+        q = NTL::ZZ(qq);
         g = NTL::ZZ(gg);
         t = tt;
     }
@@ -66,29 +76,6 @@ class ContextScheme1{
 
     void write_to_file(std::string filename){
         //write this to file
-    }
-};
-
-class ContextScheme2{
-    public:
-    NTL::ZZ p;
-    NTL::ZZ q;
-    int t;
-    ContextScheme2(){}
-    ContextScheme2(int pp, int tt){
-        p = NTL::ZZ(pp);
-        q = NTL::ZZ((p-1)/2);
-        t = tt;
-    }
-    ContextScheme2(int pp, int qq, int tt){
-        p = NTL::ZZ(pp);
-        q = NTL::ZZ(qq);
-        t = tt;
-    }
-    ContextScheme2(NTL::ZZ pp, NTL::ZZ qq, int tt){
-        p = NTL::ZZ(pp);
-        q = NTL::ZZ(qq);
-        t = tt;
     }
 };
 

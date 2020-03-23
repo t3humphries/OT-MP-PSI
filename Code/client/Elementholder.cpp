@@ -20,7 +20,7 @@ Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
     pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
 }
 
-void Elementholder::Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, ContextScheme1 public_context, int __X){
+void Elementholder::Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, Context public_context, int __X){
     ZZ X = ZZ(__X);
     ZZ_p::init(public_context.p);
     ZZ_p g_p;
@@ -43,7 +43,7 @@ void Elementholder::Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, ContextScheme1 pu
     return;
 }
 
-Scheme1_Round2_send Elementholder::Scheme1_Round2(ContextScheme1 context, Scheme1_Round1_receive out){
+Scheme1_Round2_send Elementholder::Scheme1_Round2(Context context, Scheme1_Round1_receive out){
 
     ZZ_p::init(context.p);
     int t = context.t;
@@ -81,7 +81,7 @@ void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_s
     mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
-Share Elementholder::get_share_1(ContextScheme1 context, int __X, client elem_holder, int num_bins){
+Share Elementholder::get_share_1(Context context, int __X, client elem_holder, int num_bins){
     
     ZZ_p::init(context.p);
     string result;
@@ -112,7 +112,7 @@ Share Elementholder::get_share_1(ContextScheme1 context, int __X, client elem_ho
     );
 }
 
-void Elementholder::Scheme2_Round1(ZZ *h_x_alpha, ContextScheme2 public_context, int __X){
+void Elementholder::Scheme2_Round1(ZZ *h_x_alpha, Context public_context, int __X){
     ZZ p = public_context.p, q = public_context.q;
 	int t = public_context.t;
 	ZZ_p::init(p);
@@ -132,12 +132,12 @@ void Elementholder::Scheme2_Round1(ZZ *h_x_alpha, ContextScheme2 public_context,
 	*h_x_alpha = rep(NTL::power(h_x, alpha));
 }
 
-void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, ContextScheme2 public_context, ZZ secret_share_alpha, ZZ mac_share_alpha){
+void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context public_context, ZZ secret_share_alpha, ZZ mac_share_alpha){
 	*secret_share = rep(NTL::power(conv<ZZ_p>(secret_share_alpha), alpha_inv));
 	*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
 }
 
-Share Elementholder::get_share_2(ContextScheme2 context, int __X, Keyholder k, int num_bins){
+Share Elementholder::get_share_2(Context context, int __X, Keyholder k, int num_bins){
     
     ZZ_p::init(context.p);
     ZZ h_x_alpha;

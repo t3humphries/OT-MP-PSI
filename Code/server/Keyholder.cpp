@@ -11,7 +11,7 @@ using namespace NTL;
 //     randoms_mac = __rands_mac;
 // }
 
-Keyholder::Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
+Keyholder::Keyholder(Context __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
     public_context = __c1;
     key = __key;
     key_mac = __key_mac;
@@ -19,23 +19,23 @@ Keyholder::Keyholder(ContextScheme1 __c1, ZZ __key, ZZ __key_mac, ZZ __rands[], 
     randoms_mac = __rands_mac;
 }
 
-Keyholder::Keyholder(ContextScheme2 __c2, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
-    context2 = __c2;
-    key = __key;
-    key_mac = __key_mac;
-    randoms = __rands;
-    randoms_mac = __rands_mac;
-}
+// Keyholder::Keyholder(Context __c2, ZZ __key, ZZ __key_mac, ZZ __rands[], ZZ __rands_mac[]){
+//     context2 = __c2;
+//     key = __key;
+//     key_mac = __key_mac;
+//     randoms = __rands;
+//     randoms_mac = __rands_mac;
+// }
 
-Keyholder::Keyholder(ContextScheme1 __c1){
+Keyholder::Keyholder(Context __c1){
     initialize_context(__c1);
 }
 
-Keyholder::Keyholder(ContextScheme2 __c2){
-    initialize_context(__c2);
-}
+// Keyholder::Keyholder(Context __c2){
+//     initialize_context(__c2);
+// }
 
-void Keyholder::initialize_context(ContextScheme1 __c1){
+void Keyholder::initialize_context(Context __c1){
     public_context = __c1;
     ZZ_p::init(public_context.p-1);
     key = rep(random_ZZ_p());
@@ -48,18 +48,18 @@ void Keyholder::initialize_context(ContextScheme1 __c1){
     }
 }
 
-void Keyholder::initialize_context(ContextScheme2 __c2){
-    context2 = __c2;
-    ZZ_p::init(context2.p-1);
-    key = rep(random_ZZ_p());
-    key_mac = rep(random_ZZ_p());
-    randoms = new ZZ[context2.t]; //TODO this is wrong should be t-1??
-    randoms_mac = new ZZ[context2.t];
-    for (int i=0;i<context2.t;i++){
-        randoms[i] = rep(random_ZZ_p());
-        randoms_mac[i] = rep(random_ZZ_p());
-    }
-}
+// void Keyholder::initialize_context(Context __c2){
+//     context2 = __c2;
+//     ZZ_p::init(context2.p-1);
+//     key = rep(random_ZZ_p());
+//     key_mac = rep(random_ZZ_p());
+//     randoms = new ZZ[context2.t]; //TODO this is wrong should be t-1??
+//     randoms_mac = new ZZ[context2.t];
+//     for (int i=0;i<context2.t;i++){
+//         randoms[i] = rep(random_ZZ_p());
+//         randoms_mac[i] = rep(random_ZZ_p());
+//     }
+// }
 
 Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 	
@@ -94,26 +94,16 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 
 	R_alpha = NTL::power(g_alpha, r);
     output.masked_secret_alpha = rep(R_alpha * NTL::power(h_x_alpha, key));
-    // ZZ_p masked_coefficients_alpha[t-1];
 	for (int i = 0; i < t-1; i++){
-        // cout << "1: " << R_alpha * NTL::power(h_x_alpha, randoms[i]) << endl;
-        // cout << "2: " << R_alpha * NTL::power(h_x_alpha, randoms[i]) << endl;
 		output.masked_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms[i])));
 	}
 
     output.masked_mac_alpha = rep(R_alpha * NTL::power(h_x_alpha, key * key_mac));
-    // ZZ_p masked_mac_coefficients_alpha[t-1];
 	for (int i = 0; i < t-1; i++){
 		output.masked_mac_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms_mac[i])));
 	}
 
     return output;
-    // return Scheme1_Round1_receive(
-    //     masked_secret_alpha,
-    //     masked_coefficients_alpha,
-    //     masked_mac_alpha,
-    //     masked_mac_coefficients_alpha
-    // );
 }
 
 // void Keyholder::Scheme1_Round2(
@@ -169,7 +159,7 @@ Scheme1_Round2_receive Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
 
 }
 
-void Keyholder::Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, ContextScheme2 context, ZZ h_x_alpha, int idd){
+void Keyholder::Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, Context context, ZZ h_x_alpha, int idd){
     ZZ p = context.p;
     int t = context.t;
     ZZ secret_exp, mac_exp;
@@ -208,12 +198,12 @@ string Keyholder::toString()  //TODO these are likely much larger than needed.
     toReturn += to_string(public_context.t);
     toReturn += delim;
 
-    toReturn += ZZ_to_str(context2.p);
-    toReturn += delim;
-    toReturn += ZZ_to_str(context2.q);
-    toReturn += delim;
-    toReturn += to_string(context2.t);
-    toReturn += delim;
+    // toReturn += ZZ_to_str(context2.p);
+    // toReturn += delim;
+    // toReturn += ZZ_to_str(context2.q);
+    // toReturn += delim;
+    // toReturn += to_string(context2.t);
+    // toReturn += delim;
 
     toReturn += ZZ_to_str(key);
     toReturn += delim;
@@ -254,12 +244,12 @@ Keyholder::Keyholder(string str)
     std::getline(ss, token, delim);
     public_context.t = stoi(token);
 
-    std::getline(ss, token, delim);
-    context2.p = str_to_ZZ(token);
-    std::getline(ss, token, delim);
-    context2.q = str_to_ZZ(token);
-    std::getline(ss, token, delim);
-    context2.t = stoi(token);
+    // std::getline(ss, token, delim);
+    // context2.p = str_to_ZZ(token);
+    // std::getline(ss, token, delim);
+    // context2.q = str_to_ZZ(token);
+    // std::getline(ss, token, delim);
+    // context2.t = stoi(token);
 
     std::getline(ss, token, delim);
     key = str_to_ZZ(token);

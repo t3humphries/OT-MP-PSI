@@ -60,7 +60,7 @@ int incBinIndexs(vector<int> &binIndexs, int t, int binSize)
 	return 1;
 }
 
-ZZ_p reconScheme1(vector<Share> shares, ContextScheme1 context, int mac) //mac=1 to recon SS_mac and mac=0 to recon SS
+ZZ_p reconScheme1(vector<Share> shares, Context context, int mac) //mac=1 to recon SS_mac and mac=0 to recon SS
 {
 	
 	ZZ_p numerator, denominator, secret;
@@ -94,7 +94,7 @@ ZZ_p reconScheme1(vector<Share> shares, ContextScheme1 context, int mac) //mac=1
 	return secret; 
 }
 
-ZZ_p reconScheme2(vector<Share> shares, ContextScheme2 context, int mac)
+ZZ_p reconScheme2(vector<Share> shares, Context context, int mac)
 {
 	ZZ_p secret, temp;
 	ZZ temp2; 
@@ -145,7 +145,7 @@ ZZ_p reconScheme2(vector<Share> shares, ContextScheme2 context, int mac)
 }
 
 //Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a list of what reconstructed
-vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context, ZZ k2, int m, int max_bin_size){
+vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, ZZ k2, int m, int max_bin_size){
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;
@@ -201,7 +201,7 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, ContextScheme1 context,
 
 }
 
-vector<ZZ> recon2_in_bin_x(vector<vector<Share>> shares, ContextScheme2 context, ZZ k2, int m, int max_bin_size){
+vector<ZZ> recon2_in_bin_x(vector<vector<Share>> shares, Context context, ZZ k2, int m, int max_bin_size){
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;

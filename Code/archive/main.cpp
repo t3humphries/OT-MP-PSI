@@ -12,8 +12,8 @@ int main()
 	int q = 500000003;
 	int g = 3;
 	int id, X=7, Y=8, t=10, key=4, key_mac=5;
-	ContextScheme1 c1(p, g, t);
-	ContextScheme2 c2(p, t);
+	Context c1(p, g, t);
+	Context c2(p, t);
 
 	ZZ_p::init(ZZ(p));
 	Share ans;

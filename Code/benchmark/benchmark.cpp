@@ -25,21 +25,16 @@ inline bool exists(const std::string& name) {
   return (stat (name.c_str(), &buffer) == 0); 
 }
 
-void generate_benchmark_context(int m, int n, int t, string dirname, bool force=false){
-    if (!force && exists(dirname + "/benchmark_config.json")){
-        cout << "Benchmark config exist, proceeding..." << endl;
-        return;
-    } else if (force){
+string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=false){
 
-        if (exists(dirname + "//benchmark_config.json")){
-            remove((dirname + "//benchmark_config.json").c_str());
-        }
-        if (exists(dirname + "//elements")){
-            // rmdir((dirname + "//elements").c_str());
-            system(("rm -r " + dirname + "//elements").c_str());
-        }
+    string dirname = "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
+    if (!force && exists(dirname)){
+        return dirname;
     }
-
+    else if(force & exists(dirname)){
+        system(("rm -r " + dirname).c_str());        
+    }
+    system(("mkdir " + dirname).c_str());
     srand(time(0));
     
     ofstream config_file(dirname + "//benchmark_config.json");
@@ -74,37 +69,19 @@ void generate_benchmark_context(int m, int n, int t, string dirname, bool force=
         element_file.close();
     }
     cout << "Benchmark config created successfully" << endl;
-}
 
-// //generally needed
-// vector<vector<Share>> generate_shares_1(
-//     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-//     ContextScheme1 public_context, KeyholderContext keyholder_context
-//     ){
-//     vector<vector<Share>> shares_bins;
-//     int size_of_set = elements_list.size();
-//     Share share_x;
-//     for (int i=0;i<num_bins;i++){
-//         shares_bins.push_back(vector<Share>(0));
-//     }
-//     int __index;
-//     for (int i = 0; i< size_of_set; i++){
-//         share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
-//         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
-//     }
-//     //padding the bins
-//     for (int i=0;i<num_bins;i++){
-//         while(shares_bins[i].size() < max_bin_size){
-//             shares_bins[i].push_back(Share(ZZ(idd), ZZ(i), public_context.p));
-//         }
-//     }
-//     return shares_bins;
-// }
+    ZZ p = read_prime(bitsize);
+    KeyholderContext keyholder_context;
+    keyholder_context.initialize_context(ZZ(p)-1, t);
+    keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+
+    return dirname;
+}
 
 //generally needed
 vector<vector<Share>> generate_shares_1(
     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-    ContextScheme1 public_context, client elem_holder
+    Context public_context, client elem_holder
     ){
     vector<vector<Share>> shares_bins;
     int size_of_set = elements_list.size();
@@ -132,7 +109,7 @@ vector<vector<Share>> generate_shares_1(
 
 vector<vector<Share>> generate_shares_2(
     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-    ContextScheme2 public_context, KeyholderContext keyholder_context
+    Context public_context, KeyholderContext keyholder_context
     ){
     vector<vector<Share>> shares_bins;
     int size_of_set = elements_list.size();
@@ -184,37 +161,19 @@ vector<int> read_elements_to_vector(string filename){
     return toReturn;
 }
 
-void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
-    ZZ p = read_prime(bitsize), g=read_generator(bitsize);
-    string dirname = "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
-    KeyholderContext keyholder_context;
-    if(force){
-        if (exists(dirname)){
-            // rmdir((dirname).c_str());
-            system(("rm -r " + dirname).c_str());        
-        }
-        system(("mkdir " + dirname).c_str());        
-        generate_benchmark_context(m,n,t,dirname);
-        keyholder_context.initialize_context(ZZ(p)-1, t);
-        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
-    }
-    else if (!force && !exists(dirname)){
-        system(("mkdir " + dirname).c_str());
-        generate_benchmark_context(m,n,t,dirname);
-        keyholder_context.initialize_context(ZZ(p)-1, t);
-        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
-    }
+void run_benchmark_1(int m, int n, int t, int bitsize, string dirname, int schemetype, bool force=false){
+
+    ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
+    q = (p-1)/2;
 
     ifstream config_file(dirname + "//benchmark_config.json");
     json config;
     config_file >> config;
     
     int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"];
-    ContextScheme1 c1(p, g, t);
+    Context context(p, q, g, t);
 
-    // KeyholderContext keyholder_context;
-    // keyholder_context.initialize_context(ZZ(p)-1, t);
-    // keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    KeyholderContext keyholder_context;
     keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
 
     //ShareGen
@@ -227,9 +186,8 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
     int idd;
     int sum_sharegen = 0;
 
-
     Keyholder keyholder(
-        c1,
+        context,
         keyholder_context.key,
         keyholder_context.key_mac,
         keyholder_context.randoms,
@@ -247,7 +205,10 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
         cout << idd << ",";
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
-        bins_shares = generate_shares_1(elements, i+1, num_bins, max_bin_size, c1, elem_holder);
+        if (schemetype==1)
+            bins_shares = generate_shares_1(elements, idd, num_bins, max_bin_size, context, elem_holder);
+        else
+            bins_shares = generate_shares_2(elements, idd, num_bins, max_bin_size, context, keyholder_context);
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
@@ -263,7 +224,10 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
     int sum = 0;
     auto begin = chrono::high_resolution_clock::now();    
     for (int i=0;i<num_bins;i++){
-        ans = recon1_in_bin_x(bins_people_shares[i], c1, keyholder_context.key_mac, m, max_bin_size);
+        if (schemetype==1)
+            ans = recon1_in_bin_x(bins_people_shares[i], context, keyholder_context.key_mac, m, max_bin_size);
+        else
+            ans = recon2_in_bin_x(bins_people_shares[i], context, keyholder_context.key_mac, m, max_bin_size);
         sum += ans.size();
     }
     auto end = chrono::high_resolution_clock::now();    
@@ -278,98 +242,74 @@ void run_benchmark_1(int m, int n, int t, int bitsize, bool force=false){
 
 }
 
-void run_benchmark_2(int m, int n, int t, int bitsize, bool force=false){
+// void run_benchmark_2(int m, int n, int t, int bitsize, string dirname, bool force=false){
 
-    ZZ p = read_prime(bitsize), q;
-    q = (p-1)/2;
-    string dirname = "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
-    KeyholderContext keyholder_context;
-    if(force){
-        if (exists(dirname)){
-            // rmdir((dirname).c_str());
-            system(("rm -r " + dirname).c_str());        
-        }
-        system(("mkdir " + dirname).c_str());        
-        generate_benchmark_context(m,n,t,dirname);
-        keyholder_context.initialize_context(ZZ(p)-1, t);
-        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
-    }
-    else if (!force && !exists(dirname)){
-        system(("mkdir " + dirname).c_str());
-        generate_benchmark_context(m,n,t,dirname);
-        keyholder_context.initialize_context(ZZ(p)-1, t);
-        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
-    }
-    //Read the config from the file which is named benchmark_0000/benchmark_config.json
+//     ZZ p = read_prime(bitsize), q;
+//     q = (p-1)/2;
 
-    ifstream config_file(dirname + "//benchmark_config.json");
-    json config;
-    config_file >> config;
+//     //Read the config from the file which is named benchmark_0000/benchmark_config.json
+
+//     ifstream config_file(dirname + "//benchmark_config.json");
+//     json config;
+//     config_file >> config;
     
-    int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"]; //Read these from file
-    ContextScheme2 c2(p, q, t);
+//     int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"]; //Read these from file
+//     ContextScheme2 c2(p, q, t);
 
-    // KeyholderContext keyholder_context;
-    // keyholder_context.initialize_context(ZZ(p)-1, t);
-    // keyholder_context.write_to_file(dirname + "/keyholder_context.json");
-    keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
+//     KeyholderContext keyholder_context;
+//     keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
 
-    //ShareGen
-    vector<vector<Share>> bins_shares;
-    vector<vector<Share>> bins_people_shares[num_bins];
-    for (int i=0;i<num_bins;i++){
-        bins_people_shares[i] = vector<vector<Share>>();
-    }
-    vector<int> elements;
-    int idd;
-    int sum_sharegen = 0;
+//     //ShareGen
+//     vector<vector<Share>> bins_shares;
+//     vector<vector<Share>> bins_people_shares[num_bins];
+//     for (int i=0;i<num_bins;i++){
+//         bins_people_shares[i] = vector<vector<Share>>();
+//     }
+//     vector<int> elements;
+//     int idd;
+//     int sum_sharegen = 0;
 
-    //reading the config from file
+//     //reading the config from file
 
-    cout << "Generating type2 shares for party "; 
-    for (int i=0;i<m;i++){
+//     cout << "Generating type2 shares for party "; 
+//     for (int i=0;i<m;i++){
         
-        idd=config["id_list"][i];     
-        elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
-        cout << idd << ",";
-        auto begin = chrono::high_resolution_clock::now();    
-        //read the elements of this person
-        bins_shares = generate_shares_2(elements, i+1, num_bins, max_bin_size, c2, keyholder_context);
-        auto end = chrono::high_resolution_clock::now();    
-        auto dur = end - begin;
-        auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-        // cout << ms << " miliseconds" << endl;
-        sum_sharegen += ms;
-        for (int j=0; j<num_bins;j++){
-            bins_people_shares[j].push_back(bins_shares[j]);
-        }
-    }
+//         idd=config["id_list"][i];     
+//         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
+//         cout << idd << ",";
+//         auto begin = chrono::high_resolution_clock::now();    
+//         //read the elements of this person
+//         bins_shares = generate_shares_2(elements, i+1, num_bins, max_bin_size, c2, keyholder_context);
+//         auto end = chrono::high_resolution_clock::now();    
+//         auto dur = end - begin;
+//         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+//         // cout << ms << " miliseconds" << endl;
+//         sum_sharegen += ms;
+//         for (int j=0; j<num_bins;j++){
+//             bins_people_shares[j].push_back(bins_shares[j]);
+//         }
+//     }
 
-    cout << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
+//     cout << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
 
-    vector<ZZ> ans;
-    int sum = 0;
-    auto begin = chrono::high_resolution_clock::now();    
-    for (int i=0;i<num_bins;i++){
-        ans = recon2_in_bin_x(bins_people_shares[i], c2, keyholder_context.key_mac, m, max_bin_size);
-        sum += ans.size();
-    }
-    auto end = chrono::high_resolution_clock::now();    
-    auto dur = end - begin;
-    auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+//     vector<ZZ> ans;
+//     int sum = 0;
+//     auto begin = chrono::high_resolution_clock::now();    
+//     for (int i=0;i<num_bins;i++){
+//         ans = recon2_in_bin_x(bins_people_shares[i], c2, keyholder_context.key_mac, m, max_bin_size);
+//         sum += ans.size();
+//     }
+//     auto end = chrono::high_resolution_clock::now();    
+//     auto dur = end - begin;
+//     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
 
-    cout << "Reconstruction complete in " << ms << " miliseconds" << endl; 
+//     cout << "Reconstruction complete in " << ms << " miliseconds" << endl; 
 
-    cout << "Found " << sum << " elements in t-threshold intersection" << endl;
+//     cout << "Found " << sum << " elements in t-threshold intersection" << endl;
 
-   //write results to file
+//    //write results to file
 
-}
-
-class cls{
-    mpz_t a;
-    mpz_t b;
-};
+// }
 
 int main(int argc, char *argv[])  
 { 
@@ -414,10 +354,12 @@ int main(int argc, char *argv[])
     for(; optind < argc; optind++){      
         printf("extra arguments: %s\n", argv[optind]);  
     } 
-
-    run_benchmark_1(m,n,t,bitsize,force);
+    
+    string dirname = generate_benchmark_context(m,n,t,bitsize);
+    run_benchmark_1(m,n,t,bitsize,dirname,1,force);
     cout << endl;
-    run_benchmark_2(m,n,t,bitsize,false);
+    run_benchmark_1(m,n,t,bitsize,dirname,2,force);
+    // run_benchmark_2(m,n,t,bitsize,dirname,false);
 
     return 0; 
 } 

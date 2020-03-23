@@ -6,7 +6,7 @@ using namespace std;
 using json = nlohmann::json;
 
 Share ShareGen_1(
-    ContextScheme1 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins){
+    Context public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins){
 	ZZ p = public_context.p, g = public_context.g;
 	int t = public_context.t;
 	ZZ_p::init(p);
@@ -137,7 +137,7 @@ Share ShareGen_1(
 }
 
 Share ShareGen_2(
-    ContextScheme2 public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
+    Context public_context, KeyholderContext keyholder_context, NTL::ZZ id, NTL::ZZ X, int num_bins
 ){
 	//////////////////// Element Holder ////////////////////
 	ZZ p = public_context.p, q = public_context.q;
