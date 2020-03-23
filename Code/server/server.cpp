@@ -102,8 +102,12 @@ int main()
 
         else if(arg.compare("S2") == 0)
         {
-
+            Scheme2_send input = Scheme2_send(message);
+            Scheme2_receive output = k.Scheme2_Round1(input);
+            result = output.toString();
+            cout<<"S2 Complete!"<<endl;
         }
+        
         send(new_socket , result.c_str() , result.length() , 0 ); 
         close(new_socket);
     } 

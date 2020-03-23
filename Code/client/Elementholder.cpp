@@ -134,19 +134,14 @@ void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context publi
 	*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
 }
 
-Share Elementholder::get_share_2(Context context, int __X, Keyholder k, int num_bins){
+Share Elementholder::get_share_2(Context context, int __X, client elem_holder, int num_bins){
     
     ZZ_p::init(context.p);
+    string result;
 
-    Scheme2_send to_sendd = Scheme2_Round1(context, __X, id);
-    //Teting
-    string str = to_sendd.toString();
-    Scheme2_send to_send = Scheme2_send(str);
-
-    Scheme2_receive receivedd = k.Scheme2_Round1(to_send);
-    //Testing
-    str = receivedd.toString();
-    Scheme2_receive received = Scheme2_receive(str);
+    Scheme2_send to_send = Scheme2_Round1(context, __X, id);
+    result = elem_holder.send_to_server("S2", to_send.toString());
+    Scheme2_receive received = Scheme2_receive(result);
     
     ZZ secret_share, mac_share;
     Scheme2_Final(&secret_share, &mac_share, context, received.secret_share_alpha, received.mac_share_alpha);

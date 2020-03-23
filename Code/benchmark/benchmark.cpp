@@ -111,7 +111,7 @@ vector<vector<Share>> generate_shares_1(
 
 vector<vector<Share>> generate_shares_2(
     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-    Context public_context, KeyholderContext keyholder_context
+    Context public_context, client elem_holder
     ){
     vector<vector<Share>> shares_bins;
     int size_of_set = elements_list.size();
@@ -122,15 +122,9 @@ vector<vector<Share>> generate_shares_2(
     int __index;
     int dummy_elements[] = {1,2, 3};
     Elementholder e(idd, dummy_elements, 3);
-    Keyholder keyholder(
-        public_context,
-        keyholder_context.key,
-        keyholder_context.key_mac,
-        keyholder_context.randoms,
-        keyholder_context.randoms_mac
-    );
+  
     for (int i = 0; i< size_of_set; i++){
-        share_x = e.get_share_2(public_context, elements_list[i], keyholder, num_bins);
+        share_x = e.get_share_2(public_context, elements_list[i], elem_holder, num_bins);
         // share_x = ShareGen_2(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
@@ -210,7 +204,7 @@ void run_benchmark(int m, int n, int t, int bitsize, string dirname, int schemet
         if (schemetype==1)
             bins_shares = generate_shares_1(elements, idd, num_bins, max_bin_size, context, elem_holder);
         else
-            bins_shares = generate_shares_2(elements, idd, num_bins, max_bin_size, context, keyholder_context);
+            bins_shares = generate_shares_2(elements, idd, num_bins, max_bin_size, context, elem_holder);
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
