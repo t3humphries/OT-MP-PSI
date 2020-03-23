@@ -79,9 +79,9 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
 }
 
 //generally needed
-vector<vector<Share>> generate_shares_1(
+vector<vector<Share>> generate_shares_of_id(
     vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-    Context public_context, client elem_holder
+    Context public_context, client elem_holder, int scheme
     ){
     vector<vector<Share>> shares_bins;
     int size_of_set = elements_list.size();
@@ -94,38 +94,10 @@ vector<vector<Share>> generate_shares_1(
     Elementholder e(idd, dummy_elements, 3);
 
     for (int i = 0; i< size_of_set; i++){
-        share_x = e.get_share_1(public_context, elements_list[i], elem_holder, num_bins); 
-        // else
-        //     share_x = e.get_share_2(public_context, elements_list[i], elem_holder, num_bins); 
-        // share_x = ShareGen_1(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
-        shares_bins[conv<int>(share_x.bin)].push_back(share_x);
-    }
-    //padding the bins
-    for (int i=0;i<num_bins;i++){
-        while(shares_bins[i].size() < max_bin_size){
-            shares_bins[i].push_back(Share(ZZ(idd), ZZ(i), public_context.p));
-        }
-    }
-    return shares_bins;
-}
-
-vector<vector<Share>> generate_shares_2(
-    vector<int> elements_list, int idd, int num_bins, int max_bin_size,
-    Context public_context, client elem_holder
-    ){
-    vector<vector<Share>> shares_bins;
-    int size_of_set = elements_list.size();
-    Share share_x;
-    for (int i=0;i<num_bins;i++){
-        shares_bins.push_back(vector<Share>(0));
-    }
-    int __index;
-    int dummy_elements[] = {1,2, 3};
-    Elementholder e(idd, dummy_elements, 3);
-  
-    for (int i = 0; i< size_of_set; i++){
-        share_x = e.get_share_2(public_context, elements_list[i], elem_holder, num_bins);
-        // share_x = ShareGen_2(public_context, keyholder_context, ZZ(idd), ZZ(elements_list[i]), num_bins);
+        if (scheme==1)
+            share_x = e.get_share_1(public_context, elements_list[i], elem_holder, num_bins); 
+        else
+            share_x = e.get_share_2(public_context, elements_list[i], elem_holder, num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
     //padding the bins
@@ -201,10 +173,10 @@ void run_benchmark(int m, int n, int t, int bitsize, string dirname, int schemet
         cout << idd << ",";
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
-        if (schemetype==1)
-            bins_shares = generate_shares_1(elements, idd, num_bins, max_bin_size, context, elem_holder);
-        else
-            bins_shares = generate_shares_2(elements, idd, num_bins, max_bin_size, context, elem_holder);
+        // if (schemetype==1)
+        bins_shares = generate_shares_of_id(elements, idd, num_bins, max_bin_size, context, elem_holder,schemetype);
+        // else
+            // bins_shares = generate_shares_2(elements, idd, num_bins, max_bin_size, context, elem_holder);
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
