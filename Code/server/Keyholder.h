@@ -20,6 +20,7 @@ class Keyholder{
 	Keyholder(string str);
 	Keyholder(){}
     void initialize_context(Context __c1);
+	void initialize_from_file(Context context, string filename);
     string toString();
 
 	Scheme1_Round1_receive Scheme1_Round1(Scheme1_Round1_send payload);

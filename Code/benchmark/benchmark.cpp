@@ -80,30 +80,27 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
 
 //generally needed
 vector<vector<Share>> generate_shares_of_id(
-    vector<int> elements_list, int idd, int num_bins, int max_bin_size,
+    Elementholder elementholder,
+    int num_bins, int max_bin_size,
     Context public_context, client elem_holder, int scheme
     ){
     vector<vector<Share>> shares_bins;
-    int size_of_set = elements_list.size();
     Share share_x;
     for (int i=0;i<num_bins;i++){
         shares_bins.push_back(vector<Share>(0));
     }
-    int __index;
-    int dummy_elements[] = {1,2, 3};
-    Elementholder e(idd, dummy_elements, 3);
 
-    for (int i = 0; i< size_of_set; i++){
+    for (int i = 0; i< elementholder.num_elements; i++){
         if (scheme==1)
-            share_x = e.get_share_1(public_context, elements_list[i], elem_holder, num_bins); 
+            share_x = elementholder.get_share_1(public_context, elementholder.elements[i], elem_holder, num_bins); 
         else
-            share_x = e.get_share_2(public_context, elements_list[i], elem_holder, num_bins);
+            share_x = elementholder.get_share_2(public_context, elementholder.elements[i], elem_holder, num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
     //padding the bins
     for (int i=0;i<num_bins;i++){
         while(shares_bins[i].size() < max_bin_size){
-            shares_bins[i].push_back(Share(ZZ(idd), ZZ(i), public_context.p));
+            shares_bins[i].push_back(Share(ZZ(elementholder.id), ZZ(i), public_context.p));
         }
     }
     return shares_bins;
@@ -141,9 +138,6 @@ void run_benchmark(int m, int n, int t, int bitsize, string dirname, int schemet
     int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"];
     Context context(p, q, g, t);
 
-    KeyholderContext keyholder_context;
-    keyholder_context.initialize_from_file(dirname + "/keyholder_context.json");
-
     //ShareGen
     vector<vector<Share>> bins_shares;
     vector<vector<Share>> bins_people_shares[num_bins];
@@ -154,29 +148,22 @@ void run_benchmark(int m, int n, int t, int bitsize, string dirname, int schemet
     int idd;
     int sum_sharegen = 0;
 
-    Keyholder keyholder(
-        context,
-        keyholder_context.key,
-        keyholder_context.key_mac,
-        keyholder_context.randoms,
-        keyholder_context.randoms_mac
-    );
+    Keyholder keyholder;
+    keyholder.initialize_from_file(context, dirname + "/keyholder_context.json");
+
     //Initialize connection to server
     client elem_holder("127.0.0.1");//TODO change this to an arg??
     elem_holder.send_to_server("INIT", keyholder.toString());
 
-    cout << "Generating type1 shares for party "; 
+    cout << "Generating type " << schemetype << " shares for party ";
     for (int i=0;i<m;i++){
-        
-        idd=config["id_list"][i];     
+        idd=config["id_list"][i];
         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
+        Elementholder elementholder(idd, elements.data(), (int)elements.size());
         cout << idd << ",";
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
-        // if (schemetype==1)
-        bins_shares = generate_shares_of_id(elements, idd, num_bins, max_bin_size, context, elem_holder,schemetype);
-        // else
-            // bins_shares = generate_shares_2(elements, idd, num_bins, max_bin_size, context, elem_holder);
+        bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, elem_holder,schemetype);
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
@@ -186,16 +173,16 @@ void run_benchmark(int m, int n, int t, int bitsize, string dirname, int schemet
         }
     }
 
-    cout << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
+    cout << "\b" << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
 
     vector<ZZ> ans;
     int sum = 0;
     auto begin = chrono::high_resolution_clock::now();    
     for (int i=0;i<num_bins;i++){
         if (schemetype==1)
-            ans = recon1_in_bin_x(bins_people_shares[i], context, keyholder_context.key_mac, m, max_bin_size);
+            ans = recon1_in_bin_x(bins_people_shares[i], context, m, max_bin_size);
         else
-            ans = recon2_in_bin_x(bins_people_shares[i], context, keyholder_context.key_mac, m, max_bin_size);
+            ans = recon2_in_bin_x(bins_people_shares[i], context, m, max_bin_size);
         sum += ans.size();
     }
     auto end = chrono::high_resolution_clock::now();    

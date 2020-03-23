@@ -48,18 +48,26 @@ void Keyholder::initialize_context(Context __c1){
     }
 }
 
-// void Keyholder::initialize_context(Context __c2){
-//     context2 = __c2;
-//     ZZ_p::init(context2.p-1);
-//     key = rep(random_ZZ_p());
-//     key_mac = rep(random_ZZ_p());
-//     randoms = new ZZ[context2.t]; //TODO this is wrong should be t-1??
-//     randoms_mac = new ZZ[context2.t];
-//     for (int i=0;i<context2.t;i++){
-//         randoms[i] = rep(random_ZZ_p());
-//         randoms_mac[i] = rep(random_ZZ_p());
-//     }
-// }
+void Keyholder::initialize_from_file(Context context, string filename){
+    public_context = context;
+    std::ifstream inputFile(filename);
+    json jsonFile;
+    inputFile >> jsonFile;
+    if(!inputFile.good()){
+        cout<< "Could not open:"<<filename<<endl;
+    }
+    inputFile.close();
+    // t = jsonFile["t"] ;
+    int t = public_context.t;
+    key = ZZ(INIT_VAL, jsonFile["key"].get<string>().c_str());
+    key_mac = ZZ(INIT_VAL, jsonFile["key_mac"].get<string>().c_str());
+    randoms = new NTL::ZZ[t-1];
+    randoms_mac = new NTL::ZZ[t-1];
+    for(int i = 0 ; i < t-1 ; i++){
+        randoms[i] = ZZ(INIT_VAL, jsonFile["randoms"][i].get<string>().c_str());
+        randoms_mac[i] = ZZ(INIT_VAL, jsonFile["randoms_mac"][i].get<string>().c_str());
+    }
+}
 
 Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 	
@@ -105,33 +113,6 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 
     return output;
 }
-
-// void Keyholder::Scheme1_Round2(
-//     pcs_public_key *pk, int id,
-//     mpz_t __mpz_secret, mpz_t __mpz_mac,
-//     mpz_t* __mpz_coefficients, mpz_t* __mpz_mac_coefficients
-// ){
-// 	mpz_t __mpz_temp;
-// 	mpz_init(__mpz_temp);
-	
-// 	ZZ_to_mpz_t(__mpz_temp, __R_inverse);
-// 	pcs_ep_mul(pk, __mpz_secret, __mpz_secret, __mpz_temp);
-// 	pcs_ep_mul(pk, __mpz_mac, __mpz_mac, __mpz_temp);
-	
-//     ZZ_p::init(public_context.p);
-
-// 	ZZ_p R_inv_id_pows = to_ZZ_p(id) * conv<ZZ_p>(__R_inverse);
-// 	for (int i=0;i<public_context.t-1;i++){
-// 		ZZ_p_to_mpz_t(__mpz_temp, R_inv_id_pows);
-// 		pcs_ep_mul(pk, __mpz_coefficients[i], __mpz_coefficients[i], __mpz_temp);
-// 		pcs_ep_mul(pk, __mpz_mac_coefficients[i], __mpz_mac_coefficients[i], __mpz_temp);
-// 		R_inv_id_pows = R_inv_id_pows * to_ZZ_p(id);
-
-// 		pcs_ee_add(pk, __mpz_secret, __mpz_secret, __mpz_coefficients[i]);
-// 		pcs_ee_add(pk, __mpz_mac, __mpz_mac, __mpz_mac_coefficients[i]);
-// 	}
-
-// }
 
 Scheme1_Round2_receive Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
 	mpz_t __mpz_temp;

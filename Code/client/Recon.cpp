@@ -145,7 +145,7 @@ ZZ_p reconScheme2(vector<Share> shares, Context context, int mac)
 }
 
 //Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a list of what reconstructed
-vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, ZZ k2, int m, int max_bin_size){
+vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size){
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;
@@ -201,7 +201,7 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, ZZ k2,
 
 }
 
-vector<ZZ> recon2_in_bin_x(vector<vector<Share>> shares, Context context, ZZ k2, int m, int max_bin_size){
+vector<ZZ> recon2_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size){
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;

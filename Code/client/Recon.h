@@ -11,7 +11,7 @@
 
 NTL::ZZ_p reconScheme1(std::vector<Share> shares, Context context, int mac); //mac=1 to recon SS_mac and mac=0 to recon SS
 NTL::ZZ_p reconScheme2(std::vector<Share> shares, Context context, int mac);
-std::vector<NTL::ZZ> recon1_in_bin_x(std::vector<std::vector<Share>> shares, Context context, NTL::ZZ k2, int m, int max_bin_size);
-std::vector<NTL::ZZ> recon2_in_bin_x(std::vector<std::vector<Share>> shares, Context context, NTL::ZZ k2, int m, int max_bin_size);
+std::vector<NTL::ZZ> recon1_in_bin_x(std::vector<std::vector<Share>> shares, Context context, int m, int max_bin_size);
+std::vector<NTL::ZZ> recon2_in_bin_x(std::vector<std::vector<Share>> shares, Context context, int m, int max_bin_size);
 
 #endif
