@@ -98,7 +98,7 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
 		output.masked_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms[i])));
 	}
 
-    output.masked_mac_alpha = rep(R_alpha * NTL::power(h_x_alpha, key * key_mac));
+    output.masked_mac_alpha = rep(R_alpha * NTL::power(h_x_alpha, key));
 	for (int i = 0; i < t-1; i++){
 		output.masked_mac_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms_mac[i])));
 	}
@@ -169,7 +169,7 @@ void Keyholder::Scheme2_Round1(ZZ *secret_share_alpha, ZZ *mac_share_alpha, Cont
 		// ZZ_p::init(q);
 		ZZ_p __secret_exp, __mac_exp, id_pows, __temp;
 		conv(__secret_exp, key);
-		conv(__mac_exp, key * key_mac);
+		conv(__mac_exp, key);
 		conv(id_pows, idd);
 		for (int i = 0; i < t-1; i++){
 			conv(__temp, randoms[i]);
