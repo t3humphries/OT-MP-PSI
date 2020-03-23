@@ -137,9 +137,17 @@ void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context publi
 Share Elementholder::get_share_2(Context context, int __X, Keyholder k, int num_bins){
     
     ZZ_p::init(context.p);
-    Scheme2_send to_send = Scheme2_Round1(context, __X, id);
-    ZZ secret_share_alpha, mac_share_alpha;
-    Scheme2_receive received = k.Scheme2_Round1(to_send);
+
+    Scheme2_send to_sendd = Scheme2_Round1(context, __X, id);
+    //Teting
+    string str = to_sendd.toString();
+    Scheme2_send to_send = Scheme2_send(str);
+
+    Scheme2_receive receivedd = k.Scheme2_Round1(to_send);
+    //Testing
+    str = receivedd.toString();
+    Scheme2_receive received = Scheme2_receive(str);
+    
     ZZ secret_share, mac_share;
     Scheme2_Final(&secret_share, &mac_share, context, received.secret_share_alpha, received.mac_share_alpha);
     return Share(

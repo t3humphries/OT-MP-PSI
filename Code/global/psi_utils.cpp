@@ -353,6 +353,7 @@ Scheme1_Round2_send::Scheme1_Round2_send(string str)
     str_to_mpz_t(mpz_mac,token);
 
 }
+
 string Scheme1_Round2_receive::toString()
 {
     string delim = "@";
@@ -377,3 +378,56 @@ Scheme1_Round2_receive::Scheme1_Round2_receive(string str)
     mpz_init(mpz_mac);
     str_to_mpz_t(mpz_mac,token);
 }
+
+string Scheme2_send::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+
+    toReturn += ZZ_to_str(h_x_alpha);
+    toReturn += delim;
+
+    toReturn += to_string(id);
+
+    return toReturn;
+}
+
+Scheme2_send::Scheme2_send(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+
+    std::getline(ss, token, delim);
+    h_x_alpha = str_to_ZZ(token);
+
+    std::getline(ss, token, delim);
+    id = stoi(token);
+}
+
+string Scheme2_receive::toString()
+{
+    string delim = "@";
+    string toReturn = "";
+
+    toReturn += ZZ_to_str(secret_share_alpha);
+    toReturn += delim;
+    toReturn += ZZ_to_str(mac_share_alpha);
+    toReturn += delim;
+
+    return toReturn;
+}
+
+Scheme2_receive::Scheme2_receive(string str)
+{
+    stringstream ss(str);
+    string token;
+    char delim = '@';
+
+    std::getline(ss, token, delim);
+    secret_share_alpha = str_to_ZZ(token);
+
+    std::getline(ss, token, delim);
+    mac_share_alpha = str_to_ZZ(token);
+}
+
