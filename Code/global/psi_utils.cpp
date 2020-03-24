@@ -34,21 +34,21 @@ void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
 void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
 	// ZZ __temp_ZZ;
 	std::stringstream __ssa;
-	char __temp[2000];//TODO remove this somehow
-	mpz_get_str(__temp, 10, num);
+	string __temp;//TODO remove this somehow
+	__temp=mpz_get_str(NULL, 10, num);
 	__ssa << __temp;
 	__ssa >> __out;
 }
 
-void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
-	ZZ __temp_ZZ;
-	std::stringstream __ssa;
-	char __temp[2000];//TODO remove this somehow
-	mpz_get_str(__temp, 10, num);
-	__ssa << __temp;
-	__ssa >> __temp_ZZ;
-	conv(__out, __temp_ZZ);
-}
+// void mpz_t_to_ZZ_p(ZZ_p& __out, mpz_t num){
+// 	ZZ __temp_ZZ;
+// 	std::stringstream __ssa;
+// 	string __temp;//TODO remove this somehow
+// 	__temp=mpz_get_str(NULL, 10, num);
+// 	__ssa << __temp;
+// 	__ssa >> __temp_ZZ;
+// 	conv(__out, __temp_ZZ);
+// }
 
 ZZ read_prime(int bitsize){
     ifstream prime_file("../client/primes.json");
@@ -123,7 +123,6 @@ Scheme1_Round2_send::Scheme1_Round2_send(int __t, pcs_public_key *__pk, int __id
         mpz_init(mpz_coefficients[i]);
         mpz_init(mpz_mac_coefficients[i]);
     }
-
 }
 
 Scheme1_Round2_receive::Scheme1_Round2_receive(){
@@ -154,11 +153,7 @@ void str_to_mpz_t(mpz_t toReturn, string str)
 
 string mpz_t_to_str(mpz_t num)
 {
-    std::stringstream ssa;
-    char __temp[2000];//TODO remove this somehow
-    mpz_get_str(__temp, 10, num);
-    ssa << __temp;
-    return ssa.str();
+    return mpz_get_str(NULL, 10, num);
 }
 
 KeyholderContext::KeyholderContext(int __t, int __key, int __key_mac, NTL::ZZ __rands[], NTL::ZZ __rands_mac[]){

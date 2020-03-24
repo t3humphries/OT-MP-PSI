@@ -3,16 +3,40 @@
 using namespace std;
 using namespace NTL;
 
+// Elementholder::Elementholder(int __id){
+//     id=__id;
+//     pk = pcs_init_public_key();
+//     vk = pcs_init_private_key();
+//     hr = hcs_init_random();
+//     pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
+// }
 
+Elementholder::Elementholder(int __id, int bitsize){
+    id=__id;
+    pk = pcs_init_public_key();
+    vk = pcs_init_private_key();
+    hr = hcs_init_random();
+    pcs_generate_key_pair(pk, vk, hr, 2 * bitsize + 80); //TODO: 2 * bitsize(p) + 80
+}
 
-Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
+// Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
+//     id=__id;
+//     elements=__elements;
+//     num_elements=__num_elements;
+//     pk = pcs_init_public_key();
+//     vk = pcs_init_private_key();
+//     hr = hcs_init_random();
+//     pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
+// }
+
+Elementholder::Elementholder(int __id, int* __elements, int __num_elements, int bitsize){
     id=__id;
     elements=__elements;
     num_elements=__num_elements;
     pk = pcs_init_public_key();
     vk = pcs_init_private_key();
     hr = hcs_init_random();
-    pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
+    pcs_generate_key_pair(pk, vk, hr, 2 * bitsize + 80); //TODO: 2 * bitsize(p) + 80
 }
 
 void Elementholder::Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, Context public_context, int __X){

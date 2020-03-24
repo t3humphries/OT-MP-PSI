@@ -145,7 +145,7 @@ ZZ_p reconScheme2(vector<Share> shares, Context context, int mac)
 }
 
 //Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a list of what reconstructed
-vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size){
+vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size, int scheme){
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;
@@ -162,26 +162,27 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, int m,
     vector<int> binIndexs(max_bin_size);
     //For each combinations of users do recon on the users in chosen indexs
     do {
-
         chosenUsers=comb.getElements();
   
 		//Initialize the bin indexs for this combination of users
-		
 		for(int i = 0 ; i < max_bin_size ; i++)
 		{
 			binIndexs[i] = 0;
 		} 
-
 		do{
-
 			//Do recon on chosen users bins (from chosenUsers) using the an element from each bin (from binIndexs)
 			vector<Share> toRecon(context.t);
 			for(int i = 0 ; i < context.t ; i++ )
 			{
 				toRecon[i] = shares[chosenUsers[i]][binIndexs[i]];
 			}
-			secret = reconScheme1(toRecon, context, 0);
-			mac = reconScheme1(toRecon, context, 1);
+			if (scheme==1){
+				secret = reconScheme1(toRecon, context, 0);
+				mac = reconScheme1(toRecon, context, 1);
+			}else{
+				secret = reconScheme2(toRecon, context, 0);
+				mac = reconScheme2(toRecon, context, 1);
+			}
 			if(secret == mac) //If recontructs add to the list toReturn
 			{
 				bool alreadyFound = false;
@@ -200,129 +201,3 @@ vector<ZZ> recon1_in_bin_x(vector<vector<Share>> shares, Context context, int m,
 	return toReturn;
 
 }
-
-vector<ZZ> recon2_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size){
-
-	ZZ_p::init(ZZ(context.p));
-	vector<ZZ> toReturn;
-	ZZ_p secret, mac;
-	//Initialize first combination (first t bins)
-	vector<int> startingPoint(context.t);
-	for(int i = 0 ; i < context.t ; i++)
-	{
-		startingPoint[i] = i;
-	} 
-
-    Combinations comb{startingPoint, m-1, context.t};
-    vector<int> chosenUsers;
-    vector<int> binIndexs(max_bin_size);
-    //For each combinations of users do recon on the users in chosen indexs
-    do {
-
-        chosenUsers=comb.getElements();
-  
-		//Initialize the bin indexs for this combination of users
-		
-		for(int i = 0 ; i < max_bin_size ; i++)
-		{
-			binIndexs[i] = 0;
-		} 
-
-		do{
-
-			//Do recon on chosen users bins (from chosenUsers) using the an element from each bin (from binIndexs)
-			vector<Share> toRecon(context.t);
-			for(int i = 0 ; i < context.t ; i++ )
-			{
-				toRecon[i] = shares[chosenUsers[i]][binIndexs[i]];
-			}
-			secret = reconScheme2(toRecon, context, 0);
-			mac = reconScheme2(toRecon, context, 1);
-			if(secret == mac) //If recontructs add to the list toReturn
-			{
-				bool alreadyFound = false;
-				for (int k=0;k<toReturn.size();k++){
-					if (toReturn[k] == rep(secret)){
-						alreadyFound=true; break;
-					}
-				}
-				if (!alreadyFound) toReturn.push_back(rep(secret));
-			}
-
-		}while(incBinIndexs(binIndexs,context.t,max_bin_size));
-
-    } while (comb.next());
-
-	return toReturn;
-
-}
-
- //-----------------------OLD CODE------------------------------------------
-
- // void readFile(string filename,Share shares[], int size) //Reads a single file and makes an array of Shares out of it
-// {	
-// 	std::ifstream shares_file(filename);
-// 	json temp;
-// 	shares_file >> temp;
-
-// 	for(int i = 0;i<size;i++)
-// 	{
-// 		shares[i].id=temp[i]["id"];
-// 		std::string str = temp[i]["SS"];
-// 		shares[i].SS= atol(str.c_str());
-// 		str = temp[i]["SS_MAC"];
-// 		shares[i].SS_mac= atol(str.c_str());
-// 	}
-// }
-
-// int in_intersection(Share shares[], int t, long k2) //returns true/false if reconstructed succesfully
-// {
-// 	ZZ_p secret, secret_mac, k2_secret, k2_mac;
-// 	if(SCHEME == 1)
-// 	{
-// 		secret=reconScheme1(shares,t,0);
-// 		secret_mac = reconScheme1(shares,t,1);
-// 	}
-// 	else
-// 	{
-// 		secret=reconScheme2(shares,t,0);
-// 		secret_mac = reconScheme2(shares,t,1);
-// 	}
-// 	k2_secret = power(secret,k2);
-
-// 	return k2_secret == secret_mac;
-// }
-
-
-//   int main()
-// {
-// 	//Initialize modulus 
-// 	ZZ p;
-// 	p = PRIME;
-// 	ZZ_p::init(p);
-
-// 	//parse json into an array of shares
-// 	Share shares[t];
-// 	readFile(FILENAME,shares,t); 
-
-// 	//Quick tests
-// 	int reconstruct = in_intersection(shares,t,k2);
-// 	if(reconstruct)
-// 	{
-// 		cout<< "It reconstruted!\n";
-// 		if (SCHEME == 1)
-// 		{
-// 			cout<<"H(x)=" << reconScheme1(shares,t,0) << endl;
-// 		}
-// 		else
-// 		{
-// 			cout<<"H(x)=" << reconScheme2(shares,t,0) << endl;
-// 		}	
-// 	}
-// 	else
-// 	{
-// 		cout<< "It didn't reconstruct\n";
-// 	}
-
- // 	return 0;
- // }

@@ -20,7 +20,10 @@ class Elementholder{
     hcs_random *hr;
 
     Elementholder(){}
-    Elementholder(int __id, int* __elements, int __num_elements);
+    // Elementholder(int __id);
+    Elementholder(int __id, int bitsize);
+    // Elementholder(int __id, int* __elements, int __num_elements);
+    Elementholder(int __id, int* __elements, int __num_elements, int bitsize);
 
     void Scheme1_Round1(ZZ *h_x_alpha, ZZ *g_alpha, Context public_context, int __X);
     Scheme1_Round2_send Scheme1_Round2(Context context, Scheme1_Round1_receive out);

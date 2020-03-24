@@ -1,5 +1,5 @@
-output: benchmark.o Elementholder.o Keyholder.o Recon.o client.o psi_utils.o
-	g++ -std=c++11 -pthread  benchmark.o Elementholder.o Keyholder.o Recon.o client.o psi_utils.o -o output -lntl -lgmp -lhcs
+benchmark: benchmark.o Elementholder.o Keyholder.o Recon.o client.o psi_utils.o
+	g++ -std=c++11 -pthread  benchmark.o Elementholder.o Keyholder.o Recon.o client.o psi_utils.o -o benchmark -lntl -lgmp -lhcs
 
 benchmark.o: benchmark.cpp 
 	g++ -c -std=c++11 -pthread benchmark.cpp  -lntl -lgmp -lhcs
@@ -19,11 +19,5 @@ client.o: ../client/client.cpp ../client/client.h
 psi_utils.o : ../global/psi_utils.cpp ../global/psi_utils.h
 	g++ -c -std=c++11 -pthread ../global/psi_utils.cpp -lntl -lgmp -lhcs
 
-
-
-
-
-
-
 clean:
-	rm *.o output
+	rm *.o benchmark
