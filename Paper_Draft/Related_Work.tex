@@ -1,0 +1,62 @@
+Private set intersection is a well-studied problem, although most
+prior work deals with its standard, non-threshold formulation: the
+specific case when $t=m$. We first discuss approaches to the threshold
+PSI problem discussed in this paper and then give an overview of the
+techniques used for standard PSI. A more comprehensive overview of
+the latter is included in \cite{Pinkas}.
+
+\subsection{Over-Threshold PSI}
+
+Kissner and Song \cite{Kissner} proposed protocols for private set intersection
+and various related problems such as cardinality set intersection,
+where only the size of the set is revealed; over-threshold intersection,
+which roughly corresponds to our problem; and threshold set intersection,
+where it is not revealed how many parties own a given element in the
+intersecting set. Their approach (to threshold and over-threshold
+intersection) does not reveal the identities of the parties which
+own a given element in the intersecting set and involves a small amount
+of local computation (on the order of the communication cost). However,
+their protocol's total communication complexity is $O(nm^{3})$, which
+makes it less suitable than either of our two $O(nm)$ schemes when
+the number of parties is large.
+
+Threshold PSI can also be achieved using generic secure computation
+protocols since it corresponds to the functionality
+\[
+f(\mathbb{L}_{1},\ldots,\mathbb{L}_{m})=\{x\mid\exists i_{1},\ldots i_{t},\ x\in\cap_{r=1}^{t}\mathbb{L}_{i_{r}}\}.
+\]
+$f$ can be implemented using the following circuit: the union $\mathbb{L}$
+of all input elements is sorted (using a sorting network), and the
+resulting output is scanned for contiguous groups of at least $t$
+identical elements. Note that since the required output is an (unordered)
+set, we need to randomly shuffle all such found elements to avoid
+leaking additional information. The communication complexity of this
+approach is equal to the resulting circuit size: $O(nm\log^{2}nm)$. 
+
+\subsection{Standard PSI }
+
+\subsubsection{Public-Key Protocols}
+
+Many approaches to PSI rely heavily on public-key cryptography, as
+in our paper. Meadows et al. \cite{Meadows} and Huberman et al. \cite{Huberman}
+present protocols based on Diffie-Hellman key exchange, while several
+based on RSA feature in the more recent work by De Cristofaro et al \cite{DeCristofaro}.
+The protocols in \cite{Freedman2004, Freedman2016} are similar to our work in that they make use
+polynomial interpolation and the Paillier cryptosystem (or alternatively,
+ElGamal), ultimately relying on the decisional Diffie-Hellman assumption.
+Public-key approaches to PSI tend to have better communication complexity
+than other methods, at the expense of having higher overall computational
+costs \cite{Pinkas}.
+
+\subsubsection{Protocols Based on Oblivious Transfer}
+
+Oblivious transfer (OT) \cite{Rabin} is a two-party protocol where
+one of the parties, the sender, holds several pieces of data, one
+of which will be sent to the receiver. The receiver can freely choose
+which of the messages to learn, however, the sender does not obtain
+any information about the receiver's choice. A common way to perform
+a large number of OT executions with low amortized cost is through
+OT extension \cite{Pinkas}, which is often used in the construction
+of OPRFs. Recent work in this direction is that of Pinkas et al. \cite{Pinkas},
+which provides a through survey of such approaches. A further improved
+protocol based on a variant of OT extension is presented in \cite{SpOT}. 
