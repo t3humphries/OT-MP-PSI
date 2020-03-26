@@ -59,29 +59,28 @@ string client::send_to_server(string arg, string raw_message)
         cout<<"connection could not be closed";
     } 
 
-    if(log)
+    
+    if(arg.compare("S1_R1") == 0)
     {
-        if(arg.compare("S1_R1") == 0)
-        {
-            s1r1[0] += 1;
-            s1r1[1] += message.length();
-            s1r1[2] += response.length();
-        }
-        
-        else if(arg.compare("S1_R2") == 0)
-        {
-            s1r2[0] += 1;
-            s1r2[1] += message.length();
-            s1r2[2] += response.length();
-        }
-
-        else if(arg.compare("S2") == 0)
-        {
-            s2[0] += 1;
-            s2[1] += message.length();
-            s2[2] += response.length();
-        }
+        s1r1[0] += 1;
+        s1r1[1] += message.length();
+        s1r1[2] += response.length();
     }
+    
+    else if(arg.compare("S1_R2") == 0)
+    {
+        s1r2[0] += 1;
+        s1r2[1] += message.length();
+        s1r2[2] += response.length();
+    }
+
+    else if(arg.compare("S2") == 0)
+    {
+        s2[0] += 1;
+        s2[1] += message.length();
+        s2[2] += response.length();
+        }
+    
     return response; 
 } 
 

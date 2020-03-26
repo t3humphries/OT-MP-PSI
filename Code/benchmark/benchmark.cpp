@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
     }else if(strcmp(argv[1],"sharegen")==0){
         std::cout << "Running Share Generation" << endl;
         repeat=10;
-        while((opt = getopt(argc, argv, ":ht:b:k:s:r:l:")) != -1)  
+        while((opt = getopt(argc, argv, ":ht:b:k:s:r:l")) != -1)  
         {  
             switch(opt)  
             {  
