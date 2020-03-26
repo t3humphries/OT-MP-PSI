@@ -1,6 +1,6 @@
 *.o
 venv/
 .vscode/
-iCode/benchmark/benchmark
+Code/benchmark/benchmark
 Code/benchmark/benchmark_*/
 Code/server/server
