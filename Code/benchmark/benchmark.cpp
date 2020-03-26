@@ -14,6 +14,7 @@
 #include "../global/psi_utils.h"
 #include "../client/Recon.h"
 #include "../client/Elementholder.h"
+#include "../client/client.h"
 #include <chrono>
 
 using namespace NTL;
@@ -86,7 +87,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
 vector<vector<Share>> generate_shares_of_id(
     Elementholder elementholder,
     int num_bins, int max_bin_size,
-    Context context, client elem_holder, int scheme
+    Context context, client* elem_holder, int scheme
     ){
     vector<vector<Share>> shares_bins;
     Share share_x;
@@ -130,7 +131,7 @@ vector<int> read_elements_to_vector(string filename){
     return toReturn;
 }
 
-void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1"){
+void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", int log=0){
 
     string dirname = generate_benchmark_context(m,n,t,bitsize);
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
@@ -157,7 +158,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     keyholder.initialize_from_file(context, dirname + "/keyholder_context.json");
 
     //Initialize connection to server
-    client elem_holder(server_address);//TODO change this to an arg??
+    client elem_holder(server_address, log);//TODO change this to an arg??
     elem_holder.send_to_server("INIT", keyholder.toString());
 
     cout << "Generating type " << schemetype << " shares for party ";
@@ -168,7 +169,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         cout << idd << ",";
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
-        bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, elem_holder,schemetype);
+        bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, &elem_holder,schemetype);
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
@@ -194,11 +195,18 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     cout << "Reconstruction complete in " << ms << " miliseconds" << endl; 
 
     cout << "Found " << sum << " elements in t-threshold intersection" << endl;
-
+    if(log)
+    {
+        cout<< elem_holder.get_message_sizes()<<endl;
+        ofstream log_file;
+        log_file.open(dirname + "/message_sizes.log",std::ofstream::out | std::ofstream::app);
+        log_file << elem_holder.get_message_sizes();
+        log_file.close();
+    }
    //write results to file
 }
 
-float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="127.0.0.1", int repeat=100){
+float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="127.0.0.1", int repeat=100, int log = 0){
 
     cout << "Generating Share with Scheme " << scheme << endl
             << " t: " << t
@@ -212,7 +220,7 @@ float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip=
 
     Keyholder keyholder(context);
     Elementholder elementholder(rand()%1000 + 1, bitsize);
-    client elem_holder(server_ip);//TODO change this to an arg??
+    client elem_holder(server_ip,log);//TODO change this to an arg??
     elem_holder.send_to_server("INIT", keyholder.toString());
 
     Share share_x;
@@ -222,9 +230,9 @@ float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip=
     //read the elements of this person
     for (int i = 0; i< repeat; i++){
         if (scheme==1)
-            share_x = elementholder.get_share_1(context, rand()%10000, elem_holder, num_bins); 
+            share_x = elementholder.get_share_1(context, rand()%10000, &elem_holder, num_bins); 
         else
-            share_x = elementholder.get_share_2(context, rand()%10000, elem_holder, num_bins);
+            share_x = elementholder.get_share_2(context, rand()%10000, &elem_holder, num_bins);
     }
     auto end = chrono::high_resolution_clock::now();    
     auto dur = end - begin;
@@ -232,6 +240,15 @@ float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip=
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
 
     cout << "Average time: " << (float)ms/repeat << " ms" << endl;
+
+       if(log)
+    {
+        cout<< elem_holder.get_message_sizes()<<endl;
+        // ofstream log_file;
+        // log_file.open("message_sizes.log",std::ofstream::out | std::ofstream::app);
+        // log_file << elem_holder.get_message_sizes();
+        // log_file.close();
+    }
 
     return (float)ms/repeat;
 }
@@ -295,18 +312,19 @@ void show_usage()
             << "\t-m\tNumber of parties (default=10)\n"
             << "\t-n\tMax number of elements (default=10)\n"
             << "\t-t\tThreshold (default=2)\n"
-            << "\t-b\tPrime bit length (default=1024)\n"
+            << "\t-b\tPrime bit length (default=2048)\n"
             << "\t-f\tRegenerate elements for benchmarking instance (default=false)\n"
             << "\t-k\tAddress of keyholder server (default 127.0.0.1)\n"
             << "\t-r\tNumber of times to repeat experiment (has defaults)\n"
             << "\t-s\tChoice of Scheme 0=both,1,2 (default 0) \n"
+            << "\t-l\tLog message sizes disable = 0, enalbe = 1(default = 0) \n"
             << endl;
 }
 
 
 int main(int argc, char *argv[])  
 { 
-    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0;
+    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0, log=0;
     bool force=false;
     string server_address="127.0.0.1";
     int opt;
@@ -319,7 +337,7 @@ int main(int argc, char *argv[])
         return 0;
     }else if(strcmp(argv[1],"all")==0){
         std::cout << "Running entire protocol" << endl;
-        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:")) != -1)  
+        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:l:")) != -1)  
         {  
             switch(opt)  
             {  
@@ -347,6 +365,9 @@ int main(int argc, char *argv[])
                 case 's':
                     scheme=stoi(optarg);
                     break;
+                case 'l':
+                    log=stoi(optarg);
+                    break;
                 case ':':  
                     printf("option needs a value\n");  
                     break;
@@ -356,17 +377,17 @@ int main(int argc, char *argv[])
             }
         }
         if (scheme==0){
-            run_benchmark(m,n,t,bitsize,1,force,server_address);
+            run_benchmark(m,n,t,bitsize,1,force,server_address,log);
             cout << endl;
-            run_benchmark(m,n,t,bitsize,2,force,server_address);
+            run_benchmark(m,n,t,bitsize,2,force,server_address,log);
         }else{
-            run_benchmark(m,n,t,bitsize,scheme,force,server_address);
+            run_benchmark(m,n,t,bitsize,scheme,force,server_address,log);
         }
         return 0;
     }else if(strcmp(argv[1],"sharegen")==0){
         std::cout << "Running Share Generation" << endl;
         repeat=10;
-        while((opt = getopt(argc, argv, ":ht:b:k:s:r:")) != -1)  
+        while((opt = getopt(argc, argv, ":ht:b:k:s:r:l:")) != -1)  
         {  
             switch(opt)  
             {  
@@ -388,6 +409,9 @@ int main(int argc, char *argv[])
                 case 'r':
                     repeat=stoi(optarg);
                     break;
+                case 'l':
+                    log=stoi(optarg);
+                    break;
                 case ':':  
                     printf("option needs a value\n");  
                     break;
@@ -397,10 +421,10 @@ int main(int argc, char *argv[])
             }
         }
         if (scheme==0){
-            benchmark_generate_share(t,bitsize,1,server_address,repeat);
-            benchmark_generate_share(t,bitsize,2,server_address,repeat);
+            benchmark_generate_share(t,bitsize,1,server_address,repeat,log);
+            benchmark_generate_share(t,bitsize,2,server_address,repeat,log);
         }else{
-            benchmark_generate_share(t,bitsize,scheme,server_address,repeat);
+            benchmark_generate_share(t,bitsize,scheme,server_address,repeat,log);
         }
         return 0;
     }else if(strcmp(argv[1],"recon")==0){

@@ -29,12 +29,12 @@ class Elementholder{
     Scheme1_Round2_send Scheme1_Round2(Context context, Scheme1_Round1_receive out);
     void Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_secret, mpz_t __mpz_mac);
 
-    Share get_share_1(Context context, int __X, client elem_holder, int num_bins);
+    Share get_share_1(Context context, int __X, client* elem_holder, int num_bins);
 
     Scheme2_send Scheme2_Round1(Context public_context, int __X, int id);
     void Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context public_context, ZZ secret_share_alpha, ZZ mac_share_alpha);
 
-    Share get_share_2(Context context, int __X, client elem_holder, int num_bins);
+    Share get_share_2(Context context, int __X, client* elem_holder, int num_bins);
 
 
 };

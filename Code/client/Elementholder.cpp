@@ -100,7 +100,7 @@ void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_s
     mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
-Share Elementholder::get_share_1(Context context, int __X, client elem_holder, int num_bins){
+Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, int num_bins){
     
     ZZ_p::init(context.p);
     string result;
@@ -112,12 +112,12 @@ Share Elementholder::get_share_1(Context context, int __X, client elem_holder, i
     Scheme1_Round1_send to_send_round_1;
     to_send_round_1.h_x_alpha = h_x_alpha;
     to_send_round_1.g_alpha = g_alpha;
-    result = elem_holder.send_to_server("S1_R1", to_send_round_1.toString());
+    result = elem_holder->send_to_server("S1_R1", to_send_round_1.toString());
     Scheme1_Round1_receive out_round1 = Scheme1_Round1_receive(result); //this will be done on server side
     
     //Round 2
     Scheme1_Round2_send to_send_round_2 = Scheme1_Round2(context, out_round1);
-    result = elem_holder.send_to_server("S1_R2", to_send_round_2.toString());
+    result = elem_holder->send_to_server("S1_R2", to_send_round_2.toString());
     Scheme1_Round2_receive out_round2 = Scheme1_Round2_receive(result);
 
     ZZ secret_share, mac_share;
@@ -158,13 +158,13 @@ void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context publi
 	*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
 }
 
-Share Elementholder::get_share_2(Context context, int __X, client elem_holder, int num_bins){
+Share Elementholder::get_share_2(Context context, int __X, client* elem_holder, int num_bins){
     
     ZZ_p::init(context.p);
     string result;
 
     Scheme2_send to_send = Scheme2_Round1(context, __X, id);
-    result = elem_holder.send_to_server("S2", to_send.toString());
+    result = elem_holder->send_to_server("S2", to_send.toString());
     Scheme2_receive received = Scheme2_receive(result);
     
     ZZ secret_share, mac_share;

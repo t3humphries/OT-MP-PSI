@@ -3,7 +3,7 @@
 using namespace std;
 
 
-client::client(string connection_address)   // constructor for intiializing
+client::client(string connection_address, int __log)   // constructor for intiializing
 {
     sock= 0;  
     MAX_BUF_LENGTH = 4096;  
@@ -12,9 +12,17 @@ client::client(string connection_address)   // constructor for intiializing
     if(inet_pton(AF_INET, connection_address.c_str(), &serv_addr.sin_addr)<=0)  
     { 
         printf("\nInvalid address/ Address not supported \n"); 
-    } 
-}
+    }
 
+    log = __log;
+    
+    for(int i=0 ; i<3 ;i++)
+    {
+        s1r1.push_back(0);
+        s1r2.push_back(0);
+        s2.push_back(0);
+    }
+}
        
 string client::send_to_server(string arg, string raw_message) 
 { 
@@ -45,13 +53,58 @@ string client::send_to_server(string arg, string raw_message)
             response.append( buffer.cbegin(), buffer.cend() );
         }
     } while ( bytesReceived == MAX_BUF_LENGTH );
-
+    response.resize(strlen(response.c_str()));
     if(close(sock)<0)
     {
         cout<<"connection could not be closed";
     } 
+
+    if(log)
+    {
+        if(arg.compare("S1_R1") == 0)
+        {
+            s1r1[0] += 1;
+            s1r1[1] += message.length();
+            s1r1[2] += response.length();
+        }
+        
+        else if(arg.compare("S1_R2") == 0)
+        {
+            s1r2[0] += 1;
+            s1r2[1] += message.length();
+            s1r2[2] += response.length();
+        }
+
+        else if(arg.compare("S2") == 0)
+        {
+            s2[0] += 1;
+            s2[1] += message.length();
+            s2[2] += response.length();
+        }
+    }
     return response; 
 } 
+
+string client::get_message_sizes()
+{
+   string toReturn = "Message Sizes: \n";
+   if(s1r1[0] != 0)
+   {
+     toReturn += "S1R1 Avg size sent = " + to_string(s1r1[1]/s1r1[0]) +" bytes\n";
+     toReturn += "S1R1 Avg size recived = " + to_string(s1r1[2]/s1r1[0]) +" bytes\n";
+   }
+   if(s1r2[0] != 0)
+   {
+    toReturn += "S1R2 Avg size sent = " + to_string(s1r2[1]/s1r2[0]) +" bytes\n";
+    toReturn += "S1R2 Avg size recived = " + to_string(s1r2[2]/s1r2[0]) +" bytes\n";
+   }
+   if(s2[0] != 0)
+   {
+    toReturn += "S2 Avg size sent = " + to_string(s2[1]/s2[0]) +" bytes\n";
+    toReturn += "S2 Avg size recived = " + to_string(s2[2]/s2[0]) +" bytes\n";
+   }
+   return toReturn;
+}
 
 
 
