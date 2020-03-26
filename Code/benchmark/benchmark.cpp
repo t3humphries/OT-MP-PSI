@@ -131,7 +131,76 @@ vector<int> read_elements_to_vector(string filename){
     return toReturn;
 }
 
-void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", int log=0){
+void write_shares_to_file(vector<vector<Share>> *bins_people_shares, string dirname, int schemetype, int num_bins, int m, int max_bin_size){
+    string share_dirname=dirname + "//sharesofscheme"+ to_string(schemetype);
+    if(exists(share_dirname)){
+        system(("rm -r " + share_dirname).c_str());        
+    }
+    system(("mkdir " + share_dirname).c_str());//Generate the shares directory
+    ofstream shares_file;
+    for (int i =0; i<num_bins; i++)
+    {
+        system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i)).c_str());
+        for(int j=0; j<m; j++)
+        {
+            shares_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".json");
+            if (!shares_file.is_open())
+            {
+                cout << "Something wrong for the shares of user " + to_string(j) << endl;
+            } else
+            {
+                json temp;
+                for (int k =0;k<max_bin_size;k++){
+                    temp[k]["id"] = ZZ_to_str(bins_people_shares[i][j][k].id);
+                    temp[k]["bin"] = ZZ_to_str(bins_people_shares[i][j][k].bin);
+                    temp[k]["SS"] = ZZ_to_str(bins_people_shares[i][j][k].SS);
+                    temp[k]["SS_MAC"] = ZZ_to_str(bins_people_shares[i][j][k].SS_mac);
+                }
+                shares_file << temp;
+            }
+            shares_file.close();
+        }
+    }
+}
+
+void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dirname, int schemetype, int num_bins, int m, int max_bin_size){
+    ifstream share_file;
+
+    for(int i=0; i<num_bins; i++)
+    {
+        bins_people_shares[i] = vector<vector<Share>>();
+        for(int j=0; j<m; j++)
+        {
+            bins_people_shares[i].push_back(vector<Share>());
+            share_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".json");
+            json temp;
+            share_file>>temp;
+            for (int k=0;k<max_bin_size;k++)
+            {
+                string str1;
+                str1 = temp[k]["id"] ;
+                // bins_people_shares[i][j][k].id=str_to_ZZ(str1);
+                string str2 ;
+                str2= temp[k]["bin"];
+                // bins_people_shares[i][j][k].bin=str_to_ZZ(str2);
+                string str3;
+                str3=temp[k]["SS"];
+                // bins_people_shares[i][j][k].SS=str_to_ZZ(str3);
+                string str4;
+                str4=temp[k]["SS_MAC"];
+                // bins_people_shares[i][j][k].SS_mac = str_to_ZZ(str4);
+
+                Share __share(str_to_ZZ(str1),str_to_ZZ(str2),str_to_ZZ(str3),str_to_ZZ(str4));
+                bins_people_shares[i][j].push_back(__share);
+
+            }
+            share_file.close();
+        }
+    }
+}
+
+
+void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false){
 
     string dirname = generate_benchmark_context(m,n,t,bitsize);
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
@@ -160,13 +229,13 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     //Initialize connection to server
     client elem_holder(server_address, log);//TODO change this to an arg??
     elem_holder.send_to_server("INIT", keyholder.toString());
-
-    cout << "Generating type " << schemetype << " shares for party ";
+    
+    cout << "-------------------- Scheme " << schemetype << " -------------------- " << endl;
+    cout << "---------- Share Generation ---------- " << endl;
     for (int i=0;i<m;i++){
         idd=config["id_list"][i];
         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
         Elementholder elementholder(idd, elements.data(), (int)elements.size(), bitsize);
-        cout << idd << ",";
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person
         bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, &elem_holder,schemetype);
@@ -179,75 +248,11 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         }
     }
 
+    cout << "---------- Share Genration Complete  ----------" << endl;
+    cout << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
+    write_shares_to_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
 
-
-    system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype)).c_str());//Generate the shares directory
-    
-    ofstream shares_file;
-    for (int i =0; i<num_bins; i++)
-    {
-        system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i)).c_str());
-
-        for(int j=0; j<m; j++)
-        {
-        
-            shares_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".txt");
-            if (!shares_file.is_open())
-            {
-            cout << "Something wrong for the shares of user " + to_string(j) << endl;
-            } else
-            {
-            json temp;
-            for (int k =0;k<max_bin_size;k++){
-                //temp["sharelist"][k] = bins_people_shares[i][j][k]; 
-
-                temp[k]["id"] = ZZ_to_str(bins_people_shares[i][j][k].id);
-                temp[k]["bin"] = ZZ_to_str(bins_people_shares[i][j][k].bin);
-                temp[k]["SS"] = ZZ_to_str(bins_people_shares[i][j][k].SS);
-                temp[k]["SS_MAC"] = ZZ_to_str(bins_people_shares[i][j][k].SS_mac);
-
-            }
-                shares_file << temp; //TODO: generate the elements accordingly
-            
-
-            }
-            shares_file.close();
-
-        }
-    
-    }
-
-    cout << "\b" << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
-
-
-    ifstream share_file;
-    for(int i=0; i<num_bins; i++)
-    {
-        for(int j=0; j<m; j++)
-        {
-            share_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".txt");
-            json temp;
-            share_file>>temp;
-            for (int k=0;k<max_bin_size;k++)
-            {
-                string str1;
-                str1 = temp[k]["id"] ;
-                bins_people_shares[i][j][k].id=str_to_ZZ(str1);
-                string str2 ;
-                str2= temp[k]["bin"];
-                bins_people_shares[i][j][k].bin=str_to_ZZ(str2);
-                string str3;
-                str3=temp[k]["SS"];
-                bins_people_shares[i][j][k].SS=str_to_ZZ(str3);
-                string str4;
-                str4=temp[k]["SS_MAC"];
-                bins_people_shares[i][j][k].SS_mac = str_to_ZZ(str4);    
-                
-            }
-            share_file.close();
-        }
-    }
-
+    cout << "---------- Reconstruction ---------- " << endl;
 
     vector<ZZ> ans;
     int sum = 0;
@@ -260,26 +265,33 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     auto dur = end - begin;
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
 
-    cout << "Reconstruction complete in " << ms << " miliseconds" << endl; 
-
-    cout << "Found " << sum << " elements in t-threshold intersection" << endl;
+    cout << "---------- Reconstruction complete ----------" << endl; 
+    cout << "\tTotal time: " << ms << " miliseconds" << endl;
+    cout<< elem_holder.get_message_sizes() << endl;
+    cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
     if(log)
     {
-        cout<< elem_holder.get_message_sizes()<<endl;
         ofstream log_file;
-        log_file.open(dirname + "/message_sizes.log",std::ofstream::out | std::ofstream::app);
-        log_file << elem_holder.get_message_sizes();
+        log_file.open(dirname + "/logfile.txt",std::ofstream::out | std::ofstream::app);
+        log_file << "-------------------- Scheme " << schemetype << " -------------------- ";
+        log_file << "---------- Share Generation ---------- " << endl;
+        log_file << "---------- Share Genration Complete  ----------" << endl;
+        log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
+        log_file << "---------- Reconstruction ---------- ";
+        log_file << "---------- Reconstruction complete ----------" << endl; 
+        log_file << "\tTotal time: " << ms << " miliseconds" << endl;        log_file << "\tFound " << sum << " elements in t-threshold intersection" << endl;
+        log_file << elem_holder.get_message_sizes() << endl;
         log_file.close();
     }
    //write results to file
 }
 
-float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="127.0.0.1", int repeat=100, int log = 0){
+void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="127.0.0.1", int repeat=100, bool log = false){
 
-    cout << "Generating Share with Scheme " << scheme << endl
-            << " t: " << t
-            << " bitsize: " << bitsize
-            << " repeat: " << repeat << endl;
+    cout << "---------- Generating Share with Scheme " << scheme << " ----------" << endl
+            << "\tt=" << t
+            << "\tbitsize=" << bitsize
+            << "\trepeat=" << repeat << endl;
 
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
@@ -308,27 +320,32 @@ float benchmark_generate_share(int t, int bitsize, int scheme, string server_ip=
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
 
     cout << "Average time: " << (float)ms/repeat << " ms" << endl;
+    cout<< elem_holder.get_message_sizes() <<endl;
 
-       if(log)
-    {
-        cout<< elem_holder.get_message_sizes()<<endl;
-        // ofstream log_file;
-        // log_file.open("message_sizes.log",std::ofstream::out | std::ofstream::app);
-        // log_file << elem_holder.get_message_sizes();
-        // log_file.close();
+    if (log){
+        ofstream log_file;
+        string dirname="benchmark_sharegen_"+to_string(t)+to_string(bitsize);
+        log_file.open(dirname+"logfile.txt",std::ofstream::out | std::ofstream::app);
+        log_file << "---------- Generating Share with Scheme " << scheme << " ----------" << endl
+                << "\tt=" << t
+                << "\tbitsize=" << bitsize
+                << "\trepeat=" << repeat << endl;
+
+        log_file << "Average time=" << (float)ms/repeat << " ms" << endl;
+        log_file << elem_holder.get_message_sizes() << endl;
+        log_file.close();
     }
 
-    return (float)ms/repeat;
+    return;
 }
 
-void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int schemetype, int repeat=1){
-    cout << "Reconstructing in single bin with Scheme " << schemetype << endl
-            << " m: " << m
-            << " n: " << n
-            << " t: " << t
-            << " bitsize: " << bitsize
-            << " repeat: " << repeat << endl;
-
+void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int schemetype, int repeat=1,bool log=false){
+    cout << "---------- Reconstructing in single bin with Scheme " << schemetype << " ----------" << endl
+            << "\tm=" << m
+            << "\tn=" << n
+            << "\tt=" << t
+            << "\tbitsize=" << bitsize
+            << "\trepeat=" << repeat << endl;
 
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
@@ -338,6 +355,7 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     if (!exists(dirname)){
         cout << "Neccessary shares for running this benchmark doesn't exist." << endl
             << "run \"./benchmark all\" first" << endl;
+        return;
     }
 
     ifstream config_file(dirname + "//benchmark_config.json");
@@ -347,11 +365,8 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
 
     Context context(p, q, g, t);
 
-    cout << "Not ready yet" << endl;
-    return;
-
     vector<vector<Share>> bins_people_shares[num_bins];
-    //TODO: READ THE SHARES FROM THE FILES HERE
+    read_shares_from_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
     
     vector<ZZ> ans;
     int sum = 0;
@@ -364,7 +379,20 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     auto dur = end - begin;
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
 
-    cout << "Reconstruction complete in " << ms << " miliseconds" << endl;
+    cout << "\tReconstruction complete in " << (float)ms/repeat << " miliseconds" << endl;
+
+    if (log){
+        ofstream log_file;
+        log_file.open(dirname+"recon_logfile.txt",std::ofstream::out | std::ofstream::app);
+        log_file << "---------- Reconstructing in single bin with Scheme " << schemetype << " ----------" << endl
+                << "\tm=" << m
+                << "\tn=" << n
+                << "\tt=" << t
+                << "\tbitsize=" << bitsize
+                << "\trepeat=" << repeat << endl;
+        log_file << "\tReconstruction complete in " << (float)ms/repeat << " miliseconds" << endl;
+        log_file.close();
+    }
 
 }
 
@@ -385,14 +413,14 @@ void show_usage()
             << "\t-k\tAddress of keyholder server (default 127.0.0.1)\n"
             << "\t-r\tNumber of times to repeat experiment (has defaults)\n"
             << "\t-s\tChoice of Scheme 0=both,1,2 (default 0) \n"
-            << "\t-l\tLog message sizes disable = 0, enalbe = 1(default = 0) \n"
+            << "\t-l\tLog results in file (default false) \n"
             << endl;
 }
 
 
 int main(int argc, char *argv[])  
 { 
-    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0, log=0;
+    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0, log=false;
     bool force=false;
     string server_address="127.0.0.1";
     int opt;
@@ -405,7 +433,7 @@ int main(int argc, char *argv[])
         return 0;
     }else if(strcmp(argv[1],"all")==0){
         std::cout << "Running entire protocol" << endl;
-        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:l:")) != -1)  
+        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:l")) != -1)  
         {  
             switch(opt)  
             {  
@@ -434,7 +462,7 @@ int main(int argc, char *argv[])
                     scheme=stoi(optarg);
                     break;
                 case 'l':
-                    log=stoi(optarg);
+                    log=true;
                     break;
                 case ':':  
                     printf("option needs a value\n");  
@@ -478,7 +506,7 @@ int main(int argc, char *argv[])
                     repeat=stoi(optarg);
                     break;
                 case 'l':
-                    log=stoi(optarg);
+                    log=true;
                     break;
                 case ':':  
                     printf("option needs a value\n");  
@@ -531,66 +559,15 @@ int main(int argc, char *argv[])
             }
         }
         if (scheme==0){
-            benchmark_reconstruction_single_bin(m,n,t,bitsize,1);
-            benchmark_reconstruction_single_bin(m,n,t,bitsize,2);
+            benchmark_reconstruction_single_bin(m,n,t,bitsize,1,repeat,log);
+            benchmark_reconstruction_single_bin(m,n,t,bitsize,2,repeat,log);
         }else{
-            benchmark_reconstruction_single_bin(m,n,t,bitsize,scheme);
+            benchmark_reconstruction_single_bin(m,n,t,bitsize,scheme,repeat,log);
         }        
         return 0;
     }else{
         cerr << argv[1] << " is not a command" << endl;
         return 0;
     }
-    
-
-    // put ':' in the starting of the 
-    // string so that program can  
-    //distinguish between '?' and ':'
-    // while((opt = getopt(argc, argv, ":hm:n:t:b:fk:")) != -1)  
-    // {  
-    //     switch(opt)  
-    //     {  
-    //         case 'h':
-    //             show_usage();
-    //             return 0;
-    //         case 'm':  
-    //             m = stoi(optarg);
-    //             break;
-    //         case 'n':  
-    //             n = stoi(optarg);
-    //             break;
-    //         case 't':  
-    //             t = stoi(optarg);
-    //             break;
-    //         case 'b':  
-    //             bitsize = stoi(optarg);
-    //             break;
-    //         case 'f':  
-    //             force=true;
-    //             break;
-    //         case 'k':  
-    //             server_address=optarg;
-    //             break;  
-    //         case ':':  
-    //             printf("option needs a value\n");  
-    //             break;
-    //         case '?':
-    //             printf("unknown option: %c\n", optopt); 
-    //             break;  
-    //     }  
-    // }  
-    
-    // optind is for the extra arguments 
-    // which are not parsed 
-    // for(; optind < argc; optind++){      
-    //     printf("extra arguments: %s\n", argv[optind]);  
-    // } 
-    
-    // run_benchmark(m,n,t,bitsize,1,force,server_address);
-    // cout << endl;
-    // run_benchmark(m,n,t,bitsize,2,force,server_address);
-
-    // benchmark_generate_share(t,bitsize,1,server_address);
-    // benchmark_generate_share(t,bitsize,2,server_address);
     return 0; 
 } 
