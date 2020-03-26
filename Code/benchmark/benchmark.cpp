@@ -383,7 +383,7 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
 
     if (log){
         ofstream log_file;
-        log_file.open(dirname+"recon_logfile.txt",std::ofstream::out | std::ofstream::app);
+        log_file.open(dirname+"//recon_logfile.txt",std::ofstream::out | std::ofstream::app);
         log_file << "---------- Reconstructing in single bin with Scheme " << schemetype << " ----------" << endl
                 << "\tm=" << m
                 << "\tn=" << n
@@ -525,7 +525,7 @@ int main(int argc, char *argv[])
         return 0;
     }else if(strcmp(argv[1],"recon")==0){
         std::cout << "Running Reconstruction" << endl;
-        while((opt = getopt(argc, argv, ":hm:n:t:b:s:r:")) != -1)  
+        while((opt = getopt(argc, argv, ":hm:n:t:b:s:r:l")) != -1)  
         {  
             switch(opt)  
             {  
@@ -549,6 +549,9 @@ int main(int argc, char *argv[])
                     break;
                 case 'r':
                     repeat=stoi(optarg);
+                    break;
+                case 'l':
+                    log=true;
                     break;
                 case ':':  
                     printf("option needs a value\n");  
