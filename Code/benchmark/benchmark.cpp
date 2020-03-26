@@ -178,7 +178,75 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         }
     }
 
+
+
+    system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype)).c_str());//Generate the shares directory
+    
+    ofstream shares_file;
+    for (int i =0; i<num_bins; i++)
+    {
+        system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i)).c_str());
+
+        for(int j=0; j<m; j++)
+        {
+        
+            shares_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".txt");
+            if (!shares_file.is_open())
+            {
+            cout << "Something wrong for the shares of user " + to_string(j) << endl;
+            } else
+            {
+            json temp;
+            for (int k =0;k<max_bin_size;k++){
+                //temp["sharelist"][k] = bins_people_shares[i][j][k]; 
+
+                temp[k]["id"] = ZZ_to_str(bins_people_shares[i][j][k].id);
+                temp[k]["bin"] = ZZ_to_str(bins_people_shares[i][j][k].bin);
+                temp[k]["SS"] = ZZ_to_str(bins_people_shares[i][j][k].SS);
+                temp[k]["SS_MAC"] = ZZ_to_str(bins_people_shares[i][j][k].SS_mac);
+
+            }
+                shares_file << temp; //TODO: generate the elements accordingly
+            
+
+            }
+            shares_file.close();
+
+        }
+    
+    }
+
     cout << "\b" << endl << "Generating shares complete in " << sum_sharegen/m << " miliseconds on average for each party (including padding)" << endl;
+
+
+    ifstream share_file;
+    for(int i=0; i<num_bins; i++)
+    {
+        for(int j=0; j<m; j++)
+        {
+            share_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".txt");
+            json temp;
+            share_file>>temp;
+            for (int k=0;k<max_bin_size;k++)
+            {
+                string str1;
+                str1 = temp[k]["id"] ;
+                bins_people_shares[i][j][k].id=str_to_ZZ(str1);
+                string str2 ;
+                str2= temp[k]["bin"];
+                bins_people_shares[i][j][k].bin=str_to_ZZ(str2);
+                string str3;
+                str3=temp[k]["SS"];
+                bins_people_shares[i][j][k].SS=str_to_ZZ(str3);
+                string str4;
+                str4=temp[k]["SS_MAC"];
+                bins_people_shares[i][j][k].SS_mac = str_to_ZZ(str4);    
+                
+            }
+            share_file.close();
+        }
+    }
+
 
     vector<ZZ> ans;
     int sum = 0;
