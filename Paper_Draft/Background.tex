@@ -1,0 +1,69 @@
+\subsection{OPRF}
+
+An oblivious pseudo-random function (OPRF) \cite{OPRF,OT_Ext} is
+a two-party protocol where the client can query a pseudo-random function
+$F_{k}$ on input values $x$, in such a way that the key $k$, generated
+by the server, remains hidden from the client, while at the same time
+the client's input $x$ is not revealed to the server. OPRFs can be
+established through generic methods for secure multiparty computation
+(on top of circuits that implement ordinary pseudo-random functions),
+or by means of the Diffie-Hellman assumption. For instance, the client
+chooses a random $r$ and sends $x^{r}$ to the server; the server
+responds by sending back $x^{kr}$, from which the client can obtain
+$x^{k}=(x^{kr})^{-r}$.
+
+\subsection{Secret Sharing}
+
+In secret sharing, the goal is to distribute among $m$ parties \emph{shares
+}$s_{1},\ldots,s_{m}$ of a secret $s$. An \emph{$(m,t)$-threshold
+scheme} is such all $t$ of the shares are sufficient to \emph{reconstruct
+}$s$ but no group of parties possessing fewer than $t$ shares can
+infer any information about $s$. In Shamir's secret sharing scheme
+\cite{Shamir}, the distributing party forms the polynomial 
+\[
+f(x)=a_{t-1}x^{t-1}+a_{t-2}x^{t-2}+\ldots a_{1}x+s
+\]
+over a finite field of prime order, with $a_{1},\ldots,a_{t-1}$ randomly
+generated. It then produces the shares by evaluating $f$ at $m$
+publicly-known distinct values: for instance, by setting $s_{i}=(i,f(i))$.
+Since $t$ points uniquely determine a polynomial of degree $t$,
+given all the $s_{i}$, anyone possessing $t$ shares can use Lagrange
+interpolation to recover $f$ and thus obtain $s$. However, fewer
+than $t$ shares together reveal no information about $s$.
+
+\subsection{SS-OPRFs}
+
+OPRF that outputs secret share of PRF
+
+Note that the ss polynomial needs to be different for every message
+
+\subsection{Paillier and D\aa mgard Jurik Crytposystems}
+
+The Paillier cryptosystem \cite{Paillier} is an additively homomorphic
+scheme for public key encryption based on the intractability of the
+Composite Residuosity Class Problem. Ciphertexts are regarded as elements
+over the multiplicative group $\mathbb{Z}_{n^{2}}^{*}$, where $n=pq$
+for primes $p$ and $q$. Letting $\lambda=\text{lcm}(p-1,q-1)$,
+and choosing $g$ to be a random base such that its order is divisible
+by $n$, the public key is $(n,g)$ and the private key is $(p,q)$.
+Encrypting a plaintext message $m<n$ is done by choosing a random
+$r<n$ and computing: 
+\[
+Enc(m)=g^{m}r^{n}\mod n^{2}.
+\]
+A given ciphertext $c<n^{2}$ is decrypted using $\lambda$: 
+\[
+Dec(c)=\frac{L(c^{\lambda}\text{ mod }n^{2})}{L(g^{\lambda}\text{ mod }n^{2})}\mod n,
+\]
+where 
+\[
+L(x)=\frac{x-1}{n}.
+\]
+Such a scheme satisfies the following homomorphic properties (the
+moduli are implicit): 
+\begin{align*}
+Dec(Enc(m_{1})Enc(m_{2})) & =m_{1}+m_{2}\\
+Dec(Enc(m)^{k}) & =km.
+\end{align*}
+
+D\aa mgard Jurik \cite{Damgard} 

@@ -79,41 +79,10 @@ $m$ parties, each with a set of size $n$, would like to compute the number of oc
 The computation should be secure against a coalition of $k$ semi-honest parties.
 
 \section{Background}
+\input{Background}
 
-\subsection{OPRF}
-
-$A -> S: x^a$ \\
-$S -> A: x^{as}$ \\
-$A: x^s$
-
-
-	
-\begin{definition}
-	An Oblivious PseudoreRndom Function (OPRF)...
-\end{definition}
-
-
-\begin{definition}
-	In a $(t,n)$\textit{-threshold scheme} an entity generates $n$ shares of a secret $s$ to be provided to $n$ participants such that: (1) any size-$t$ subset of the $n$ participants can compute the secret given their $t$ shares, and (2) no subset of the $n$ participants consisting of $t-1$ or fewer participants is able to gain any knowledge of the secret given their combined shares.
-\end{definition}
-
-\begin{definition}
-	A Secret Sharing - Oblivious Pseudo-Random Function (SS-OPRF) is an OPRF which employs a unique secret sharing polynomial (satisfying the requirements for a threshold scheme) for each input message such that the output of the function is a set of secret shares of the pseudorandom function satisfying the following properties: 
-	\begin{itemize}
-		\item a
-	\end{itemize} 
-\end{definition}
-
-
-
-\subsection{Paillier \cite{Paillier} and Damgard Jurik \cite{Damgard} Crytposystems}
-
-\pagebreak
 \section{Protocol Overview}
 \input{Algorithm_Mas}
-
-\pagebreak
-
 
 \section{SS-OPRF}
 
@@ -188,23 +157,7 @@ Time to reconstruct OT-SI in the base
 Time to reconstruct OT-SI in the exponent
 
 \section{Related Work}
-
-Kissner, Song
-
-Generic Secure Computation, PSI via Secure computation
-
-PSI protocols based on OPRF
-
-PSI protocols based on hashing
-
-
-
-
-Efficient Batched Oblivious PRF with Applications to Private Set Intersection, CCS 2016 Vladimir Kolesnikov, Ranjit  Kumaresan, Mike Rosulek, Ni Trieu
-
-
-
-
+\input{Related_Work}
 
 \section{Conclusion}
 
