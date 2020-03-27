@@ -200,7 +200,7 @@ void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dir
 }
 
 
-void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false){
+void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false){
 
     string dirname = generate_benchmark_context(m,n,t,bitsize);
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
@@ -252,36 +252,52 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     cout << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
     write_shares_to_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
 
-    cout << "---------- Reconstruction ---------- " << endl;
 
-    vector<ZZ> ans;
-    int sum = 0;
-    auto begin = chrono::high_resolution_clock::now();    
-    for (int i=0;i<num_bins;i++){
-        ans = recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype);
-        sum += ans.size();
-    }
-    auto end = chrono::high_resolution_clock::now();    
-    auto dur = end - begin;
-    auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-
-    cout << "---------- Reconstruction complete ----------" << endl; 
-    cout << "\tTotal time: " << ms << " miliseconds" << endl;
-    cout<< elem_holder.get_message_sizes() << endl;
-    cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
     if(log)
     {
         ofstream log_file;
-        log_file.open(dirname + "/logfile.txt",std::ofstream::out | std::ofstream::app);
+        log_file.open(dirname + "//logfile.txt",std::ofstream::out | std::ofstream::app);
         log_file << "-------------------- Scheme " << schemetype << " -------------------- ";
         log_file << "---------- Share Generation ---------- " << endl;
         log_file << "---------- Share Genration Complete  ----------" << endl;
         log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
-        log_file << "---------- Reconstruction ---------- ";
-        log_file << "---------- Reconstruction complete ----------" << endl; 
-        log_file << "\tTotal time: " << ms << " miliseconds" << endl;        log_file << "\tFound " << sum << " elements in t-threshold intersection" << endl;
         log_file << elem_holder.get_message_sizes() << endl;
         log_file.close();
+    }
+
+    if (!only_sharegen){
+        cout << "---------- Reconstruction ---------- " << endl;
+
+        vector<ZZ> ans;
+        int sum = 0;
+        auto begin = chrono::high_resolution_clock::now();    
+        for (int i=0;i<num_bins;i++){
+            ans = recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype);
+            sum += ans.size();
+        }
+        auto end = chrono::high_resolution_clock::now();    
+        auto dur = end - begin;
+        auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+
+        cout << "---------- Reconstruction complete ----------" << endl; 
+        cout << "\tTotal time: " << ms << " miliseconds" << endl;
+        cout<< elem_holder.get_message_sizes() << endl;
+        cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
+
+        if(log)
+        {
+            ofstream log_file;
+            log_file.open(dirname + "//logfile.txt",std::ofstream::out | std::ofstream::app);
+            // log_file << "-------------------- Scheme " << schemetype << " -------------------- ";
+            // log_file << "---------- Share Generation ---------- " << endl;
+            // log_file << "---------- Share Genration Complete  ----------" << endl;
+            // log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
+            log_file << "---------- Reconstruction ---------- ";
+            log_file << "---------- Reconstruction complete ----------" << endl; 
+            log_file << "\tTotal time: " << ms << " miliseconds" << endl;        log_file << "\tFound " << sum << " elements in t-threshold intersection" << endl;
+            log_file << elem_holder.get_message_sizes() << endl;
+            log_file.close();
+        }
     }
    //write results to file
 }
@@ -325,7 +341,7 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     if (log){
         ofstream log_file;
         string dirname="benchmark_sharegen_"+to_string(t)+to_string(bitsize);
-        log_file.open(dirname+"logfile.txt",std::ofstream::out | std::ofstream::app);
+        log_file.open(dirname+"//logfile.txt",std::ofstream::out | std::ofstream::app);
         log_file << "---------- Generating Share with Scheme " << scheme << " ----------" << endl
                 << "\tt=" << t
                 << "\tbitsize=" << bitsize
@@ -400,9 +416,9 @@ void show_usage()
 {
     cerr << "Usage:\n"
             << "Commands:\n"
-            << "\tall: run the entire benchmarking process\n"
-            << "\tsharegen: run the share generation process\n"
-            << "\trecon: run the reconstruction process\n"
+            << "\tall: run the entire benchmarking process, generate all share, reconstruct in all bins\n"
+            << "\tsharegen: run a single share generation process, micro-benchmark\n"
+            << "\trecon: run the reconstruction process in only one bin, micro-benchmark\n"
             << "Options:\n"
             << "\t-h\tShow this help message\n"
             << "\t-m\tNumber of parties (default=10)\n"
@@ -414,14 +430,15 @@ void show_usage()
             << "\t-r\tNumber of times to repeat experiment (has defaults)\n"
             << "\t-s\tChoice of Scheme 0=both,1,2 (default 0) \n"
             << "\t-l\tLog results in file (default false) \n"
+            << "\t-x\tDon't run the reconstruction in the \"all\" command \n"
             << endl;
 }
 
 
 int main(int argc, char *argv[])  
 { 
-    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0, log=false;
-    bool force=false;
+    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0;
+    bool force=false,log=false, only_sharegen=false;
     string server_address="127.0.0.1";
     int opt;
     if (argc < 2){
@@ -433,7 +450,7 @@ int main(int argc, char *argv[])
         return 0;
     }else if(strcmp(argv[1],"all")==0){
         std::cout << "Running entire protocol" << endl;
-        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:l")) != -1)  
+        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:lx")) != -1)  
         {  
             switch(opt)  
             {  
@@ -464,7 +481,11 @@ int main(int argc, char *argv[])
                 case 'l':
                     log=true;
                     break;
-                case ':':  
+                case 'x':
+                    only_sharegen=true;
+                    break;
+                case ':':
+                    cout << optarg << endl;
                     printf("option needs a value\n");  
                     break;
                 case '?':
@@ -473,11 +494,11 @@ int main(int argc, char *argv[])
             }
         }
         if (scheme==0){
-            run_benchmark(m,n,t,bitsize,1,force,server_address,log);
+            run_benchmark(m,n,t,bitsize,1,force,server_address,log,only_sharegen);
             cout << endl;
-            run_benchmark(m,n,t,bitsize,2,force,server_address,log);
+            run_benchmark(m,n,t,bitsize,2,force,server_address,log,only_sharegen);
         }else{
-            run_benchmark(m,n,t,bitsize,scheme,force,server_address,log);
+            run_benchmark(m,n,t,bitsize,scheme,force,server_address,log,only_sharegen);
         }
         return 0;
     }else if(strcmp(argv[1],"sharegen")==0){
