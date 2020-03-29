@@ -18,7 +18,7 @@
 \algnewcommand\algorithmicforeach{\textbf{for each}}
 \algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 \usepackage{enumitem}
-\usepackage[n ,advantage, operators, sets , adversary, landau, probability, notions, logic, ff , mm, primitives, events, complexity, asymptotics, keys]{cryptocode}
+\usepackage[lambda ,advantage, operators, sets , adversary, landau, probability, notions, logic, ff , mm, primitives, events, complexity, asymptotics, keys]{cryptocode}
 \usepackage{booktabs} % For formal tables
 %\usepackage{color,soul}
 \usepackage{comment}
@@ -32,6 +32,7 @@
  			{\mntext{\parbox{0.95\marginparwidth}{\superscript{\arabic{mn}}~\raggedright{#2}}}}
  			{\mntext{\parbox{0.95\marginparwidth}{\superscript{\arabic{mn}}#1 says~:~\raggedright{#2}}}}
  		}}\stepcounter{mn}}
+ \newcommand{\cryptost}{\mathsf{st}}
 
 \title{Over-Threshold Multi-Party Private Set Intersection}
 \date{}
@@ -83,6 +84,10 @@ The computation should be secure against a coalition of $k$ semi-honest parties.
 
 \section{Protocol Overview}
 \input{Algorithm_Mas}
+
+\section{Security}
+\input{security}
+
 
 \section{SS-OPRF}
 

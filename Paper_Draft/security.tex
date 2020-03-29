@@ -1,0 +1,57 @@
+\begin{definition}
+We say the Decisional Diffie-Hellman (DDH) Assumptions holds if
+$$
+\pseudocode{
+a, b, c \sample \FF_{\phi(p)}^3 \\
+\prob{\adv(g^a, g^b, g^c) = 1} - \prob{\adv(g^a, g^b, g^{ab}) = 1} < \negl \\
+}
+$$
+\end{definition}
+
+\begin{theorem}
+\label{thm:sec_prf}
+If the DDH Assumption holds and $H$ is a programmable random oracle, the output of $t$ participants in Scheme 2 is a pseudo-random function.
+\end{theorem}
+
+\begin{proof}
+We prove by reducing an adversary in $\pcgamename^{\prf}$ to an adversary against the DDH Assumption.
+Let $g^a, g^b, g^c$ be a DDH instance.
+We program $H$ to output $g^a$ on input $x$.
+We set the public $\pk$ to $g^b$.
+We can still answer queries for $F_{k}(x')$ where $x' \neq x$ by programming $H$ to choose and store $r \sample \FF_{\phi(p)}$ and output $R = g^r$.
+An answer to an OPRF query for $x'$ is then $g^{b r} = H(x')^b$.
+We set $y_b$ to $g^c$.
+We set the output of adversary $\adv^{\mathsf{DDH}}$ to the output of adversary $\adv^{\prf}$.
+All outputs are indistinguishable from the real scheme and any advantage between the two adversaries translates directly.
+\end{proof}
+
+\begin{theorem}
+Scheme 2 is a secret-shared oblivious pseudo-random function.
+\end{theorem}
+
+\begin{corollary}
+There exist simulators $\simulator_{Participant}(x, Share_{i}(F_{k}(x))$ and $\simulator_{Keyholder}(k)$ that are computationally indistinguishable from the messages received during the protocol.
+\end{corollary}
+
+\begin{proof}
+Correctness is given by the protocol construction, such that $Share_{i}(F_{k}(x))$ is returned to the participant and $t' \leq t$ participants can reconstruct $F_k(x)$.
+
+Since each coefficient of the Shamir secret shares is the output of a PRF (Theorem~\ref{thm:ec_prf}), the output of Scheme 2 is computationally indistinguishable from a secret share of $F_{k}(x)$.
+Furthermore, $t-1$ secret shares of $F_{k}(x)$ are perfectly indistinguishable from a set of $t-1$ uniformly chosen random numbers, since they leave one degree of freedom for choosing $x$.
+
+It remains to show that the protocols is oblivious and the simulators exist.
+
+We construct the simulator $\simulator_{Participant}(x, Share_{i}(F_{k}(x))$ as follows.
+The simulator outputs $2t$ random elements $r \sample \FF_p$.
+This is perfectly indistinguishable, since the keyholder chooses a unifrom random blinding element per message.
+Let $r, r' \sample [0, |\FF_p| \cdot 2^{\lambda}]^2$.
+The simulator outputs $\enc(r |\FF_p| + Share_{i}(F_{k}(x)))$ and $\enc(r' |\FF_p| + Share'_{i}(F_{k}(x)))$.
+This is statistically indistinguishable, since the keyholder uses share conversion to hide the multiplications in $\FF_N$.
+
+We construct the simulator $\simulator_{Keyholder}(k)$ as follows.
+The simulator outputs $a, c \sample \FF_{\phi(p)}^2$ and programs the random oracle $H(x)$ for $x \gets \FF_p$ to $g^{c/a}$.
+This is perfectly indistinguishable, since all values are uniform and the random oracle is consistent.
+The simulator outputs $2t$ random elements $r \sample \FF_{q^2}$.
+This is computationally indistinguishable, since Paillier ciphertexts are semantically secure~\cite{Paillier}.
+
+\end{proof}

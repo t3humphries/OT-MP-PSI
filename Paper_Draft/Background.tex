@@ -1,17 +1,3 @@
-\subsection{OPRF}
-
-An oblivious pseudo-random function (OPRF) \cite{OPRF,Pinkas} is
-a two-party protocol where the client can query a pseudo-random function
-$F_{k}$ on input values $x$, in such a way that the key $k$, generated
-by the server, remains hidden from the client, while at the same time
-the client's input $x$ is not revealed to the server. OPRFs can be
-established through generic methods for secure multiparty computation
-(on top of circuits that implement ordinary pseudo-random functions),
-or by means of the Diffie-Hellman assumption. For instance, the client
-chooses a random $r$ and sends $x^{r}$ to the server; the server
-responds by sending back $x^{kr}$, from which the client can obtain
-$x^{k}=(x^{kr})^{-r}$.
-
 \subsection{Secret Sharing}
 
 In secret sharing, the goal is to distribute among $m$ parties \emph{shares
@@ -21,49 +7,88 @@ scheme} is such all $t$ of the shares are sufficient to \emph{reconstruct
 infer any information about $s$. In Shamir's secret sharing scheme
 \cite{Shamir}, the distributing party forms the polynomial 
 \[
-f(x)=a_{t-1}x^{t-1}+a_{t-2}x^{t-2}+\ldots a_{1}x+s
+f(x)=c_{t-1}x^{t-1}+c_{t-2}x^{t-2}+\ldots c_{1}x+s
 \]
-over a finite field of prime order, with $a_{1},\ldots,a_{t-1}$ randomly
+over a finite field of prime order, with $c_{1},\ldots, c_{t-1}$ randomly
 generated. It then produces the shares by evaluating $f$ at $m$
-publicly-known distinct values: for instance, by setting $s_{i}=(i,f(i))$.
+publicly-known distinct values: for instance, by setting $s_{id_i}=(id_i,f(id_i))$.
 Since $t$ points uniquely determine a polynomial of degree $t$,
-given all the $s_{i}$, anyone possessing $t$ shares can use Lagrange
+given all the $s_{id_i}$, anyone possessing $t$ shares can use Lagrange
 interpolation to recover $f$ and thus obtain $s$. However, fewer
 than $t$ shares together reveal no information about $s$.
 
-\subsection{SS-OPRFs}
-
-OPRF that outputs secret share of PRF
-
-Note that the ss polynomial needs to be different for every message
-
-\subsection{Paillier and D\aa mgard Jurik Crytposystems}
+\subsection{Paillier Crytposystems}
 
 The Paillier cryptosystem \cite{Paillier} is an additively homomorphic
 scheme for public key encryption based on the intractability of the
 Composite Residuosity Class Problem. Ciphertexts are regarded as elements
-over the multiplicative group $\mathbb{Z}_{n^{2}}^{*}$, where $n=pq$
-for primes $p$ and $q$. Letting $\lambda=\text{lcm}(p-1,q-1)$,
+over the multiplicative field $\FF_{N^2} = \mathbb{Z}_{N^{2}}^{*}$, where $N=pq$
+for primes $p$ and $q$. Letting $\mu=\text{lcm}(p-1,q-1)$,
 and choosing $g$ to be a random base such that its order is divisible
-by $n$, the public key is $(n,g)$ and the private key is $(p,q)$.
-Encrypting a plaintext message $m<n$ is done by choosing a random
-$r<n$ and computing: 
+by $N$, the public key is $(N,g)$ and the private key is $(p,q)$.
+Encrypting a plaintext message $0\leq x<N$ is done by choosing a random
+$r<N$ and computing: 
 \[
-Enc(m)=g^{m}r^{n}\mod n^{2}.
+Enc(x)=g^{x}r^{N}\mod N^{2}.
 \]
-A given ciphertext $c<n^{2}$ is decrypted using $\lambda$: 
+A given ciphertext $C<N^{2}$ is decrypted using $\mu$: 
 \[
-Dec(c)=\frac{L(c^{\lambda}\text{ mod }n^{2})}{L(g^{\lambda}\text{ mod }n^{2})}\mod n,
+Dec(C)=\frac{L(C^{\mu}\text{ mod }N^{2})}{L(g^{\mu}\text{ mod }N^{2})}\mod N,
 \]
 where 
 \[
-L(x)=\frac{x-1}{n}.
+L(x)=\frac{x-1}{N}.
 \]
 Such a scheme satisfies the following homomorphic properties (the
 moduli are implicit): 
 \begin{align*}
-Dec(Enc(m_{1})Enc(m_{2})) & =m_{1}+m_{2}\\
-Dec(Enc(m)^{k}) & =km.
+Dec(Enc(x_{1})Enc(x_{2})) & =x_{1}+x_{2}\\
+Dec(Enc(x)^{y}) & =yx.
 \end{align*}
 
-D\aa mgard Jurik \cite{Damgard} 
+%D\aa mgard Jurik \cite{Damgard} 
+
+\subsection{Oblivious Pseudo-Random Function}
+
+Let $F_{k}(x)$ be a pseudo-random function (PRF) with key $k$ on input $x$.
+We say a pseudo-random function is secure if $\advantage{\pcgamename^{\prf}}{\adv} < \frac{1}{2} + \negl$
+
+$$
+\procedure{$\pcgamename^{\prf}$}{
+(k, \pk) \gets \kgen(\secparam) \\
+( \cryptost, x) \gets \adv(\pk) \\
+y_0 \gets F_{k}(x) \\
+y_1 \sample \GG \\
+b \sample {0,1} \\
+b' \gets \adv(y_b, \cryptost) \\
+\pcreturn b = b' }
+$$
+
+An oblivious pseudo-random function (OPRF) \cite{OPRF,Pinkas} is
+a two-party protocol where the client can query a pseudo-random function
+$F_{k}$ on input values $x$, in such a way that the key $k$, generated
+by the server, remains hidden from the client, while at the same time
+the client's input $x$ is not revealed to the server. OPRFs can be
+established through generic methods for secure multiparty computation
+(on top of circuits that implement ordinary pseudo-random functions),
+or by means of the Diffie-Hellman assumption. 
+%For instance, the client
+%chooses a random $r$ and sends $x^{r}$ to the server; the server
+%responds by sending back $x^{kr}$, from which the client can obtain
+%$x^{k}=(x^{kr})^{-r}$.
+
+An oblivious pseudo-random function (OPRF) is defined as a protocol between a keyholder and client, such that
+\begin{itemize}
+\item the client inputs $x$ and outputs $F_{k}(x)$ and nothing else.
+\item the keyholder inputs $k$ and outputs nothing.
+\end{itemize}
+
+An secret-shared oblivious pseudo-random function (SS-OPRF) is defined as a pairwise protocol between a keyholder and one of $m$ clients, such that
+\begin{itemize}
+\item the client inputs $x$.
+\item any subset of clients of size $t - 1$ or smaller outputs nothing.
+\item any subset of clients of size $t$ or larger outputs $F_{k}(x)$ and nothing else.
+\item the keyholder inputs $k$ and outputs nothing.
+\end{itemize}
+
+
