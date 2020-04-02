@@ -34,6 +34,9 @@
  		}}\stepcounter{mn}}
  \newcommand{\cryptost}{\mathsf{st}}
 
+\newcommand{\bmargin}[2]{\textcolor{purple}{\ensuremath{^{#1}}}\marginpar{\scriptsize \raggedright \textcolor{purple}{\ensuremath{^{#1}}Bailey: #2}}}
+
+
 \title{Over-Threshold Multi-Party Private Set Intersection}
 \date{}
 \usepackage{natbib}
@@ -59,7 +62,6 @@ Brief problem intro
 
 Comparison to Kissner, Song protocol \cite{Kissner}: \\
 - $O(1)$ rounds vs. $O(m)$
-- problem-adaptive communication complexity $O(nmk)$ vs. $O(nm^3)$ \\
 
 Comparison to generic secure computation: \\
 - lower communication complexity $O(nmk)$ vs. $O(nm^3 \log^2 nm)$ -- assuming optimal circuit is $O(nm \log^2 nm)$ \\
@@ -76,8 +78,8 @@ Contributions \\
 
 \section{Problem Description}
 
-$m$ parties, each with a set of size $n$, would like to compute the number of occurences of each element that occurs at least $t$, but nothing else.
-The computation should be secure against a coalition of $k$ semi-honest parties.
+$m$ parties, each with a set of size at most $n$, would like to compute the set of elements that occur in at least $t$ participants' sets and who the corresponding owners are without revealing elements outside of the threshold intersecting set
+
 
 \section{Background}
 \input{Background}
