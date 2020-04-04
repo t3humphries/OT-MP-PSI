@@ -42,7 +42,7 @@ class Share{
 	NTL::ZZ SS_mac;
     Share(){}
     Share(NTL::ZZ id_in, NTL::ZZ bin_in, NTL::ZZ SS_in);
-    Share(NTL::ZZ id_in, NTL::ZZ bin_in, NTL::ZZ p); //For generating random nonsense shares for padding
+    Share(int id_in, int bin_in, NTL::ZZ p); //For generating random nonsense shares for padding
 };
 
 

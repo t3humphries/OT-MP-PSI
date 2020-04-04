@@ -60,7 +60,7 @@ int incBinIndexs(vector<int> &binIndexs, int t, int binSize)
 	return 1;
 }
 
-ZZ_p reconScheme1(vector<Share> shares, Context context, int mac) //mac=1 to recon SS_mac and mac=0 to recon SS
+int reconScheme1(vector<Share> shares, Context context) //mac=1 to recon SS_mac and mac=0 to recon SS
 {
 	
 	ZZ_p numerator, denominator, secret;
@@ -79,22 +79,22 @@ ZZ_p reconScheme1(vector<Share> shares, Context context, int mac) //mac=1 to rec
 			}
 		}
 
-		if(mac==1)
-		{
-			secret += conv<ZZ_p>(shares[i].SS_mac) * (numerator / denominator);
-		}
-		else
-		{
-			secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);	
-		}
+		//if(mac==1)
+		//{
+		secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);
+		//}
+		// else
+		// {
+		// 	secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);	
+		// }
 
 		numerator = 1;
 		denominator = 1;
 	}
-	return secret; 
+	return secret == 0; 
 }
 
-ZZ_p reconScheme2(vector<Share> shares, Context context, int mac)
+int reconScheme2(vector<Share> shares, Context context)
 {
 	ZZ_p secret, temp;
 	ZZ temp2; 
@@ -130,18 +130,18 @@ ZZ_p reconScheme2(vector<Share> shares, Context context, int mac)
 			temp2 = conv<ZZ>(prod_in_expq);
 		}
 		
-		if(mac == 1)
-		{
-			temp = NTL::power(conv<ZZ_p>(shares[i].SS_mac), temp2);
-			secret *= temp;
-		}
-		else
-		{
-			temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
-			secret *= temp;
-		}
+		//if(mac == 1)
+		//{
+		temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
+		secret *= temp;
+		// }
+		// else
+		// {
+		// 	temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
+		// 	secret *= temp;
+		// }
 	}
-	return secret;
+	return secret == 1;
 }
 
 //Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a list of what reconstructed
@@ -149,7 +149,8 @@ vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, 
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;
-	ZZ_p secret, mac;
+	//ZZ_p secret, mac;
+	int reconstructed = 0;
 	//Initialize first combination (first t bins)
 	vector<int> startingPoint(context.t);
 	for(int i = 0 ; i < context.t ; i++)
@@ -177,21 +178,22 @@ vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, 
 				toRecon[i] = shares[chosenUsers[i]][binIndexs[i]];
 			}
 			if (scheme==1){
-				secret = reconScheme1(toRecon, context, 0);
-				mac = reconScheme1(toRecon, context, 1);
+				reconstructed = reconScheme1(toRecon, context);
+				//mac = reconScheme1(toRecon, context, 1);
 			}else{
-				secret = reconScheme2(toRecon, context, 0);
-				mac = reconScheme2(toRecon, context, 1);
+				reconstructed = reconScheme2(toRecon, context);
+				//mac = reconScheme2(toRecon, context, 1);
 			}
-			if(secret == mac) //If recontructs add to the list toReturn
+			if(reconstructed) //If recontructs add to the list toReturn
 			{
-				bool alreadyFound = false;
-				for (int k=0;k<toReturn.size();k++){
-					if (toReturn[k] == rep(secret)){
-						alreadyFound=true; break;
-					}
-				}
-				if (!alreadyFound) toReturn.push_back(rep(secret));
+				// bool alreadyFound = false;
+				// for (int k=0;k<toReturn.size();k++){
+				// 	if (toReturn[k] == rep(secret)){
+				// 		alreadyFound=true; break;
+				// 	}
+				// }
+				// if (!alreadyFound) 
+				toReturn.push_back(ZZ(1));
 			}
 
 		}while(incBinIndexs(binIndexs,context.t,max_bin_size));

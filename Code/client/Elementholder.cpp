@@ -126,7 +126,7 @@ Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, 
     return Share(
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
-        ZZ(secret_share),
+        ZZ(secret_share)
         //ZZ(mac_share)
     );
 }
@@ -172,7 +172,7 @@ Share Elementholder::get_share_2(Context context, int __X, client* elem_holder, 
     return Share(
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
-        ZZ(secret_share),
+        ZZ(secret_share)
         //ZZ(mac_share)
     );
 }

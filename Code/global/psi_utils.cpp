@@ -89,9 +89,9 @@ Share::Share(ZZ id_in, ZZ bin_in, ZZ SS_in){
 	//SS_mac = SS_mac_in;
 }
 
-Share::Share(ZZ id_in, ZZ bin_in, ZZ p){
-	id = id_in;
-	bin = bin_in;
+Share::Share(int id_in, int bin_in, ZZ p){
+	id = ZZ(id_in);
+	bin = ZZ(bin_in);
 	ZZ_p::init(p);
 	SS = rep(random_ZZ_p());
 	//SS_mac = rep(random_ZZ_p());
