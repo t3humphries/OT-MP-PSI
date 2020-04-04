@@ -68,36 +68,36 @@ Scheme1_Round2_send Elementholder::Scheme1_Round2(Context context, Scheme1_Round
     int t = context.t;
     Scheme1_Round2_send output(t, pk, id);
     ZZ_p masked_secret = NTL::power(conv<ZZ_p>(out.masked_secret_alpha), alpha_inv);
-    ZZ_p masked_mac = NTL::power(conv<ZZ_p>(out.masked_mac_alpha), alpha_inv);
+    //ZZ_p masked_mac = NTL::power(conv<ZZ_p>(out.masked_mac_alpha), alpha_inv);
 
     ZZ_p masked_coefficients[t-1];
-    ZZ_p masked_mac_coefficients[t-1];
+    //ZZ_p masked_mac_coefficients[t-1];
     for (int i=0; i < t-1; i++){
         masked_coefficients[i] = NTL::power(conv<ZZ_p>(out.masked_coefficients_alpha[i]), alpha_inv);
-        masked_mac_coefficients[i] = NTL::power(conv<ZZ_p>(out.masked_mac_coefficients_alpha[i]), alpha_inv);
+        //masked_mac_coefficients[i] = NTL::power(conv<ZZ_p>(out.masked_mac_coefficients_alpha[i]), alpha_inv);
     }
 
     ZZ_p_to_mpz_t(output.mpz_secret, masked_secret);
-    ZZ_p_to_mpz_t(output.mpz_mac, masked_mac);
+    //ZZ_p_to_mpz_t(output.mpz_mac, masked_mac);
     for (int i=0;i<t-1;i++){
         ZZ_p_to_mpz_t(output.mpz_coefficients[i], masked_coefficients[i]);
-        ZZ_p_to_mpz_t(output.mpz_mac_coefficients[i], masked_mac_coefficients[i]);
+       // ZZ_p_to_mpz_t(output.mpz_mac_coefficients[i], masked_mac_coefficients[i]);
     }
 
     pcs_encrypt(pk, hr, output.mpz_secret, output.mpz_secret);
-    pcs_encrypt(pk, hr, output.mpz_mac, output.mpz_mac);
+    //pcs_encrypt(pk, hr, output.mpz_mac, output.mpz_mac);
     for (int i=0;i<t-1;i++){
         pcs_encrypt(pk, hr, output.mpz_coefficients[i], output.mpz_coefficients[i]);
-        pcs_encrypt(pk, hr, output.mpz_mac_coefficients[i], output.mpz_mac_coefficients[i]);
+        //pcs_encrypt(pk, hr, output.mpz_mac_coefficients[i], output.mpz_mac_coefficients[i]);
     }
     return output;
 }
 
-void Elementholder::Scheme1_Final(ZZ &secret_share, ZZ &mac_share, mpz_t __mpz_secret, mpz_t __mpz_mac){
+void Elementholder::Scheme1_Final(ZZ &secret_share, mpz_t __mpz_secret){
     pcs_decrypt(vk, __mpz_secret, __mpz_secret);	
-    pcs_decrypt(vk, __mpz_mac, __mpz_mac);
+    //pcs_decrypt(vk, __mpz_mac, __mpz_mac);
     mpz_t_to_ZZ(secret_share, __mpz_secret);
-    mpz_t_to_ZZ(mac_share, __mpz_mac);
+    //mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
 Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, int num_bins){
@@ -120,14 +120,14 @@ Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, 
     result = elem_holder->send_to_server("S1_R2", to_send_round_2.toString());
     Scheme1_Round2_receive out_round2 = Scheme1_Round2_receive(result);
 
-    ZZ secret_share, mac_share;
-    Scheme1_Final(secret_share, mac_share, out_round2.mpz_secret, out_round2.mpz_mac);
+    ZZ secret_share;
+    Scheme1_Final(secret_share, out_round2.mpz_secret);
 
     return Share(
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
         ZZ(secret_share),
-        ZZ(mac_share)
+        //ZZ(mac_share)
     );
 }
 
@@ -153,9 +153,9 @@ Scheme2_send Elementholder::Scheme2_Round1(Context public_context, int __X, int 
     return output;
 }
 
-void Elementholder::Scheme2_Final(ZZ *secret_share, ZZ *mac_share, Context public_context, ZZ secret_share_alpha, ZZ mac_share_alpha){
+void Elementholder::Scheme2_Final(ZZ *secret_share, Context public_context, ZZ secret_share_alpha){
 	*secret_share = rep(NTL::power(conv<ZZ_p>(secret_share_alpha), alpha_inv));
-	*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
+	//*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
 }
 
 Share Elementholder::get_share_2(Context context, int __X, client* elem_holder, int num_bins){
@@ -167,12 +167,12 @@ Share Elementholder::get_share_2(Context context, int __X, client* elem_holder, 
     result = elem_holder->send_to_server("S2", to_send.toString());
     Scheme2_receive received = Scheme2_receive(result);
     
-    ZZ secret_share, mac_share;
-    Scheme2_Final(&secret_share, &mac_share, context, received.secret_share_alpha, received.mac_share_alpha);
+    ZZ secret_share;
+    Scheme2_Final(&secret_share, context, received.secret_share_alpha);
     return Share(
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
         ZZ(secret_share),
-        ZZ(mac_share)
+        //ZZ(mac_share)
     );
 }
