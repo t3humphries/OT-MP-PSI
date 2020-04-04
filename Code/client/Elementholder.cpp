@@ -67,7 +67,7 @@ Scheme1_Round2_send Elementholder::Scheme1_Round2(Context context, Scheme1_Round
     ZZ_p::init(context.p);
     int t = context.t;
     Scheme1_Round2_send output(t, pk, id);
-    ZZ_p masked_secret = NTL::power(conv<ZZ_p>(out.masked_secret_alpha), alpha_inv);
+    //ZZ_p masked_secret = NTL::power(conv<ZZ_p>(out.masked_secret_alpha), alpha_inv);
     //ZZ_p masked_mac = NTL::power(conv<ZZ_p>(out.masked_mac_alpha), alpha_inv);
 
     ZZ_p masked_coefficients[t-1];
@@ -77,7 +77,7 @@ Scheme1_Round2_send Elementholder::Scheme1_Round2(Context context, Scheme1_Round
         //masked_mac_coefficients[i] = NTL::power(conv<ZZ_p>(out.masked_mac_coefficients_alpha[i]), alpha_inv);
     }
 
-    ZZ_p_to_mpz_t(output.mpz_secret, masked_secret);
+    //ZZ_p_to_mpz_t(output.mpz_secret, 0);
     //ZZ_p_to_mpz_t(output.mpz_mac, masked_mac);
     for (int i=0;i<t-1;i++){
         ZZ_p_to_mpz_t(output.mpz_coefficients[i], masked_coefficients[i]);

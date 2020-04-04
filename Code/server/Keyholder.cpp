@@ -100,7 +100,7 @@ Scheme1_Round1_receive Keyholder::Scheme1_Round1(Scheme1_Round1_send payload){
     // conv(R_inverse, __R_inverse);
 
 	R_alpha = NTL::power(g_alpha, r);
-    output.masked_secret_alpha = ZZ(0);//TODO double check this rep(R_alpha * NTL::power(h_x_alpha, key));
+    output.masked_secret_alpha = ZZ(0);//TODO remove double check this rep(R_alpha * NTL::power(h_x_alpha, key));
 	for (int i = 0; i < t-1; i++){
 		output.masked_coefficients_alpha.push_back(rep(R_alpha * NTL::power(h_x_alpha, randoms[i])));
 	}
@@ -120,6 +120,7 @@ Scheme1_Round2_receive Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
     Scheme1_Round2_receive output;
 	
 	ZZ_to_mpz_t(__mpz_temp, __R_inverse);
+    //mpz_set_ui(output.mpz_secret,1);
 	pcs_ep_mul(payload.pk, output.mpz_secret, payload.mpz_secret, __mpz_temp);//TODO do we need this?
 	//pcs_ep_mul(payload.pk, output.mpz_mac, payload.mpz_mac, __mpz_temp);
 	
