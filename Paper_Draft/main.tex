@@ -45,7 +45,7 @@
 \onecolumn
 \begingroup
 \centering
-{\Huge Over-Threshold Multi-Party Private Set Intersection}\\[3em]
+{\Huge Practical Over-Threshold Multi-Party Private Set Intersection}\\[3em]
 \endgroup
 % \maketitle
 % \begin{abstract}
@@ -53,26 +53,62 @@
 
 \section{Introduction}
 
-Use case: collaborating network operations centers under different legislations
+Two-party private set intersections are practically deployed for ad conversions \cite{}, but multi-party set intersections have many more applications.
+However, in many of these applications it is required to learn whether a subset of the parties has an element in common.
+This is known as the over-threshold multi-party private set intersection (OT-MP-PSI) problem \cite{}.
+A typical use case is that of collaborating network operation centers.
+These centers may want to determine whether they are subject to a common attack by comparing log files of indicators of compromise \cite{}.
+An attack is already worth investigating, if it affects a subset of the centers, but not all.
+However, exchanging indicators of compromise without probable cause is not an option, since they contain privacy-protected information, such as IP addresses \cite{}.
+The situation is often complicated by different legislations governing those data centers.
+An OT-MP-PSI protocol can identify common indicators of compromise without revealing any information about those that do not pass the threshold.
+It is hence privacy-preserving, yet enables the investigation of cyberattacks.
 
-Brief problem intro
+The problem of OT-MP-PSI has been defined and its first protocol has been presented by Kissner and Song \cite{}.
+Let there be $m$ parties each holding a database of $n$ elements.
+Determine the elements (and their owners) that occur in at least $t$ databases, but reveal nothing else as long as not more than $k$ parties collude.
+Kissner and Song's protocol is not yet practical and no implementation exist.
+It is a polynomial-based PSI protocol and requires to factor a polynomial of degree $nm$ over a field.
+It requires $O(m)$ rounds and has a communication complexity of $O(nm^3)$.
 
-Comparison to Kissner, Song protocol \cite{Kissner}: \\
-- $O(1)$ rounds vs. $O(m)$
-- problem-adaptive communication complexity $O(nmk)$ vs. $O(nm^3)$ \\
+The problem could also be solved using generic multi-party computation techniques.
+We assume that constant round multi-party computation protocols \cite{} are not yet practical, since no implementation exists, and resort to secret shared multi-party protocols, such as SCALE-MAMBA \cite{}.
+Using a circuit similar to the one used in PSI based on two-party computation \cite{}, the optimal circuit size is $O(nm \log^2 nm)$ for $O(n + \log^2 nm)$ rounds or $O(nm \log^2 nm + nmt)$ for $O(\log^2 nm)$ rounds.
+The communication complexity is larger by a factor of $O(m^2)$ \cite{}.
+Although, multi-party computation protocols do not require a reconstructions phase, the communication complexity is prohibitive in most cases.
 
-Comparison to generic secure computation: \\
-- lower communication complexity $O(nmk)$ vs. $O(nm^3 \log^2 nm)$ -- assuming optimal circuit is $O(nm \log^2 nm)$ \\
-- constant round multi-party protocols not yet practical
+In this paper we present a different construction of OT-MP-PSI.
+PSI protocols generally exploit locally computation for efficiency.
+Our protocol is not different, but uses oblivious pseudo-random functions (OPRF) and hashing to achieve efficiency.
+These techniques are commonly used in efficient two-party PSI protocols \cite{}, but have not yet been applied to OT-MP-PSI.
+While our reconstruction phase time complexity $O(n m^t \log^t n)$ is exponential in the threshold $t$, we take every effort to keep the constants low in order to scale to practical sizes for envisioned use case of indicator of compromise exchange.
+Our protocol is very flexible with tunable parameters for the threshold $t$ and the collusion threshold $k$.
+We present a variant with communication complexity $O(nmk)$.
+However, the constants in reconstruction prevent scaling to practically relevant problem sizes.
+Our improved scheme has communication complexity $O(nmkt)$ and round complexity $O(k)$.
+We practically implement and evaluate our protocol showing that the reconstruction phase is feasible for up $m = 10$ parties and a threshold of $t = 5$.
+Our construction features a new primitive, we call secret-shared oblivious pseudo-random function (SS-OPRF) which returns a secret share of a PRF in an oblivious protocol.
+This primitve may of independent interest in other applications than OT-MP-PSI.
 
-SS-OPRF
+In summary, this paper contributes
 
-Two variants: SS in the exponent, communication O(nmk); SS in the base, communication O(nmkt)
+\begin{enumerate}
 
-Contributions \\
-- new construction of over-threshold multi-party private set intersection protocol with communication ... and security ... \\
-- two secret-shared oblivious pseudo-random function (SS-OPRF) \\
-- practical evaluation?
+\item a new OT-MP-PSI protocol with communication complexity $O(nmk)$.
+
+\item a new OT-MP-PSI protocol with communication complexity $O(nmkt)$ and low constants during the reconstruction phase.
+
+\item a new primitive SS-OPRF which is an OPRF that returns the secret share of a PRF in an oblivious protocol.
+
+\item a practical implementation and evaluation of SS-OPRF.
+
+\end{enumerate}
+
+The remainder of the paper is structured as follows.
+
+
+
+
 
 \section{Problem Description}
 
