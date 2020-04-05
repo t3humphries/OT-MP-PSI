@@ -10,7 +10,7 @@ $$
 
 \begin{theorem}
 \label{thm:sec_prf}
-If the DDH Assumption holds and $H$ is a programmable random oracle, the output of $t$ participants in Scheme 2 is a pseudo-random function.
+If the DDH Assumption holds and $H$\bmargin{*}{which H. The hash function $H(\cdot)$ or need a different notation here } is a programmable random oracle, the output of $t$ participants in Scheme 2 is a pseudo-random function.
 \end{theorem}
 
 \begin{proof}
@@ -34,7 +34,7 @@ There exist simulators $\simulator_{Participant}(x, Share_{i}(F_{k}(x))$ and $\s
 \end{corollary}
 
 \begin{proof}
-Correctness is given by the protocol construction, such that $Share_{i}(F_{k}(x))$ is returned to the participant and $t' \leq t$ participants can reconstruct $F_k(x)$.
+Correctness is given by the protocol construction, such that $Share_{i}(F_{k}(x))$ is returned to the participant and $t' \leq t$ participants\bmargin{*}{I'm confused by the leq reconstruction here} can reconstruct $F_k(x)$.
 
 Since each coefficient of the Shamir secret shares is the output of a PRF (Theorem~\ref{thm:ec_prf}), the output of Scheme 2 is computationally indistinguishable from a secret share of $F_{k}(x)$.
 Furthermore, $t-1$ secret shares of $F_{k}(x)$ are perfectly indistinguishable from a set of $t-1$ uniformly chosen random numbers, since they leave one degree of freedom for choosing $x$.
@@ -43,7 +43,7 @@ It remains to show that the protocols is oblivious and the simulators exist.
 
 We construct the simulator $\simulator_{Participant}(x, Share_{i}(F_{k}(x))$ as follows.
 The simulator outputs $2t$ random elements $r \sample \FF_p$.
-This is perfectly indistinguishable, since the keyholder chooses a unifrom random blinding element per message.
+This is perfectly indistinguishable, since the keyholder chooses a uniform random blinding element per message.
 Let $r, r' \sample [0, |\FF_p| \cdot 2^{\lambda}]^2$.
 The simulator outputs $\enc(r |\FF_p| + Share_{i}(F_{k}(x)))$ and $\enc(r' |\FF_p| + Share'_{i}(F_{k}(x)))$.
 This is statistically indistinguishable, since the keyholder uses share conversion to hide the multiplications in $\FF_N$.

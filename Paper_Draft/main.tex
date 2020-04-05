@@ -34,6 +34,9 @@
  		}}\stepcounter{mn}}
  \newcommand{\cryptost}{\mathsf{st}}
 
+\newcommand{\bmargin}[2]{\textcolor{purple}{\ensuremath{^{#1}}}\marginpar{\scriptsize \raggedright \textcolor{purple}{\ensuremath{^{#1}}Bailey: #2}}}
+
+
 \title{Over-Threshold Multi-Party Private Set Intersection}
 \date{}
 \usepackage{natbib}
@@ -55,7 +58,7 @@
 
 Two-party private set intersections are practically deployed for ad conversions \cite{}, but multi-party set intersections have many more applications.
 However, in many of these applications it is required to learn whether a subset of the parties has an element in common.
-This is known as the over-threshold multi-party private set intersection (OT-MP-PSI) problem \cite{}.
+This is known as the over-threshold multi-party private set intersection (OT-MP-PSI) problem \cite{Kissner}.
 A typical use case is that of collaborating network operation centers.
 These centers may want to determine whether they are subject to a common attack by comparing log files of indicators of compromise \cite{}.
 An attack is already worth investigating, if it affects a subset of the centers, but not all.
@@ -64,7 +67,7 @@ The situation is often complicated by different legislations governing those dat
 An OT-MP-PSI protocol can identify common indicators of compromise without revealing any information about those that do not pass the threshold.
 It is hence privacy-preserving, yet enables the investigation of cyberattacks.
 
-The problem of OT-MP-PSI has been defined and its first protocol has been presented by Kissner and Song \cite{}.
+The problem of OT-MP-PSI has been defined and its first protocol has been presented by Kissner and Song \cite{Kissner}.
 Let there be $m$ parties each holding a database of $n$ elements.
 Determine the elements (and their owners) that occur in at least $t$ databases, but reveal nothing else as long as not more than $k$ parties collude.
 Kissner and Song's protocol is not yet practical and no implementation exist.
@@ -108,12 +111,10 @@ The remainder of the paper is structured as follows.
 
 
 
-
-
 \section{Problem Description}
 
-$m$ parties, each with a set of size $n$, would like to compute the number of occurences of each element that occurs at least $t$, but nothing else.
-The computation should be secure against a coalition of $k$ semi-honest parties.
+$m$ parties, each with a set of size at most $n$, would like to compute the set of elements that occur in at least $t$ participants' sets and who the corresponding owners are without revealing elements outside of the threshold intersecting set
+
 
 \section{Background}
 \input{Background}
