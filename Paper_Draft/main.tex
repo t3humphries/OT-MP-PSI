@@ -87,9 +87,9 @@ Our protocol is not different, but uses oblivious pseudo-random functions (OPRF)
 These techniques are commonly used in efficient two-party PSI protocols \cite{Freedman2016,Kolesnikov,Pinkas}, but have not yet been applied to OT-MP-PSI.
 While time complexity $O(n m^t \log^t n)$ of our reconstruction phase is exponential in the threshold $t$, we take care to keep the constants low in order to scale to practical sizes for the envisioned use case of indicator of compromise exchange.
 Our protocol is very flexible with tunable parameters for the threshold $t$ and the collusion threshold $k$.
-We present a variant with communication complexity $O(nmk)$ and round complexity $O(\log{k} + 1)$.
+We present a variant with communication complexity $O(nmk)$ and round complexity $O(1)$.
 However, the constants in reconstruction prevent scaling to practically relevant problem sizes.
-Our improved scheme has communication complexity $O(nmkt)$ and round complexity $O(\log{k} + 1)$.
+Our improved scheme has communication complexity $O(nmkt)$ and round complexity $O(1)$.
 We practically implement and evaluate our protocol showing that the reconstruction phase is feasible for up $m = 10$ parties and a threshold of $t = 5$.
 Our construction features a new primitive, we call secret-shared oblivious pseudo-random function (SS-OPRF) which returns a secret share of a PRF in an oblivious protocol.
 This primitve may of independent interest in other applications than OT-MP-PSI.
@@ -98,9 +98,9 @@ In summary, this paper contributes
 
 \begin{enumerate}
 
-\item a new OT-MP-PSI protocol with communication complexity $O(nmk)$.
+\item a new OT-MP-PSI protocol with communication complexity $O(nmk)$ and round complexity $O(1)$.
 
-\item a new OT-MP-PSI protocol with communication complexity $O(nmkt)$ and low constants during the reconstruction phase.
+\item a new OT-MP-PSI protocol with communication complexity $O(nmkt)$, round complexity $O(1)$ and low constants during the reconstruction phase.
 
 \item a new primitive SS-OPRF which is an OPRF that returns the secret share of a PRF in an oblivious protocol.
 
