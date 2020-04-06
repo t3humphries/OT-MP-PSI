@@ -346,13 +346,14 @@ We described in Algorithms \ref{alg:S2_Recon} and \ref{alg:S1_Recon} how the rec
 We can extend our schemes from a single key holder scenario to a multi key holder one. In this extension, all or a subset of all parties form the key holders set. 
 We describe this extension only briefly due to space restrictions.
 The key holders received the initial message from the participant and run a secure computation protocol among themselves using a group key and group random numbers (in Scheme 2).
-The group keys $c_j = c_{j,1} + c_{j,2} + \ldots c_{j,k}$ and the group random numbers $R_j = R_{j,1} + R_{j,2} + \ldots R_{j,k}$ (in Scheme 2) are shared additively.
+The group keys $c_j = c_{j,1} + c_{j,2} + \ldots c_{j,k}$ and the group random numbers $R_j = g^{\alpha r_j} = R_{j,1} + R_{j,2} + \ldots R_{j,k}$ (in Scheme 2) are shared additively.
 Keyholder $id_i$ holds shares $c_{j,i}$ and $R_{j,i}$.
 The $k$ keyholders need to multiply the exponentiation of the participant's message and their key share and finally the sum of their random group shares using a secure computation.
-Instead of performing this secure computation using secret-share based secure computation with $O(k^2)$ communication in $O(\log{k})$, the parties can send the output of their exponentation to the first keyholder who multiplies them, since they are outputs of PRFs.
-The multiplication with the sum of the group random shares is only a constant round secure computation.
-In round 2 of Scheme 2 the parties first compute shares of the inverse of the sum of their group random shares in a $O(1)$ round secure computation.
-Then, the multiplications of the ciphertexts  can again be performed by sending it to the first keyholder, since they are semantically secure ciphertexts.
-The entire protocol has $O(k)$ communication and runs in $O(1)$ rounds.
-%The group key serves as the key holder key $K_1$ in the Schemes 1 and 2 (Figures \ref{fig:S2_ShareGen} and \ref{fig:S1_ShareGen}), and the group random numbers serve as $c_j, c'_j; j=1,\dots,t-1$ in Scheme 1 and as $r_1, r_2, r'_1, r'_2$ and $c_j, c'_j; j=1,\dots,t-1$ in the Scheme 2. 
+Instead of performing this secure computation using secret-share based secure computation with $O(k^2)$ communication in $O(\log{k})$, the parties can use precomputed shares $R_j = R'_{j,1} \cdot R'_{j,2} \cdot \ldots R'_{j,k}$, since all inputs are random and independent of the elements in $\mathbb{L}$.
+Each keyholder sends the product $R'_{j,i} H(x)^{\alpha c_{j,i}}$ to the first keyholder who multiplies them.
+In the semi-honest model each keyholder follows the protocol, but must not learn additional information.
+The first keyholder learns no information, since all products are indistinguishable from random numbers.
+In round 2 of Scheme 2 the keyholders use precomuted additive shares of the inverse $R_j^{-1/\alpha}$ of the group random number.
+Then, the product (of the ciphertexts / sum of the plaintexts) can again be performed by sending it to the first keyholder, since they are semantically secure ciphertexts.
+The entire protocol has $O(k)$ communication and runs in $O(1)$ rounds with an offline pre-computation phase.
 The multi key holder scheme follows the exact same procedure as in Schemes 1 and 2 otherwise. 
