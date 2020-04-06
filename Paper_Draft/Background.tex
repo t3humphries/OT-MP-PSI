@@ -9,7 +9,7 @@ infer any information about $s$. In Shamir's secret sharing scheme
 \[
 f(x)=c_{t-1}x^{t-1}+c_{t-2}x^{t-2}+\ldots c_{1}x+s
 \]
-over a finite field of prime order, with $c_{1},\ldots, c_{t-1}$ randomly
+over a finite field $\FF_p$ of prime order $p$, with $c_{1},\ldots, c_{t-1}$ randomly
 generated. It then produces the shares by evaluating $f$ at $m$
 publicly-known distinct values: for instance, by setting $s_{id_i}=(id_i,f(id_i))$.
 Since $t$ points uniquely determine a polynomial of degree $t$,
@@ -22,8 +22,8 @@ than $t$ shares together reveal no information about $s$.
 The Paillier cryptosystem \cite{Paillier} is an additively homomorphic
 scheme for public key encryption based on the intractability of the
 Composite Residuosity Class Problem. Ciphertexts are regarded as elements
-over the multiplicative field $\FF_{N^2} = \mathbb{Z}_{N^{2}}^{*}$, where $N=pq$
-for primes $p$ and $q$. Letting $\mu=\text{lcm}(p-1,q-1)$\bmargin{*}{should define lcm although I'm assuming it is just least common multiple. Perhaps uppercase.},
+over the multiplicative field $\FF_{N^2} = \mathbb{Z}_{N^{2}}^{*}$, where $N=p'q'$
+for primes $p'$ and $q'$. Letting $\mu=\text{lcm}(p-1,q-1)$\bmargin{*}{should define lcm although I'm assuming it is just least common multiple. Perhaps uppercase.},
 and choosing $g$ to be a random base such that its order is divisible
 by $N$, the public key is $(N,g)$ and the private key is $(p,q)$.
 Encrypting a plaintext message $0\leq x<N$ is done by choosing a random
@@ -43,7 +43,7 @@ Such a scheme satisfies the following homomorphic properties (the
 moduli are implicit): 
 \begin{align*}
 Dec(Enc(x_{1})Enc(x_{2})) & =x_{1}+x_{2}\\
-Dec(Enc(x)^{y}) & =yx.
+Dec(Enc(x_{1})^{x_{1}}) & =x_{1}x_{2}.
 \end{align*}
 
 %D\aa mgard Jurik \cite{Damgard} 
@@ -71,7 +71,7 @@ by the server, remains hidden from the client, while at the same time
 the client's input $x$ is not revealed to the server. OPRFs can be
 established through generic methods for secure multiparty computation
 (on top of circuits that implement ordinary pseudo-random functions),
-or by means of the Diffie-Hellman assumption. 
+or by means of the Diffie-Hellman assumption over a group $\GG_q$.
 %For instance, the client
 %chooses a random $r$ and sends $x^{r}$ to the server; the server
 %responds by sending back $x^{kr}$, from which the client can obtain
@@ -83,7 +83,7 @@ An oblivious pseudo-random function (OPRF) is defined as a protocol between a ke
 \item the keyholder inputs $k$ and outputs nothing.
 \end{itemize}
 
-An secret-shared oblivious pseudo-random function (SS-OPRF) is defined as a pairwise protocol between a keyholder and one of $m$ clients, such that
+A secret-shared oblivious pseudo-random function (SS-OPRF) is defined as a pairwise protocol between a keyholder and one of $m$ clients, such that
 \begin{itemize}
 \item the client inputs $x$.
 \item any subset of clients of size $t - 1$ or smaller outputs nothing.
