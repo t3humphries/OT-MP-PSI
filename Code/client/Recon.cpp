@@ -173,7 +173,7 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
 				{
 					if(toReturn[chosenUsers[j]][binIndexs[j]] == 1)
 					{
-						alreadyFound = 0;
+						alreadyFound = 1;
 					}
 					toReturn[chosenUsers[j]][binIndexs[j]] = 1;
 				}
