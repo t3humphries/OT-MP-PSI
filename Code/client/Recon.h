@@ -11,6 +11,6 @@
 
 int reconScheme1(std::vector<Share> shares, Context context); 
 int reconScheme2(std::vector<Share> shares, Context context);
-std::vector<NTL::ZZ> recon_in_bin_x(std::vector<std::vector<Share>> shares, Context context, int m, int max_bin_size, int scheme);
+std::vector<vector<int>> recon_in_bin_x(std::vector<std::vector<Share>> shares, Context context, int m, int max_bin_size, int scheme, int* count);
 
 #endif

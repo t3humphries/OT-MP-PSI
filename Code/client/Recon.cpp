@@ -129,11 +129,11 @@ int reconScheme2(vector<Share> shares, Context context)
 	return secret == 1;
 }
 
-//Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a list of what reconstructed
-vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size, int scheme){
+//Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a 2D binary vector containing which elements reconstructed for each user
+vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size, int scheme, int* count){
 
 	ZZ_p::init(ZZ(context.p));
-	vector<ZZ> toReturn;
+	vector<vector<int>> toReturn(m, vector<int>(max_bin_size,0));
 	int reconstructed = 0;
 	//Initialize first combination (first t bins)
 	vector<int> startingPoint(context.t);
@@ -168,14 +168,19 @@ vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, 
 			}
 			if(reconstructed) //If recontructs add to the list toReturn
 			{
-				// bool alreadyFound = false;
-				// for (int k=0;k<toReturn.size();k++){
-				// 	if (toReturn[k] == rep(secret)){
-				// 		alreadyFound=true; break;
-				// 	}
-				// }
-				// if (!alreadyFound) 
-				toReturn.push_back(ZZ(1));
+				int alreadyFound = 0;
+				for(int j = 0; j < context.t ; j++)
+				{
+					if(toReturn[chosenUsers[j]][binIndexs[j]] == 1)
+					{
+						alreadyFound = 0;
+					}
+					toReturn[chosenUsers[j]][binIndexs[j]] = 1;
+				}
+				if(!alreadyFound)
+				{
+					(*count)++;
+				}	
 			}
 
 		}while(incBinIndexs(binIndexs,context.t,max_bin_size));

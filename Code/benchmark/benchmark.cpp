@@ -261,22 +261,20 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     if (!only_sharegen){
         cout << "---------- Reconstruction ---------- " << endl;
 
-        vector<ZZ> ans;
+        vector<vector<vector<int>>> ans;//3D binary vector where bin<user<is element in intersection>>>
         int sum = 0;
         auto begin = chrono::high_resolution_clock::now();    
         for (int i=0;i<num_bins;i++){
-            ans = recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype);
-            sum += ans.size();
+            ans.push_back(recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype, &sum));
         }
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-
         cout << "---------- Reconstruction complete ----------" << endl; 
         cout << "\tTotal time: " << ms << " miliseconds" << endl;
         cout<< elem_holder.get_message_sizes() << endl;
         cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
-
+   
         if(log)
         {
             ofstream log_file;
@@ -377,12 +375,12 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     vector<vector<Share>> bins_people_shares[num_bins];
     read_shares_from_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
     
-    vector<ZZ> ans;
-    int sum = 0;
+    vector<vector<int>> ans;//2D binary vector where user<is element in intersection>>
+    int sum = 0;//Todo is this not outputted??
     auto begin = chrono::high_resolution_clock::now();
     for (int i=0;i<repeat;i++){
         int random_bin = rand()%num_bins;
-        ans = recon_in_bin_x(bins_people_shares[random_bin], context, m, max_bin_size,schemetype);
+        ans = recon_in_bin_x(bins_people_shares[random_bin], context, m, max_bin_size,schemetype, &sum);
     }
     auto end = chrono::high_resolution_clock::now();    
     auto dur = end - begin;
