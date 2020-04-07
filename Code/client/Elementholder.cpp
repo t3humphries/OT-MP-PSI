@@ -3,14 +3,6 @@
 using namespace std;
 using namespace NTL;
 
-// Elementholder::Elementholder(int __id){
-//     id=__id;
-//     pk = pcs_init_public_key();
-//     vk = pcs_init_private_key();
-//     hr = hcs_init_random();
-//     pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
-// }
-
 Elementholder::Elementholder(int __id, int bitsize){
     id=__id;
     pk = pcs_init_public_key();
@@ -18,16 +10,6 @@ Elementholder::Elementholder(int __id, int bitsize){
     hr = hcs_init_random();
     pcs_generate_key_pair(pk, vk, hr, 2 * bitsize + 80); //TODO: 2 * bitsize(p) + 80
 }
-
-// Elementholder::Elementholder(int __id, int* __elements, int __num_elements){
-//     id=__id;
-//     elements=__elements;
-//     num_elements=__num_elements;
-//     pk = pcs_init_public_key();
-//     vk = pcs_init_private_key();
-//     hr = hcs_init_random();
-//     pcs_generate_key_pair(pk, vk, hr, 2048 + 80); //TODO: 2 * bitsize(p) + 80
-// }
 
 Elementholder::Elementholder(int __id, int* __elements, int __num_elements, int bitsize){
     id=__id;
@@ -67,37 +49,26 @@ Scheme1_Round2_send Elementholder::Scheme1_Round2(Context context, Scheme1_Round
     ZZ_p::init(context.p);
     int t = context.t;
     Scheme1_Round2_send output(t, pk, id);
-    //ZZ_p masked_secret = NTL::power(conv<ZZ_p>(out.masked_secret_alpha), alpha_inv);
-    //ZZ_p masked_mac = NTL::power(conv<ZZ_p>(out.masked_mac_alpha), alpha_inv);
 
     ZZ_p masked_coefficients[t-1];
-    //ZZ_p masked_mac_coefficients[t-1];
     for (int i=0; i < t-1; i++){
         masked_coefficients[i] = NTL::power(conv<ZZ_p>(out.masked_coefficients_alpha[i]), alpha_inv);
-        //masked_mac_coefficients[i] = NTL::power(conv<ZZ_p>(out.masked_mac_coefficients_alpha[i]), alpha_inv);
     }
 
-    //ZZ_p_to_mpz_t(output.mpz_secret, 0);
-    //ZZ_p_to_mpz_t(output.mpz_mac, masked_mac);
     for (int i=0;i<t-1;i++){
         ZZ_p_to_mpz_t(output.mpz_coefficients[i], masked_coefficients[i]);
-       // ZZ_p_to_mpz_t(output.mpz_mac_coefficients[i], masked_mac_coefficients[i]);
     }
 
     pcs_encrypt(pk, hr, output.mpz_secret, output.mpz_secret);
-    //pcs_encrypt(pk, hr, output.mpz_mac, output.mpz_mac);
     for (int i=0;i<t-1;i++){
         pcs_encrypt(pk, hr, output.mpz_coefficients[i], output.mpz_coefficients[i]);
-        //pcs_encrypt(pk, hr, output.mpz_mac_coefficients[i], output.mpz_mac_coefficients[i]);
     }
     return output;
 }
 
 void Elementholder::Scheme1_Final(ZZ &secret_share, mpz_t __mpz_secret){
     pcs_decrypt(vk, __mpz_secret, __mpz_secret);	
-    //pcs_decrypt(vk, __mpz_mac, __mpz_mac);
     mpz_t_to_ZZ(secret_share, __mpz_secret);
-    //mpz_t_to_ZZ(mac_share, __mpz_mac);
 }
 
 Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, int num_bins){
@@ -127,7 +98,6 @@ Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, 
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
         ZZ(secret_share)
-        //ZZ(mac_share)
     );
 }
 
@@ -136,7 +106,6 @@ Scheme2_send Elementholder::Scheme2_Round1(Context public_context, int __X, int 
 	int t = public_context.t;
 	ZZ_p::init(p);
 	ZZ_p h_x = hash_XX(ZZ(__X), p);
-	// ZZ alpha, alpha_inv;
 	{
 		ZZ_pPush push(p-1);
 		ZZ_p __temp = random_ZZ_p();
@@ -155,7 +124,6 @@ Scheme2_send Elementholder::Scheme2_Round1(Context public_context, int __X, int 
 
 void Elementholder::Scheme2_Final(ZZ *secret_share, Context public_context, ZZ secret_share_alpha){
 	*secret_share = rep(NTL::power(conv<ZZ_p>(secret_share_alpha), alpha_inv));
-	//*mac_share = rep(NTL::power(conv<ZZ_p>(mac_share_alpha), alpha_inv));
 }
 
 Share Elementholder::get_share_2(Context context, int __X, client* elem_holder, int num_bins){
@@ -173,6 +141,5 @@ Share Elementholder::get_share_2(Context context, int __X, client* elem_holder, 
         ZZ(id),
         rep(hash_XX(ZZ(__X), ZZ(num_bins))),
         ZZ(secret_share)
-        //ZZ(mac_share)
     );
 }

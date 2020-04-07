@@ -102,7 +102,6 @@ vector<vector<Share>> generate_shares_of_id(
             share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
-    //TODO check this is only bin padding
     //padding the bins
     for (int i=0;i<num_bins;i++){
         while(shares_bins[i].size() < max_bin_size){
@@ -155,7 +154,6 @@ void write_shares_to_file(vector<vector<Share>> *bins_people_shares, string dirn
                     temp[k]["id"] = ZZ_to_str(bins_people_shares[i][j][k].id);
                     temp[k]["bin"] = ZZ_to_str(bins_people_shares[i][j][k].bin);
                     temp[k]["SS"] = ZZ_to_str(bins_people_shares[i][j][k].SS);
-                    //temp[k]["SS_MAC"] = ZZ_to_str(bins_people_shares[i][j][k].SS_mac);
                 }
                 shares_file << temp;
             }
@@ -180,16 +178,10 @@ void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dir
             {
                 string str1;
                 str1 = temp[k]["id"] ;
-                // bins_people_shares[i][j][k].id=str_to_ZZ(str1);
                 string str2 ;
                 str2= temp[k]["bin"];
-                // bins_people_shares[i][j][k].bin=str_to_ZZ(str2);
                 string str3;
                 str3=temp[k]["SS"];
-                // bins_people_shares[i][j][k].SS=str_to_ZZ(str3);
-                //string str4;
-                //str4=temp[k]["SS_MAC"];
-                // bins_people_shares[i][j][k].SS_mac = str_to_ZZ(str4);
 
                 Share __share(str_to_ZZ(str1),str_to_ZZ(str2),str_to_ZZ(str3));
                 bins_people_shares[i][j].push_back(__share);

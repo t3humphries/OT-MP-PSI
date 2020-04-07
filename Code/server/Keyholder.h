@@ -10,9 +10,7 @@ class Keyholder{
 	public:
 	Context public_context;
 	ZZ key;
-	//ZZ key_mac;
 	ZZ* randoms;
-	//ZZ* randoms_mac;
 	ZZ r, __R, __R_inverse;
 
     Keyholder(Context __c1, ZZ __key, ZZ __rands[]);

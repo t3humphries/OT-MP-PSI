@@ -15,32 +15,32 @@ using namespace NTL;
 class Combinations {
 public:
     Combinations(vector<int> elems, int n, int r)
-        : elements{elems}
+        : chosenUsers{elems}
         , n{n}
         , r{r}
     {}
 
     bool next() {
-        int lastNotEqualOffset = r - 1;
-        while (elements[lastNotEqualOffset] == n - r + (lastNotEqualOffset + 1)) {
-            --lastNotEqualOffset;
+        int positionToIncrement = r - 1;
+        while (chosenUsers[positionToIncrement] == n - r + (positionToIncrement + 1)) {
+            --positionToIncrement;
         }
-        if (lastNotEqualOffset < 0) {
+        if (positionToIncrement < 0) {
             return false;
         }
-        ++elements[lastNotEqualOffset];
-        for (int i = lastNotEqualOffset + 1; i < r; ++i) {
-            elements[i] = elements[lastNotEqualOffset] + (i - lastNotEqualOffset);
+        ++chosenUsers[positionToIncrement];
+        for (int i = positionToIncrement + 1; i < r; ++i) {
+            chosenUsers[i] = chosenUsers[positionToIncrement] + (i - positionToIncrement);
         }
         return true;
     }
     std::vector<int> getElements()
     {
-        return elements;
+        return chosenUsers;
     }
 
 private:
-    vector<int> elements;
+    vector<int> chosenUsers;
     int n;
     int r;
 };
@@ -60,7 +60,7 @@ int incBinIndexs(vector<int> &binIndexs, int t, int binSize)
 	return 1;
 }
 
-int reconScheme1(vector<Share> shares, Context context) //mac=1 to recon SS_mac and mac=0 to recon SS
+int reconScheme1(vector<Share> shares, Context context) 
 {
 	
 	ZZ_p numerator, denominator, secret;
@@ -79,14 +79,7 @@ int reconScheme1(vector<Share> shares, Context context) //mac=1 to recon SS_mac 
 			}
 		}
 
-		//if(mac==1)
-		//{
 		secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);
-		//}
-		// else
-		// {
-		// 	secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);	
-		// }
 
 		numerator = 1;
 		denominator = 1;
@@ -129,17 +122,9 @@ int reconScheme2(vector<Share> shares, Context context)
 			prod_in_expq = numerator / denominator;
 			temp2 = conv<ZZ>(prod_in_expq);
 		}
-		
-		//if(mac == 1)
-		//{
+	
 		temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
 		secret *= temp;
-		// }
-		// else
-		// {
-		// 	temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
-		// 	secret *= temp;
-		// }
 	}
 	return secret == 1;
 }
@@ -149,7 +134,6 @@ vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, 
 
 	ZZ_p::init(ZZ(context.p));
 	vector<ZZ> toReturn;
-	//ZZ_p secret, mac;
 	int reconstructed = 0;
 	//Initialize first combination (first t bins)
 	vector<int> startingPoint(context.t);
@@ -179,10 +163,8 @@ vector<ZZ> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, 
 			}
 			if (scheme==1){
 				reconstructed = reconScheme1(toRecon, context);
-				//mac = reconScheme1(toRecon, context, 1);
 			}else{
 				reconstructed = reconScheme2(toRecon, context);
-				//mac = reconScheme2(toRecon, context, 1);
 			}
 			if(reconstructed) //If recontructs add to the list toReturn
 			{

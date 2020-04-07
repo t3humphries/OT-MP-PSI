@@ -9,7 +9,7 @@
 #include <string>
 #include "../global/psi_utils.h"
 
-int reconScheme1(std::vector<Share> shares, Context context); //mac=1 to recon SS_mac and mac=0 to recon SS
+int reconScheme1(std::vector<Share> shares, Context context); 
 int reconScheme2(std::vector<Share> shares, Context context);
 std::vector<NTL::ZZ> recon_in_bin_x(std::vector<std::vector<Share>> shares, Context context, int m, int max_bin_size, int scheme);
 

@@ -84,9 +84,7 @@ class KeyholderContext{
     public:
     int t;
     NTL::ZZ key;
-    //NTL::ZZ key_mac;
     NTL::ZZ* randoms;
-    //NTL::ZZ* randoms_mac;
     KeyholderContext(){}
     KeyholderContext(int __t, int __key, NTL::ZZ __rands[]);
 
@@ -97,12 +95,9 @@ class KeyholderContext{
     void write_to_file(std::string filename);
 };
 
-class Scheme1_Round1_receive{ //TODO: try to pass ZZ_p
+class Scheme1_Round1_receive{
     public:
-    ZZ masked_secret_alpha;
     vector<ZZ> masked_coefficients_alpha;
-    //ZZ masked_mac_alpha;
-    //vector<ZZ> masked_mac_coefficients_alpha;
     Scheme1_Round1_receive(){}
     Scheme1_Round1_receive(string str);
     string toString();
@@ -123,9 +118,7 @@ class Scheme1_Round2_send{
     int id;
     int t;
     mpz_t mpz_secret;
-    //mpz_t mpz_mac;
     mpz_t* mpz_coefficients;
-    //mpz_t* mpz_mac_coefficients;
     Scheme1_Round2_send(int t, pcs_public_key *__pk, int __id);
     Scheme1_Round2_send(string str);
     string toString();
@@ -134,7 +127,6 @@ class Scheme1_Round2_send{
 class Scheme1_Round2_receive{
     public:
     mpz_t mpz_secret;
-    //mpz_t mpz_mac;
     Scheme1_Round2_receive();
     Scheme1_Round2_receive(string str);
     string toString();
@@ -152,7 +144,6 @@ class Scheme2_send{
 class Scheme2_receive{
     public:
     ZZ secret_share_alpha;
-    //ZZ mac_share_alpha;
     Scheme2_receive(){}
     Scheme2_receive(string str);
     string toString();
