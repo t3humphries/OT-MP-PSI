@@ -35,6 +35,7 @@
  \newcommand{\cryptost}{\mathsf{st}}
 
 \newcommand{\bmargin}[2]{\textcolor{purple}{\ensuremath{^{#1}}}\marginpar{\scriptsize \raggedright \textcolor{purple}{\ensuremath{^{#1}}Bailey: #2}}}
+\newcommand{\fmargin}[2]{\textcolor{green}{\ensuremath{^{#1}}}\marginpar{\scriptsize \raggedright \textcolor{green}{\ensuremath{^{#1}}Florian: #2}}}
 
 
 \title{Over-Threshold Multi-Party Private Set Intersection}
@@ -48,7 +49,7 @@
 \onecolumn
 \begingroup
 \centering
-{\Huge Over-Threshold Multi-Party Private Set Intersection}\\[3em]
+{\Huge Practical Over-Threshold Multi-Party Private Set Intersection}\\[3em]
 \endgroup
 % \maketitle
 % \begin{abstract}
@@ -56,25 +57,60 @@
 
 \section{Introduction}
 
-Use case: collaborating network operations centers under different legislations
+Two-party private set intersections are practically deployed for ad conversions \cite{yung15mental}, but multi-party set intersections have many more applications.
+However, in many of these applications it is required to learn whether a subset of the parties has an element in common.
+This is known as the over-threshold multi-party private set intersection (OT-MP-PSI) problem \cite{Kissner}.
+A typical use case is that of collaborating network operation centers.
+These centers may want to determine whether they are subject to a common attack by comparing log files of indicators of compromise \cite{burger2014taxonomy}.
+An attack is worth investigating even if it affects some but not all of the centers.
+However, exchanging indicators of compromise without probable cause is not an option, since they contain privacy-protected information, such as IP addresses \cite{lah2008are}.
+The situation is often complicated by different legislations governing those data centers.
+An OT-MP-PSI protocol can identify common indicators of compromise without revealing any information about those that do not pass the threshold.
+It is hence privacy-preserving, yet enables the investigation of cyberattacks.
 
-Brief problem intro
+The problem of OT-MP-PSI has been defined and its first protocol has been presented by Kissner and Song \cite{Kissner}.
+Let there be $m$ parties each holding a database of $n$ elements.
+Determine the elements (and their owners) that occur in at least $t$ databases, but reveal nothing else as long as not more than $k$ parties collude.
+Kissner and Song's protocol is not yet practical and no implementation exists.
+It is a polynomial-based PSI protocol and requires factoring a polynomial of degree $nm$ over a field.
+It requires $O(m)$ rounds and has a communication complexity of $O(nm^3)$.
 
-Comparison to Kissner, Song protocol \cite{Kissner}: \\
-- $O(1)$ rounds vs. $O(m)$
+The problem could also be solved using generic multi-party computation techniques.
+We assume that constant round multi-party computation protocols \cite{lindell2019efficient,lindell2016more} are not yet practical, since no implementation exists, and resort to secret shared multi-party protocols, such as SCALE-MAMBA \cite{aly2020scale}.
+Using a circuit similar to the one used in PSI based on two-party computation \cite{huang12private}, the optimal circuit size is $O(nm \log^2 nm)$ for $O(n + \log^2 nm)$ rounds or $O(nm \log^2 nm + nmt)$ for $O(\log^2 nm)$ rounds.
+The communication complexity is larger by at least a factor of $O(m^2)$ \cite{damgaard2019communication}.
+Although multi-party computation protocols do not require a reconstruction phase, the communication complexity is prohibitive in most cases.
 
-Comparison to generic secure computation: \\
-- lower communication complexity $O(nmk)$ vs. $O(nm^3 \log^2 nm)$ -- assuming optimal circuit is $O(nm \log^2 nm)$ \\
-- constant round multi-party protocols not yet practical
+In this paper we present a different construction of OT-MP-PSI.
+PSI protocols generally exploit locally computation for efficiency.
+Our protocol is not different, but uses oblivious pseudo-random functions (OPRF) and hashing to achieve efficiency.
+These techniques are commonly used in efficient two-party PSI protocols \cite{Freedman2016,Kolesnikov,Pinkas}, but have not yet been applied to OT-MP-PSI.
+While the $O(n m^t \log^t n)$ time complexity of our reconstruction phase is exponential in the threshold $t$, we take care to keep the constants low in order to scale to practical sizes for the envisioned use case of indicator of compromise exchange.
+Our protocol is very flexible with tunable parameters for the threshold $t$ and the collusion threshold $k$.
+We present a variant with communication complexity $O(nmk)$ and round complexity $O(1)$.
+However, the constants in reconstruction prevent scaling to practically relevant problem sizes.
+Our improved scheme has communication complexity $O(nmkt)$ and round complexity $O(1)$.
+We implement and evaluate our protocol, showing that the reconstruction phase is feasible for up $m = 10$ parties and a threshold of $t = 5$.
+Our construction features a new primitive called a secret-shared oblivious pseudo-random function (SS-OPRF), which returns a secret share of a PRF in an oblivious protocol.
+This primitve may be of independent interest in applications other than OT-MP-PSI.
 
-SS-OPRF
+In summary, the contributions of this paper are:
 
-Two variants: SS in the exponent, communication O(nmk); SS in the base, communication O(nmkt)
+\begin{enumerate}
 
-Contributions \\
-- new construction of over-threshold multi-party private set intersection protocol with communication ... and security ... \\
-- two secret-shared oblivious pseudo-random function (SS-OPRF) \\
-- practical evaluation?
+\item a new OT-MP-PSI protocol with communication complexity $O(nmk)$ and round complexity $O(1)$.
+
+\item a new OT-MP-PSI protocol with communication complexity $O(nmkt)$, round complexity $O(1)$ and low constants during the reconstruction phase.
+
+\item a new primitive SS-OPRF which is an OPRF that returns the secret share of a PRF in an oblivious protocol.
+
+\item a practical implementation and evaluation of our new OT-MP-PSI protocol.
+
+\end{enumerate}
+
+The remainder of the paper is structured as follows:
+
+
 
 \section{Problem Description}
 

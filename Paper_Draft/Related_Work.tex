@@ -17,8 +17,8 @@ and over-threshold intersection) does not reveal the identities of
 the parties which own a given element in the intersecting set and
 involves a small amount of local computation (on the order of the
 communication cost). However, their protocol's total communication
-complexity is $O(nm^{3})$, which makes it less suitable than either
-of our two $O(nm)$ schemes when the number of parties is large.
+complexity is $O(nm^{3})$ and takes $O(m)$ rounds, which makes it less suitable
+than our $O(nmt)$ scheme requiring $O(1)$ rounds.
 
 Threshold PSI can also be achieved using generic secure computation
 protocols since it corresponds to the functionality 
@@ -31,7 +31,10 @@ resulting output is scanned for contiguous groups of at least $t$
 identical elements. Note that since the required output is an (unordered)
 set, we need to randomly shuffle all such found elements to avoid
 leaking additional information. The communication complexity of this
-approach is equal to the resulting circuit size: $O(nm\log^{2}nm)$.
+approach depends on the resulting circuit size.  The circuit size for 
+sorting (and random shuffling) is $O(nm\log^{2}nm)$. The circuit size for
+scanning depends whether it is done sequentially with multiplicative depth
+$O(nm)$ in size $O(nm)$ or $O(\log t)$ multiplicative depth in size $O(nmt)$.
 
 \subsection{Standard PSI }
 
