@@ -84,23 +84,24 @@ string client::send_to_server(string arg, string raw_message)
     return response; 
 } 
 
-string client::get_message_sizes()
+vector <int> client::get_message_sizes()   //here
 {
-   string toReturn = "Message Sizes: \n";
+  // string toReturn = "Message Sizes: \n";
+    vector<int>  toReturn;
    if(s1r1[0] != 0)
    {
-     toReturn += "S1R1 Avg size sent = " + to_string(s1r1[1]/s1r1[0]) +" bytes\n";
-     toReturn += "S1R1 Avg size recived = " + to_string(s1r1[2]/s1r1[0]) +" bytes\n";
+     toReturn.push_back(s1r1[1]/s1r1[0]);
+     toReturn.push_back(s1r1[2]/s1r1[0]);
    }
    if(s1r2[0] != 0)
    {
-    toReturn += "S1R2 Avg size sent = " + to_string(s1r2[1]/s1r2[0]) +" bytes\n";
-    toReturn += "S1R2 Avg size recived = " + to_string(s1r2[2]/s1r2[0]) +" bytes\n";
+    toReturn.push_back(s1r2[1]/s1r2[0]);
+    toReturn.push_back(s1r2[2]/s1r2[0]);
    }
    if(s2[0] != 0)
    {
-    toReturn += "S2 Avg size sent = " + to_string(s2[1]/s2[0]) +" bytes\n";
-    toReturn += "S2 Avg size recived = " + to_string(s2[2]/s2[0]) +" bytes\n";
+    toReturn.push_back(s2[1]/s2[0]);
+    toReturn.push_back(s2[2]/s2[0]);
    }
    return toReturn;
 }

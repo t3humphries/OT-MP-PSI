@@ -97,7 +97,7 @@ vector<vector<Share>> generate_shares_of_id(
 
     for (int i = 0; i< elementholder.num_elements; i++){
         if (scheme==1)
-            share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins); 
+            share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    // John : share_x = something without all the mumbojumbo (we do not need element holder)
         else
             share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
         shares_bins[conv<int>(share_x.bin)].push_back(share_x);
@@ -110,6 +110,42 @@ vector<vector<Share>> generate_shares_of_id(
     }
     return shares_bins;
 }
+
+
+//fast share gen
+
+vector<vector<Share>> generate_shares_of_id_fast(
+    Elementholder elementholder,
+    int num_bins, int max_bin_size,
+    Context context, client* elem_holder, int scheme
+    ){
+    vector<vector<Share>> shares_bins;
+    Share share_x;
+    for (int i=0;i<num_bins;i++){
+        shares_bins.push_back(vector<Share>(0));
+    }
+
+    for (int i = 0; i< elementholder.num_elements; i++){
+        if (scheme==1)
+            share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    // John : share_x = something without all the mumbojumbo (we do not need element holder)
+        else
+            share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
+        shares_bins[conv<int>(share_x.bin)].push_back(share_x);
+    }
+    //padding the bins
+    for (int i=0;i<num_bins;i++){
+        while(shares_bins[i].size() < max_bin_size){
+            shares_bins[i].push_back(Share(elementholder.id, i, context.p));
+        }
+    }
+    return shares_bins;
+}
+
+
+
+
+
+
 
 vector<int> read_elements_to_vector(string filename){
 
@@ -193,7 +229,7 @@ void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dir
 }
 
 
-void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false){
+void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false, bool fast_sharegen=false){
 
     string dirname = generate_benchmark_context(m,n,t,bitsize);
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
@@ -216,12 +252,16 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     int idd;
     int sum_sharegen = 0;
 
-    Keyholder keyholder;
+    Keyholder keyholder;  // randomnesses -    JOhn array randoms[]
     keyholder.initialize_from_file(context, dirname + "/keyholder_context.json");
 
+
     //Initialize connection to server
-    client elem_holder(server_address, log);//TODO change this to an arg??
-    elem_holder.send_to_server("INIT", keyholder.toString());
+    //if(!fast_sharegen)
+    //{
+        client elem_holder(server_address, log);//TODO change this to an arg??
+        elem_holder.send_to_server("INIT", keyholder.toString());
+    //}
     
     cout << "-------------------- Scheme " << schemetype << " -------------------- " << endl;
     cout << "---------- Share Generation ---------- " << endl;
@@ -230,8 +270,9 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         elements = read_elements_to_vector(dirname + "/elements/"+ to_string(idd)+".txt");
         Elementholder elementholder(idd, elements.data(), (int)elements.size(), bitsize);
         auto begin = chrono::high_resolution_clock::now();    
-        //read the elements of this person
-        bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, &elem_holder,schemetype);
+        //read the elements of this person'
+        
+            bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, &elem_holder,schemetype);   //replace this line for fast sharegen  
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
@@ -254,7 +295,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         log_file << "---------- Share Generation ---------- " << endl;
         log_file << "---------- Share Genration Complete  ----------" << endl;
         log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
-        log_file << elem_holder.get_message_sizes() << endl;
+        //log_file << elem_holder.get_message_sizes() << endl;
         log_file.close();
     }
 
@@ -272,7 +313,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
         cout << "---------- Reconstruction complete ----------" << endl; 
         cout << "\tTotal time: " << ms << " miliseconds" << endl;
-        cout<< elem_holder.get_message_sizes() << endl;
+        //cout<< elem_holder.get_message_sizes() << endl;
         cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
    
         if(log)
@@ -286,7 +327,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
             log_file << "---------- Reconstruction ---------- ";
             log_file << "---------- Reconstruction complete ----------" << endl; 
             log_file << "\tTotal time: " << ms << " miliseconds" << endl;        log_file << "\tFound " << sum << " elements in t-threshold intersection" << endl;
-            log_file << elem_holder.get_message_sizes() << endl;
+            //log_file << elem_holder.get_message_sizes() << endl;
             log_file.close();
         }
     }
@@ -312,35 +353,106 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
 
     Share share_x;
     int num_bins=10;
-
-    auto begin = chrono::high_resolution_clock::now();    
+    float duration[repeat] = {0.0};
+    float time_avg, time_min, time_max, time_std, time_total;
+    time_total = (float)0;
+    time_max = time_total;
+    time_min = (float)99999;
+    //auto begin = chrono::high_resolution_clock::now();    
     //read the elements of this person
     for (int i = 0; i< repeat; i++){
+        auto begin = chrono::high_resolution_clock::now();
         if (scheme==1)
             share_x = elementholder.get_share_1(context, rand()%10000, &elem_holder, num_bins); 
         else
             share_x = elementholder.get_share_2(context, rand()%10000, &elem_holder, num_bins);
-    }
-    auto end = chrono::high_resolution_clock::now();    
+        auto end = chrono::high_resolution_clock::now();    
     auto dur = end - begin;
-
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+    time_total+=(float)ms;
+    duration[i]=(float)ms;
+    if(duration[i]>time_max)
+        time_max=duration[i];
+    if(duration[i]<time_min)
+        time_min=duration[i];
+    }
+    // auto end = chrono::high_resolution_clock::now();    
+    // auto dur = end - begin;
+    time_avg = (float)time_total/repeat;
+    // auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+    float temp = (float)0;
+    for (int i=0; i< repeat; i++)
+    {
+        temp+=(duration[i] - time_avg)*(duration[i] - time_avg);
+    }
+    temp  = (float)temp/repeat;
+    time_std = sqrt(temp);
 
-    cout << "Average time: " << (float)ms/repeat << " ms" << endl;
-    cout<< elem_holder.get_message_sizes() <<endl;
+    cout << "Average time: " << (float)time_total/repeat << " ms" << endl;
+    vector<int> comm=elem_holder.get_message_sizes(); // here
 
+    //calculating mean, standard dev etc
+
+
+
+    //end
+    log = true;
     if (log){
+        cout<<"we are here";
         ofstream log_file;
+        ofstream log_file2;
         string dirname="benchmark_sharegen_"+to_string(t)+to_string(bitsize);
+        if(!exists(dirname))
+        {
+            system(("mkdir " + dirname).c_str());
+        }
         log_file.open(dirname+"//logfile.txt",std::ofstream::out | std::ofstream::app);
         log_file << "---------- Generating Share with Scheme " << scheme << " ----------" << endl
                 << "\tt=" << t
                 << "\tbitsize=" << bitsize
                 << "\trepeat=" << repeat << endl;
 
-        log_file << "Average time=" << (float)ms/repeat << " ms" << endl;
-        log_file << elem_holder.get_message_sizes() << endl;
+        log_file << "Average time=" << (float)time_total/repeat << " ms" << endl;
+        //log_file << elem_holder.get_message_sizes() << endl;
         log_file.close();
+
+
+        log_file2.open(dirname+"//Sharegen"+to_string(t)+to_string(scheme)+".json");
+        json outputlog;
+        if(scheme==1)
+        {
+            outputlog["scheme"] = scheme;
+            outputlog["repeat"] = repeat;
+            outputlog["t"]=t;
+            outputlog["s1time_avg"]= time_avg;
+            outputlog["s1time_max"] = time_max;
+            outputlog["s1time_min"] = time_min;
+            outputlog["s1time_std"] = time_std;
+            outputlog["s1r1sent"]= comm[0];
+            outputlog["s1r1recv"] = comm[1];
+            outputlog["s1r2sent"] = comm[2];
+            outputlog["s1r2recv"] = comm[3];
+            outputlog["s1comm_total"] = comm[0]+comm[1]+comm[2]+comm[3];
+            log_file2<<outputlog;
+            //<<","<< s2time_avg<<","<< s2time_min<<","<< s2time_max<<","<< s2time_std<<","<< s2r1sent<<","<< s2r1recv<<","<< s2comm_total;
+        }
+        else
+        {
+            outputlog["scheme"] = scheme;
+            outputlog["repeat"] = repeat;
+            outputlog["t"]=t;
+            outputlog["s2time_avg"]= time_avg;
+            outputlog["s2time_max"] = time_max;
+            outputlog["s2time_min"] = time_min;
+            outputlog["s2time_std"] = time_std;
+            outputlog["s2r1sent"]= comm[0];
+            outputlog["s2r1recv"] = comm[1];
+            //outputlog["s1r2sent"] = comm[2];
+            //outputlog["s1r2recv"] = comm[3];
+            outputlog["s2comm_total"] = comm[0]+comm[1];
+        }
+        log_file2 << outputlog;
+        log_file2.close();
     }
 
     return;
@@ -377,19 +489,45 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     
     vector<vector<int>> ans;//2D binary vector where user<is element in intersection>>
     int sum = 0;//Todo is this not outputted??
-    auto begin = chrono::high_resolution_clock::now();
+    float duration[repeat] = {0.0};
+    float time_avg, time_min, time_max, time_std, time_total;
+    time_total = (float)0;
+    time_max = time_total;
+    time_min = (float)99999;
+    //auto begin = chrono::high_resolution_clock::now();
     for (int i=0;i<repeat;i++){
+        auto begin = chrono::high_resolution_clock::now();
         int random_bin = rand()%num_bins;
         ans = recon_in_bin_x(bins_people_shares[random_bin], context, m, max_bin_size,schemetype, &sum);
-    }
-    auto end = chrono::high_resolution_clock::now();    
+        auto end = chrono::high_resolution_clock::now();    
     auto dur = end - begin;
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+    time_total+=(float)ms;
+    duration[i]=(float)ms;
+    if(duration[i]>time_max)
+        time_max=duration[i];
+    if(duration[i]<time_min)
+        time_min=duration[i];
+    }
+    //auto end = chrono::high_resolution_clock::now();    
+    //auto dur = end - begin;
+    //auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
 
-    cout << "\tReconstruction complete in " << (float)ms/repeat << " miliseconds" << endl;
+    cout << "\tReconstruction complete in " << (float)time_total/repeat << " miliseconds" << endl;
+
+    time_avg = (float)time_total/repeat;
+    // auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+    float temp = (float)0;
+    for (int i=0; i< repeat; i++)
+    {
+        temp+=(duration[i] - time_avg)*(duration[i] - time_avg);
+    }
+    temp  = (float)temp/repeat;
+    time_std = sqrt(temp);
 
     if (log){
         ofstream log_file;
+        ofstream log_file2;
         log_file.open(dirname+"//recon_logfile.txt",std::ofstream::out | std::ofstream::app);
         log_file << "---------- Reconstructing in single bin with Scheme " << schemetype << " ----------" << endl
                 << "\tm=" << m
@@ -397,8 +535,26 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
                 << "\tt=" << t
                 << "\tbitsize=" << bitsize
                 << "\trepeat=" << repeat << endl;
-        log_file << "\tReconstruction complete in " << (float)ms/repeat << " miliseconds" << endl;
+        log_file << "\tReconstruction complete in " << (float)time_total/repeat << " miliseconds" << endl;
         log_file.close();
+        log_file2.open(dirname+"//Recon"+to_string(m)+to_string(n)+to_string(t)+to_string(schemetype)+".json");
+
+        json outputlog;
+        
+            outputlog["scheme"] = schemetype;
+            outputlog["repeat"] = repeat;
+            outputlog["t"]=t;
+            outputlog["m"]=m;
+            outputlog["n"]=n;
+            outputlog["s1time_avg"]= time_avg;
+            outputlog["s1time_max"] = time_max;
+            outputlog["s1time_min"] = time_min;
+            outputlog["s1time_std"] = time_std;
+
+            log_file2<<outputlog;
+        
+        log_file2.close();
+
     }
 
 }

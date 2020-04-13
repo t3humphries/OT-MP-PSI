@@ -28,7 +28,7 @@ public:
     client(){} 
     //client(const client &old_obj); 
     string send_to_server(string arg, string message);
-    string get_message_sizes();
+    vector<int> get_message_sizes();
     
 };
 
