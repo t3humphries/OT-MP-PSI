@@ -83,25 +83,79 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
     return dirname;
 }
 
+Share get_fast_share_1(Context context, int X, int num_bins, Keyholder keyholder, int id)
+{
+    ZZ_p::init(context.p);
+    ZZ_p share = ZZ_p(0);
+    for(int i=1; i<context.t; i++)
+    {
+        share = share + (ZZ_p(NTL::power(hash_XX(ZZ(X) ,ZZ(context.p)),keyholder.randoms[i-1]))* ZZ_p(NTL::power(ZZ_p (id), ZZ(i)))); 
+    }
+    ZZ final = rep(share);
+    return Share(
+        ZZ(id),
+        rep(hash_XX(ZZ(X), ZZ(num_bins))),
+        ZZ(final)
+    );
+
+}
+
+Share get_fast_share_2(Context context, int X, int num_bins, Keyholder keyholder, int id)
+{
+    ZZ_p::init(context.p);
+ZZ_p temp = ZZ_p(0);
+ZZ_p share;
+
+
+    for(int i=1; i<context.t; i++)
+    {
+        ZZ_pPush push(context.p-1);
+        temp = temp + (conv<ZZ_p>(keyholder.randoms[i-1]) * ZZ_p(NTL::power(ZZ_p(id), ZZ(i)))); 
+    }
+
+    share = ZZ_p(NTL::power(hash_XX(ZZ(X) ,ZZ(context.p)),rep(temp)));
+    ZZ final = rep(share);
+    return Share(
+        ZZ(id),
+        rep(hash_XX(ZZ(X), ZZ(num_bins))),
+        ZZ(final)
+    );
+}
+
+
 //generally needed
 vector<vector<Share>> generate_shares_of_id(
-    Elementholder elementholder,
+    Elementholder elementholder,  Keyholder keyholder,
     int num_bins, int max_bin_size,
-    Context context, client* elem_holder, int scheme
+    Context context, client* elem_holder, int scheme,
+    bool fast_sharegen
     ){
     vector<vector<Share>> shares_bins;
     Share share_x;
     for (int i=0;i<num_bins;i++){
         shares_bins.push_back(vector<Share>(0));
     }
-
-    for (int i = 0; i< elementholder.num_elements; i++){
-        if (scheme==1)
-            share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    // John : share_x = something without all the mumbojumbo (we do not need element holder)
-        else
-            share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
-        shares_bins[conv<int>(share_x.bin)].push_back(share_x);
+    if(!fast_sharegen)
+    {
+        for (int i = 0; i< elementholder.num_elements; i++){
+            if (scheme==1)
+                share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    
+            else
+                share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
+                shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
+}
+    else
+    {
+
+        for (int i = 0; i< elementholder.num_elements; i++){
+            if (scheme==1)
+                share_x = get_fast_share_1(context, elementholder.elements[i], num_bins, keyholder, elementholder.id);
+            else
+                share_x = get_fast_share_2(context, elementholder.elements[i], num_bins, keyholder, elementholder.id);
+                shares_bins[conv<int>(share_x.bin)].push_back(share_x);      
+    }
+}
     //padding the bins
     for (int i=0;i<num_bins;i++){
         while(shares_bins[i].size() < max_bin_size){
@@ -112,34 +166,7 @@ vector<vector<Share>> generate_shares_of_id(
 }
 
 
-//fast share gen
 
-vector<vector<Share>> generate_shares_of_id_fast(
-    Elementholder elementholder,
-    int num_bins, int max_bin_size,
-    Context context, client* elem_holder, int scheme
-    ){
-    vector<vector<Share>> shares_bins;
-    Share share_x;
-    for (int i=0;i<num_bins;i++){
-        shares_bins.push_back(vector<Share>(0));
-    }
-
-    for (int i = 0; i< elementholder.num_elements; i++){
-        if (scheme==1)
-            share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    // John : share_x = something without all the mumbojumbo (we do not need element holder)
-        else
-            share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
-        shares_bins[conv<int>(share_x.bin)].push_back(share_x);
-    }
-    //padding the bins
-    for (int i=0;i<num_bins;i++){
-        while(shares_bins[i].size() < max_bin_size){
-            shares_bins[i].push_back(Share(elementholder.id, i, context.p));
-        }
-    }
-    return shares_bins;
-}
 
 
 
@@ -252,16 +279,18 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
     int idd;
     int sum_sharegen = 0;
 
-    Keyholder keyholder;  // randomnesses -    JOhn array randoms[]
+    Keyholder keyholder;  
     keyholder.initialize_from_file(context, dirname + "/keyholder_context.json");
 
 
     //Initialize connection to server
-    //if(!fast_sharegen)
-    //{
-        client elem_holder(server_address, log);//TODO change this to an arg??
-        elem_holder.send_to_server("INIT", keyholder.toString());
-    //}
+   
+    client *elem_holder = NULL;
+    if(!fast_sharegen)
+    {
+        elem_holder = new client(server_address, log);//TODO change this to an arg??
+        elem_holder->send_to_server("INIT", keyholder.toString());
+    }
     
     cout << "-------------------- Scheme " << schemetype << " -------------------- " << endl;
     cout << "---------- Share Generation ---------- " << endl;
@@ -272,7 +301,8 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         auto begin = chrono::high_resolution_clock::now();    
         //read the elements of this person'
         
-            bins_shares = generate_shares_of_id(elementholder, num_bins, max_bin_size, context, &elem_holder,schemetype);   //replace this line for fast sharegen  
+            bins_shares = generate_shares_of_id(elementholder, keyholder, num_bins, max_bin_size, context, elem_holder,schemetype, fast_sharegen);     
+
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
@@ -358,8 +388,7 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     time_total = (float)0;
     time_max = time_total;
     time_min = (float)99999;
-    //auto begin = chrono::high_resolution_clock::now();    
-    //read the elements of this person
+    
     for (int i = 0; i< repeat; i++){
         auto begin = chrono::high_resolution_clock::now();
         if (scheme==1)
@@ -376,10 +405,9 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     if(duration[i]<time_min)
         time_min=duration[i];
     }
-    // auto end = chrono::high_resolution_clock::now();    
-    // auto dur = end - begin;
+    
     time_avg = (float)time_total/repeat;
-    // auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
+    
     float temp = (float)0;
     for (int i=0; i< repeat; i++)
     {
@@ -389,13 +417,8 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     time_std = sqrt(temp);
 
     cout << "Average time: " << (float)time_total/repeat << " ms" << endl;
-    vector<int> comm=elem_holder.get_message_sizes(); // here
+    vector<int> comm=elem_holder.get_message_sizes(); 
 
-    //calculating mean, standard dev etc
-
-
-
-    //end
     log = true;
     if (log){
         cout<<"we are here";
@@ -434,7 +457,7 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
             outputlog["s1r2recv"] = comm[3];
             outputlog["s1comm_total"] = comm[0]+comm[1]+comm[2]+comm[3];
             log_file2<<outputlog;
-            //<<","<< s2time_avg<<","<< s2time_min<<","<< s2time_max<<","<< s2time_std<<","<< s2r1sent<<","<< s2r1recv<<","<< s2comm_total;
+            
         }
         else
         {
@@ -447,8 +470,6 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
             outputlog["s2time_std"] = time_std;
             outputlog["s2r1sent"]= comm[0];
             outputlog["s2r1recv"] = comm[1];
-            //outputlog["s1r2sent"] = comm[2];
-            //outputlog["s1r2recv"] = comm[3];
             outputlog["s2comm_total"] = comm[0]+comm[1];
         }
         log_file2 << outputlog;
@@ -494,7 +515,6 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     time_total = (float)0;
     time_max = time_total;
     time_min = (float)99999;
-    //auto begin = chrono::high_resolution_clock::now();
     for (int i=0;i<repeat;i++){
         auto begin = chrono::high_resolution_clock::now();
         int random_bin = rand()%num_bins;
@@ -509,14 +529,9 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     if(duration[i]<time_min)
         time_min=duration[i];
     }
-    //auto end = chrono::high_resolution_clock::now();    
-    //auto dur = end - begin;
-    //auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
-
+   
     cout << "\tReconstruction complete in " << (float)time_total/repeat << " miliseconds" << endl;
-
     time_avg = (float)time_total/repeat;
-    // auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
     float temp = (float)0;
     for (int i=0; i< repeat; i++)
     {
