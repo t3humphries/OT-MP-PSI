@@ -33,6 +33,7 @@ The ```./benchmark``` file in the ```benchmark``` directory can be run as follow
 	-s	Choice of Scheme 0=both,1,2 (default 0)   
 	-l  Log results in file (default false)
 	-x  Don't run the reconstruction in the "all" command
+	-y  Fast Share Generation in the "all" command, for generating shares fast, without the actual protocol
 
 
 ## Examples
