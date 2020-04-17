@@ -51,7 +51,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
     config["t"] = t;
     int id_list[m];
     for (int i = 0;i < m;i++){
-        id_list[i] = rand()%1000+1;
+        id_list[i] = i * 100 + rand()%100 + 1;
         config["id_list"][i] = id_list[i];
     }
 
