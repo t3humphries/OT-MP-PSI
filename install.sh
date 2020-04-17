@@ -7,7 +7,7 @@ wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2
 tar -jxvf gmp-6.1.2.tar.bz2 gmp-6.1.2/
 cd gmp-6.1.2/
 ./configure --prefix=/usr --enable-cxx
-make && make check && sudo make install
+make && sudo make install
 cd ..
 rm -rf gmp-6.1.2 && rm gmp-6.1.2.tar.bz2 
 
@@ -17,7 +17,7 @@ wget https://www.shoup.net/ntl/ntl-11.4.1.tar.gz
 tar xf ntl-11.4.1.tar.gz 
 cd ntl-11.4.1/src/
 ./configure 
-make && make check && sudo make install 
+make && sudo make install 
 cd ../..
 
 # libhcs
