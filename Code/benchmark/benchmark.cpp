@@ -377,7 +377,7 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     float time_avg, time_min, time_max, time_std, time_total;
     time_total = (float)0;
     time_max = time_total;
-    time_min = (float)99999;
+    time_min = (float)-1;
     
     for (int i = 0; i< repeat; i++){
         auto begin = chrono::high_resolution_clock::now();
@@ -392,6 +392,8 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     duration[i]=(float)ms;
     if(duration[i]>time_max)
         time_max=duration[i];
+    if(time_min==(float)-1)
+        time_min=duration[i];
     if(duration[i]<time_min)
         time_min=duration[i];
     }
@@ -497,7 +499,7 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     float time_avg, time_min, time_max, time_std, time_total;
     time_total = (float)0;
     time_max = time_total;
-    time_min = (float)99999;
+    time_min = (float)-1;
     for (int i=0;i<repeat;i++){
         auto begin = chrono::high_resolution_clock::now();
         int random_bin = rand()%num_bins;
@@ -509,6 +511,8 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     duration[i]=(float)ms;
     if(duration[i]>time_max)
         time_max=duration[i];
+    if(time_min==(float)-1)
+        time_min=duration[i];
     if(duration[i]<time_min)
         time_min=duration[i];
     }
