@@ -90,17 +90,19 @@ def get_row(t, matrix, name="avg"):
             y.append(elem)
     return x, y
 
-def plot_graph(matrix_s1, scheme_no):
+def plot_graph(matrix, scheme_no):
     plt.title("Reconstruction Time - Scheme {}".format(scheme_no))
     plt.xlabel("Number of Parties (m)")
     plt.ylabel("Time in Minutes")
 
-    for s, matrix in enumerate([matrix_s1]):
+    for s, matrix in enumerate([matrix]):
         for t in range(2, 100):
             row = get_row(t, matrix, "avg")
             if len(row[0]) > 0:
                 plt.plot(*row, label="t={}".format(t), marker='x', markersize=4)
-    plt.ylim(top=60)
+    #plt.ylim(top=60)
+    plt.yscale("log")
+    plt.xscale("log")
     plt.grid()
     plt.legend()
     plt.savefig("Recontruction_S{}.png".format(scheme_no))
@@ -109,3 +111,29 @@ def plot_graph(matrix_s1, scheme_no):
 matrix_s1, matrix_s2 = load_data(base_path)
 plot_graph(matrix_s1, 2)
 plot_graph(matrix_s2, 1)
+
+
+# Now we want a graph that has m on the x-axis and time for t/2 for each m
+def plot_mhalf_graph(matrix_s1, matrix_s2, scheme_no):
+    plt.title("Reconstruction Time for m=t/2".format(scheme_no))
+    plt.xlabel("Number of Parties (m)")
+    plt.ylabel("Time in Minutes")
+
+    for s, matrix in enumerate([matrix_s1, matrix_s2]):
+        x, y = [], []
+
+        for t in range(2, 100):
+            row = get_row(t, matrix, "avg")
+            if len(row[0]) >= 2*t:
+                x.append(t)
+                y.append(row[1][2*t])
+        plt.plot(x, y)
+
+    #plt.ylim(top=60)
+    plt.yscale("log")
+    plt.grid()
+    plt.legend()
+    plt.savefig("Recontruction_S{}.png".format(scheme_no))
+    plt.show()
+
+plot_mhalf_graph(matrix_s1, matrix_s2, 1)
