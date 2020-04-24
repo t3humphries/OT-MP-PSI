@@ -99,10 +99,11 @@ def plot_graph(matrix_s1, scheme_no):
         for t in range(2, 100):
             row = get_row(t, matrix, "avg")
             if len(row[0]) > 0:
-                plt.plot(*row, label="t={}".format(t))
+                plt.plot(*row, label="t={}".format(t), marker='x', markersize=4)
     plt.ylim(top=60)
     plt.grid()
     plt.legend()
+    plt.savefig("Recontruction_S{}.png".format(scheme_no))
     plt.show()
 
 matrix_s1, matrix_s2 = load_data(base_path)
