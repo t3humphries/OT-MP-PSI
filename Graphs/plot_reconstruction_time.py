@@ -15,7 +15,6 @@ import numpy as np
 
 # Set base-path to the folder with all the extracted json files from the reconstruction
 from Graphs import paths
-
 base_path = paths.RECON_PATH
 
 def compute_outshape(path, scheme):
@@ -80,6 +79,8 @@ def load_data(path):
 
 def get_row(t, matrix, name="avg"):
     add = {"avg": 0, "min": 1, "max": 2, "std": 3}
+    if len(matrix) <= 4*t+add[name]:
+        return [], []
     row = matrix[4*t+add[name]]
     x, y = [], []
     eps = 0.000001
@@ -89,21 +90,21 @@ def get_row(t, matrix, name="avg"):
             y.append(elem)
     return x, y
 
-def plot_graph(matrix_s1, matrix_s2):
-    plt.title("Reconstruction Time")
+def plot_graph(matrix_s1, scheme_no):
+    plt.title("Reconstruction Time - Scheme {}".format(scheme_no))
     plt.xlabel("Number of Parties (m)")
     plt.ylabel("Time in Minutes")
 
-    for s, matrix in enumerate([matrix_s1, matrix_s2]):
+    for s, matrix in enumerate([matrix_s1]):
         for t in range(2, 100):
             row = get_row(t, matrix, "avg")
             if len(row[0]) > 0:
-                plt.plot(*row, label="Scheme {}, t={}".format(s+1, t))
-            else:
-                break
-
+                plt.plot(*row, label="t={}".format(t))
+    plt.ylim(top=60)
+    plt.grid()
     plt.legend()
     plt.show()
 
 matrix_s1, matrix_s2 = load_data(base_path)
-plot_graph(matrix_s1, matrix_s2)
+plot_graph(matrix_s1, 1)
+plot_graph(matrix_s2, 2)
