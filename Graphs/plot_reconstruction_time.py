@@ -107,5 +107,5 @@ def plot_graph(matrix_s1, scheme_no):
     plt.show()
 
 matrix_s1, matrix_s2 = load_data(base_path)
-plot_graph(matrix_s1, 1)
-plot_graph(matrix_s2, 2)
+plot_graph(matrix_s1, 2)
+plot_graph(matrix_s2, 1)
