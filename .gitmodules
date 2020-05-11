@@ -1,0 +1,3 @@
+[submodule "Code/libhcs"]
+	path = Code/libhcs
+	url = https://github.com/tiehuis/libhcs.git

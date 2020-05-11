@@ -38,6 +38,7 @@ void serverInitFunction()
         perror("listen"); 
         exit(EXIT_FAILURE); 
     }
+    cout <<"Init done"<<endl;
 } 
 
 int main()
@@ -56,6 +57,8 @@ int main()
             exit(EXIT_FAILURE); 
         }
 
+	cout <<"Incoming connection"<<endl;
+	
         //Get the input from the client
         vector<char> buffer(MAX_BUF_LENGTH);
         string input_from_client;   
@@ -108,7 +111,10 @@ int main()
             cout<<"S2 Complete!"<<endl;
         }
         
-        send(new_socket , result.c_str() , result.length() , 0 ); 
+        send(new_socket , result.c_str() , result.length() , 0 );
+
+	cout <<"Done, closing connection"<<endl;
+	
         close(new_socket);
     } 
 

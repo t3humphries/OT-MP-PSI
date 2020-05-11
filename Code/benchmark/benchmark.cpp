@@ -300,7 +300,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         }
     }
 
-    cout << "---------- Share Genration Complete  ----------" << endl;
+    cout << "---------- Share Generation Complete  ----------" << endl;
     cout << "Average Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
     write_shares_to_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
 
@@ -478,7 +478,7 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int s
     string dirname=get_dirname(m,n,t,bitsize);
 
     if (!exists(dirname)){
-        cout << "Neccessary shares for running this benchmark doesn't exist." << endl
+        cout << "Necessary shares for running this benchmark don't exist." << endl
             << "run \"./benchmark all\" first" << endl;
         return;
     }
