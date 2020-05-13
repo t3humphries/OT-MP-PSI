@@ -123,7 +123,8 @@ int reconScheme2(vector<Share> shares, Context context)
 	{
 		{
 			ZZ_pPush push;
-			ZZ_p::init(ZZ(context.q)); //initialize new modulus
+			ZZ_p::init(ZZ(context.q)); //intialize new modulus
+
 			ZZ_p prod_in_expq = ZZ_p(1);
 			ZZ_p numerator = ZZ_p(1);
 			ZZ_p denominator = ZZ_p(1);
@@ -134,6 +135,7 @@ int reconScheme2(vector<Share> shares, Context context)
 			{
 				conv(converted_IDs[x], shares[x].id);//TODO might not need this anymore since ZZ
 			}
+
 			for(int j=0; j<context.t; j++)
 			{
 				if(i != j)
@@ -145,14 +147,10 @@ int reconScheme2(vector<Share> shares, Context context)
 			prod_in_expq = numerator / denominator;
 			temp2 = conv<ZZ>(prod_in_expq);
 		}
-		
-		ZZ_p mytmp;
-		conv(mytmp, shares[i].SS);
-        	temp = NTL::power(mytmp, temp2);
+	
+		temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
 		secret *= temp;
-		
 	}
-	cout <<"done"<<endl;
 	return secret == 1;
 }
 
