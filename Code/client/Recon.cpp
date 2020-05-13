@@ -7,7 +7,7 @@
 #include <time.h>
 #include <vector>
 
-#include <NTL/BasicThreadPool.h>
+//#include <NTL/BasicThreadPool.h>
 #include <omp.h>
 
 #include "Recon.h"
@@ -178,15 +178,16 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
       i++;
     } while(comb.next());
 
-    //This is only for NTL's internal library to make sure they don't interfere!
-    SetNumThreads(1);
-    
     //For each combinations of users do recon on the users in chosen indicies
-    omp_set_num_threads(2);
-    #pragma omp parallel //for
+    
+    ZZ_pContext mcontext;
+    mcontext.save();
+    #pragma omp parallel
+    {
+      mcontext.restore();
+      
+    #pragma omp for
     for (size_t runner = 0; runner < comb.size(); runner++) {
-      cout <<"Thread "<<omp_get_thread_num()<<endl;
-
       int reconstructed = 0;
       vector<int> chosenUsers=combArray[runner];
      	vector<int> binIndices(max_bin_size);
@@ -204,18 +205,21 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
 			}
 
 			if (scheme==1){
+			 
 				reconstructed = reconScheme1(toRecon, context);
 			}else{
 				reconstructed = reconScheme2(toRecon, context);
 			}
-			
+
 			if(reconstructed) //If reconstructed, add to the list toReturn
 			{
 				int alreadyFound = 0;
+
+				#pragma omp critical
+				{
 				for(int j = 0; j < context.t ; j++)
 				{
 				  bool b;
-				  #pragma omp atomic read
 				  b = toReturn[chosenUsers[j]][binIndices[j]];
 				  
 					if(b == 1)
@@ -223,9 +227,10 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
 						alreadyFound = 1;
 					}
 
-					#pragma omp atomic write
 					toReturn[chosenUsers[j]][binIndices[j]] = 1;
 				}
+				}
+				
 				if(!alreadyFound)
 				{
 				  #pragma omp atomic
@@ -236,7 +241,7 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
 		} while(incBinIndices(binIndices,context.t,max_bin_size));
 
     }
-
+    }
 	return toReturn;
 
 }
