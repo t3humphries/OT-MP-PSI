@@ -85,74 +85,75 @@ int incBinIndices(vector<int> &binIndices, int t, int binSize)
 	return 1;
 }
 
-int reconScheme1(vector<Share> shares, Context context) 
-{
+// int reconScheme1(vector<Share> shares, Context context) 
+// {
 	
-	ZZ_p numerator, denominator, secret;
-	numerator = ZZ_p(1);
-	denominator = ZZ_p(1);
-	secret = ZZ_p(0);
+// 	ZZ_p numerator, denominator, secret;
+// 	numerator = ZZ_p(1);
+// 	denominator = ZZ_p(1);
+// 	secret = ZZ_p(0);
 
-	for(int i = 0; i<context.t; i++)
-	{
-		for(int j = 0; j<context.t; j++)
-		{
-			if(j != i)
-			{
-				numerator *= conv<ZZ_p>(shares[j].id);
-				denominator *= conv<ZZ_p>(shares[j].id - shares[i].id); 
-			}
-		}
+// 	for(int i = 0; i<context.t; i++)
+// 	{
+// 		for(int j = 0; j<context.t; j++)
+// 		{
+// 			if(j != i)
+// 			{
+// 				numerator *= conv<ZZ_p>(shares[j].id);
+// 				denominator *= conv<ZZ_p>(shares[j].id - shares[i].id); 
+// 			}
+// 		}
 
-		secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);
+// 		secret += conv<ZZ_p>(shares[i].SS) * (numerator / denominator);
 
-		numerator = 1;
-		denominator = 1;
-	}
-	return secret == 0; 
-}
+// 		numerator = 1;
+// 		denominator = 1;
+// 	}
+// 	return secret == 0; 
+// }
 
-int reconScheme2(vector<Share> shares, Context context)
-{
-	ZZ_p secret, temp;
-	ZZ temp2; 
-	secret = ZZ_p(1); 
-	temp = ZZ_p(1);
+// int reconScheme2(vector<Share> shares, Context context)
+// {
+// 	ZZ_p secret, temp;
+// 	ZZ temp2; 
+// 	secret = ZZ_p(1); 
+// 	temp = ZZ_p(1);
 	
-	for(int i = 0; i<context.t ; i++)
-	{
-		{
-			ZZ_pPush push;
-			ZZ_p::init(ZZ(context.q)); //intialize new modulus
+// 	for(int i = 0; i<context.t ; i++)
+// 	{
+// 		{
+// 			ZZ_pPush push;
+// 			ZZ_p::init(ZZ(context.q)); //intialize new modulus
 
-			ZZ_p prod_in_expq = ZZ_p(1);
-			ZZ_p numerator = ZZ_p(1);
-			ZZ_p denominator = ZZ_p(1);
-			ZZ_p converted_IDs[context.t];
+// 			ZZ_p prod_in_expq = ZZ_p(1);
+// 			ZZ_p numerator = ZZ_p(1);
+// 			ZZ_p denominator = ZZ_p(1);
+// 			// ZZ_p converted_IDs[context.t];
 			
-			// switch modulus for shares
-			for (int x=0 ; x<context.t ; x++)
-			{
-				conv(converted_IDs[x], shares[x].id);//TODO might not need this anymore since ZZ
-			}
+// 			// switch modulus for shares
+// 			// for (int x=0 ; x<context.t ; x++)
+// 			// {
+// 			// 	conv(converted_IDs[x], shares[x].id);//TODO might not need this anymore since ZZ
+// 			// }
 
-			for(int j=0; j<context.t; j++)
-			{
-				if(i != j)
-				{
-					numerator *= converted_IDs[j];
-					denominator *= (converted_IDs[j] - converted_IDs[i]); 
-				}
-			}
-			prod_in_expq = numerator / denominator;
-			temp2 = conv<ZZ>(prod_in_expq);
-		}
+// 			for(int j=0; j<context.t; j++)
+// 			{
+// 				if(i != j)
+// 				{
+// 					// numerator *= converted_IDs[j];
+// 					// denominator *= (converted_IDs[j] - converted_IDs[i]); 
+// 					numerator *= conv<ZZ_p>(shares[j].id);
+// 					denominator *= conv<ZZ_p>(shares[j].id - shares[i].id); 				}
+// 			}
+// 			prod_in_expq = numerator / denominator;
+// 			temp2 = conv<ZZ>(prod_in_expq);
+// 		}
 	
-		temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
-		secret *= temp;
-	}
-	return secret == 1;
-}
+// 		temp = NTL::power(conv<ZZ_p>(shares[i].SS), temp2);
+// 		secret *= temp;
+// 	}
+// 	return secret == 1;
+// }
 
 //Main Logic: takes in m * max_bin_size "matrix" of Shares, outputs a 2D binary vector containing which elements reconstructed for each user
 vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context, int m, int max_bin_size, int scheme, int* count){
@@ -186,27 +187,64 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
       
     #pragma omp for
     for (size_t runner = 0; runner < comb.size(); runner++) {
-      int reconstructed = 0;
-      vector<int> chosenUsers=combArray[runner];
+      	int reconstructed = 0;
+      	vector<int> chosenUsers=combArray[runner];
+
+		//////////////////////////////////////////////////
+		ZZ lagrange_coeffs[context.t];
+		ZZ new_mod;
+		if (scheme==1)
+			new_mod=context.p;
+		else
+			new_mod=context.q;
+			
+		{
+			ZZ_pPush push;
+			ZZ_p::init(new_mod); //intialize new modulus
+			for(int i = 0; i<context.t ; i++){
+				ZZ_p numerator = ZZ_p(1);
+				ZZ_p denominator = ZZ_p(1);
+				for(int j=0; j<context.t; j++){
+					if(i != j){
+						numerator *= conv<ZZ_p>(shares[chosenUsers[j]][0].id);
+						denominator *= conv<ZZ_p>(shares[chosenUsers[j]][0].id - shares[chosenUsers[i]][0].id);
+					}
+				}
+				lagrange_coeffs[i] = conv<ZZ>(numerator / denominator);
+			}
+		}
+		//////////////////////////////////////////////////
+
      	vector<int> binIndices(max_bin_size);
 		//Initialize the bin indices for this combination of users
-		for(int i = 0 ; i < max_bin_size ; i++)
-		{
+		for(int i = 0 ; i < max_bin_size ; i++){
 			binIndices[i] = 0;
 		}
 		do{
 			//Do recon on chosen users bins (from chosenUsers) using the an element from each bin (from binIndices)
 			vector<Share> toRecon(context.t);
-			for(int i = 0 ; i < context.t ; i++ )
-			{
+			for(int i = 0 ; i < context.t ; i++ ){
 				toRecon[i] = shares[chosenUsers[i]][binIndices[i]];
 			}
 
 			if (scheme==1){
-			 
-				reconstructed = reconScheme1(toRecon, context);
+				// reconstructed = reconScheme1(toRecon, context);
+				ZZ_p secret;
+				secret = ZZ_p(0);
+
+				for(int i = 0; i<context.t; i++){
+					secret += conv<ZZ_p>(toRecon[i].SS) * conv<ZZ_p>(lagrange_coeffs[i]);
+				}
+				reconstructed=(secret == 0); 
 			}else{
-				reconstructed = reconScheme2(toRecon, context);
+				// reconstructed = reconScheme2(toRecon, context);
+				ZZ_p secret;
+				secret = ZZ_p(1);
+
+				for(int i = 0; i<context.t; i++){
+					secret *= NTL::power(conv<ZZ_p>(toRecon[i].SS),lagrange_coeffs[i]);
+				}
+				reconstructed=(secret == 1); 
 			}
 
 			if(reconstructed) //If reconstructed, add to the list toReturn

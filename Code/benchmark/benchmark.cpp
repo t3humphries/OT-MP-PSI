@@ -33,13 +33,14 @@ string get_dirname(int m, int n, int t, int bitsize){
 string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=false){
 
     string dirname = get_dirname(m,n,t,bitsize);
+    int return_code;
     if (!force && exists(dirname)){
         return dirname;
     }
     else if(force & exists(dirname)){
-        system(("rm -r " + dirname).c_str());        
+        return_code=system(("rm -r " + dirname).c_str());        
     }
-    system(("mkdir " + dirname).c_str());
+    return_code=system(("mkdir " + dirname).c_str());
     srand(time(0));
     
     ofstream config_file(dirname + "//benchmark_config.json");
@@ -58,7 +59,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
     config_file << config;
 
     // generate elements
-    system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
+    return_code=system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
     int __num_elements__;
     ofstream element_file;
     for (int i =0; i< m; i++){
@@ -140,9 +141,9 @@ vector<vector<Share>> generate_shares_of_id(
                 share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    
             else
                 share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
-                shares_bins[conv<int>(share_x.bin)].push_back(share_x);
+            shares_bins[conv<int>(share_x.bin)].push_back(share_x);
     }
-}
+    }
     else
     {
 
@@ -151,11 +152,14 @@ vector<vector<Share>> generate_shares_of_id(
                 share_x = get_fast_share_1(context, elementholder.elements[i], num_bins, keyholder, elementholder.id);
             else
                 share_x = get_fast_share_2(context, elementholder.elements[i], num_bins, keyholder, elementholder.id);
-                shares_bins[conv<int>(share_x.bin)].push_back(share_x);      
+            shares_bins[conv<int>(share_x.bin)].push_back(share_x);      
     }
 }
     //padding the bins
     for (int i=0;i<num_bins;i++){
+        if (shares_bins[i].size() > max_bin_size){
+            cout << "Bin Overflow for a party " + to_string(elementholder.id) + "!" << endl;
+        }
         while(shares_bins[i].size() < max_bin_size){
             shares_bins[i].push_back(Share(elementholder.id, i, context.p));
         }
@@ -185,14 +189,15 @@ vector<int> read_elements_to_vector(string filename){
 
 void write_shares_to_file(vector<vector<Share>> *bins_people_shares, string dirname, int schemetype, int num_bins, int m, int max_bin_size){
     string share_dirname=dirname + "//sharesofscheme"+ to_string(schemetype);
+    int return_code;
     if(exists(share_dirname)){
-        system(("rm -r " + share_dirname).c_str());        
+        return_code=system(("rm -r " + share_dirname).c_str());        
     }
-    system(("mkdir " + share_dirname).c_str());//Generate the shares directory
+    return_code=system(("mkdir " + share_dirname).c_str());//Generate the shares directory
     ofstream shares_file;
     for (int i =0; i<num_bins; i++)
     {
-        system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i)).c_str());
+        return_code=system(("mkdir " + dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i)).c_str());
         for(int j=0; j<m; j++)
         {
             shares_file.open(dirname + "//sharesofscheme"+ to_string(schemetype) +"//bin" + to_string(i) +"//" + to_string(j) + ".json");
@@ -417,7 +422,7 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
         string dirname="benchmark_sharegen_"+to_string(t)+to_string(bitsize);
         if(!exists(dirname))
         {
-            system(("mkdir " + dirname).c_str());
+            int return_code=system(("mkdir " + dirname).c_str());
         }
         // log_file.open(dirname+"//logfile.txt",std::ofstream::out | std::ofstream::app);
         // log_file << "---------- Generating Share with Scheme " << scheme << " ----------" << endl
