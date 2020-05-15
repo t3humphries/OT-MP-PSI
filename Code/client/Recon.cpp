@@ -37,7 +37,7 @@ public:
         , n{n}
         , r{r}
     {
-      this->s = binCoeff(n+1, r);
+      this->s = binCoeff(n, r);
     }
 
   size_t size() {
@@ -46,7 +46,7 @@ public:
 
     bool next() {
         int positionToIncrement = r - 1;
-        while (chosenUsers[positionToIncrement] == n - r + (positionToIncrement + 1)) {
+        while (chosenUsers[positionToIncrement] == n - r + (positionToIncrement)) {
             --positionToIncrement;
         }
         if (positionToIncrement < 0) {
@@ -170,7 +170,7 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
    //Memory is cheap
    //Store all combination is memory
     std::vector<std::vector<int>> combArray(binCoeff(m, context.t));
-    Combinations comb{startingPoint, m-1, context.t};
+    Combinations comb{startingPoint, m, context.t};
     size_t i = 0;
     do {
       combArray[i] = comb.getElements();
