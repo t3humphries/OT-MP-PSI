@@ -37,7 +37,7 @@ public:
         , n{n}
         , r{r}
     {
-      this->s = binCoeff(n, r);
+      this->s = binCoeff(n+1, r);
     }
 
   size_t size() {
@@ -246,11 +246,9 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
 				}
 				reconstructed=(secret == 1); 
 			}
-
 			if(reconstructed) //If reconstructed, add to the list toReturn
 			{
 				int alreadyFound = 0;
-
 				#pragma omp critical
 				{
 				for(int j = 0; j < context.t ; j++)
@@ -266,7 +264,7 @@ vector<vector<int>> recon_in_bin_x(vector<vector<Share>> shares, Context context
 					toReturn[chosenUsers[j]][binIndices[j]] = 1;
 				}
 				}
-				
+
 				if(!alreadyFound)
 				{
 				  #pragma omp atomic

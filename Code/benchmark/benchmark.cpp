@@ -12,6 +12,7 @@
 #include <time.h>
 #include <vector>
 #include <chrono>
+#include <set>
 #include "../global/psi_utils.h"
 #include "../client/Recon.h"
 #include "../client/Elementholder.h"
@@ -56,24 +57,47 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
         config["id_list"][i] = id_list[i];
     }
 
-    config_file << config;
 
     // generate elements
     return_code=system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
-    int __num_elements__;
+    int __num_elements__,__new_element;
+    std::set<int> party_set;
+    vector<int> all_elements;
     ofstream element_file;
     for (int i =0; i< m; i++){
+        party_set.clear();
         __num_elements__ = 1 + rand() % n;
         element_file.open(dirname + "//elements//" + to_string(id_list[i]) + ".txt");
         if (!element_file.is_open()){
             cout << "Something wrong for party " + to_string(id_list[i]) << endl;
         } else{
             for (int j =0;j<__num_elements__;j++){
-                element_file << rand() % 10000000 << endl; //TODO: generate the elements accordingly
+                do{
+                    __new_element=rand() % (2*n);
+                } while(party_set.find(__new_element)!=party_set.end());
+                party_set.insert(__new_element);
+                element_file << __new_element << endl; //TODO: generate the elements accordingly
             }
         }
         element_file.close();
+        for (std::set<int>::iterator it=party_set.begin(); it!=party_set.end(); ++it){
+            all_elements.push_back(*it);
+        }
     }
+    sort(all_elements.begin(), all_elements.end());
+    int cnt = 0, temp_cnt=1;
+    for (std::vector<int>::iterator it=all_elements.begin()+1; it!=all_elements.end(); ++it){
+        if ((*it) == (*(it-1)))
+            temp_cnt+=1;
+        else
+            temp_cnt=1;
+        if (temp_cnt==t)
+            cnt += 1;
+    }
+
+    config["answer"]=cnt;
+    config_file << config;
+
     cout << "Benchmark config created successfully" << endl;
 
     ZZ p = read_prime(bitsize);
@@ -134,27 +158,25 @@ vector<vector<Share>> generate_shares_of_id(
     for (int i=0;i<num_bins;i++){
         shares_bins.push_back(vector<Share>(0));
     }
-    if(!fast_sharegen)
-    {
+    if(!fast_sharegen){
         for (int i = 0; i< elementholder.num_elements; i++){
             if (scheme==1)
                 share_x = elementholder.get_share_1(context, elementholder.elements[i], elem_holder, num_bins);    
             else
                 share_x = elementholder.get_share_2(context, elementholder.elements[i], elem_holder, num_bins);
             shares_bins[conv<int>(share_x.bin)].push_back(share_x);
+        }
     }
-    }
-    else
-    {
-
+    else{
         for (int i = 0; i< elementholder.num_elements; i++){
             if (scheme==1)
                 share_x = get_fast_share_1(context, elementholder.elements[i], num_bins, keyholder, elementholder.id);
             else
                 share_x = get_fast_share_2(context, elementholder.elements[i], num_bins, keyholder, elementholder.id);
             shares_bins[conv<int>(share_x.bin)].push_back(share_x);      
+        }
     }
-}
+
     //padding the bins
     for (int i=0;i<num_bins;i++){
         if (shares_bins[i].size() > max_bin_size){
@@ -338,7 +360,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=
         cout << "\tTotal time: " << ms << " miliseconds" << endl;
         //cout<< elem_holder.get_message_sizes() << endl;
         cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
-   
+        cout << "Real answer is " << config["answer"] << endl;
         // if(log)
         // {
         //     ofstream log_file;
