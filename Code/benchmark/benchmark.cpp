@@ -27,15 +27,50 @@ inline bool exists(const std::string& name) {
   return (stat (name.c_str(), &buffer) == 0); 
 }
 
-string get_dirname(int m, int n, int t, int bitsize){
-    return "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize);//TODO
+string get_dirname(int m, int n, int t, int bitsize, int c){
+    return "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);//TODO
 }
 
-string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=false){
+string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool force=false){
 
-    string dirname = get_dirname(m,n,t,bitsize);
+    // get the best bin_size
+
+    int bin_sizes[19][14]={
+        {4,4,4,3,3,3,3,2,2,2,2,2},//2,4,
+        {7,7,5,4,4,3,3,3,3,2,2,2},//3,8,
+        {9,8,6,6,4,4,4,4,3,2,2,2},//4,16,
+        {10,9,8,6,5,4,4,3,3,3,3,2},//5,32,
+        {12,11,9,6,5,4,4,3,3,3,3,2},//6,64,
+        {14,14,10,7,6,5,4,4,3,3,3,2},//7,128,
+        {15,10,8,6,5,4,5,4,3,3,3},//8,256,
+        {16,16,11,9,7,6,5,4,4,3,3,3},//9,512,
+        {18,17,12,10,8,6,5,4,4,4,4,3},//10,1024,
+        {20,17,12,10,7,7,5,5,4,4,3,3},//11,2048,
+        {20,18,14,11,8,7,6,6,5,4,3,3},//12,4096,
+        {22,19,15,11,8,7,6,5,5,4,4,3},//13,8192,
+        {23,20,16,11,11,8,7,5,5,4,4,4},//14,16384,
+        {23,22,16,12,10,8,7,6,5,5,4,4},//15,32768,
+        {26,24,17,13,10,10,7,6,6,5,5,4},//16,65536,
+        {26,24,17,13,11,8,7,6,5,5,4,4},//17,131072,
+        {28,26,18,15,11,9,8,6,5,5,4,4},//18,262144,
+        {29,28,20,14,12,9,8,7,6,5,5,4},//19,524288,
+        {29,31,20,15,12,10,8,7,6,5,5,5}//20,1048576,
+    };
+
+    int modified_c;
+    int max_bin_size;
+    if ((int)ceil(log2(n)) <= 20){
+        modified_c=(int)pow(2,(int)ceil(log2(c)));
+        max_bin_size=bin_sizes[(int)ceil(log2(n))-2][(int)ceil(log2(c))];
+    } else {
+        modified_c = 1;
+        max_bin_size = 4 * (n/(int)log(n));
+    }
+
+    string dirname = get_dirname(m,n,t,bitsize,modified_c);
     int return_code;
     if (!force && exists(dirname)){
+        cout << "Benchmark config already exists...";
         return dirname;
     }
     else if(force & exists(dirname)){
@@ -48,8 +83,10 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, bool force=f
     json config;
     config["m"] = m;
     config["n"] = n;
-    config["num_bins"] = n / (int)log(n);
-    config["max_bin_size"] = 4 * (int)log(n);
+    // config["num_bins"] = n / (int)log(n);
+    config["num_bins"] = modified_c * ( n / (int)log(n) );
+    // config["max_bin_size"] = 4 * (int)log(n);
+    config["max_bin_size"] = max_bin_size;
     config["t"] = t;
     int id_list[m];
     for (int i = 0;i < m;i++){
@@ -271,9 +308,11 @@ void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dir
     }
 }
 
-void run_benchmark(int m, int n, int t, int bitsize, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false, bool fast_sharegen=false){
+void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false, bool fast_sharegen=false){
 
-    string dirname = generate_benchmark_context(m,n,t,bitsize);
+    //find the num_bins and max_bin_size
+
+    string dirname = generate_benchmark_context(m,n,t,bitsize,c,force);
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
 
@@ -491,18 +530,20 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     return;
 }
 
-void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int schemetype, int repeat=1,bool log=false){
+void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c, int schemetype, int repeat=1,bool log=false){
     cout << "---------- Reconstructing in single bin with Scheme " << schemetype << " ----------" << endl
             << "\tm=" << m
             << "\tn=" << n
             << "\tt=" << t
             << "\tbitsize=" << bitsize
+            << "\tc=" << c << " (" << (int)pow(2,(int)ceil(log2(c))) << ")"
             << "\trepeat=" << repeat << endl;
 
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
 
-    string dirname=get_dirname(m,n,t,bitsize);
+    int modified_c=(int)pow(2,(int)ceil(log2(c)));
+    string dirname=get_dirname(m,n,t,bitsize,modified_c);
 
     if (!exists(dirname)){
         cout << "Necessary shares for running this benchmark don't exist." << endl
@@ -604,6 +645,7 @@ void show_usage(){
             << "\t-n\tMax number of elements (default=10)\n"
             << "\t-t\tThreshold (default=2)\n"
             << "\t-b\tPrime bit length (default=2048)\n"
+            << "\t-c\tConstant for number of bins (comm. vs. comp. tradeoff) (default=1)\n"
             << "\t-f\tRegenerate elements for benchmarking instance (default=false)\n"
             << "\t-k\tAddress of keyholder server (default 127.0.0.1)\n"
             << "\t-r\tNumber of times to repeat experiment (has defaults)\n"
@@ -616,7 +658,7 @@ void show_usage(){
 
 
 int main(int argc, char *argv[]){ 
-    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0;
+    int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0,c=1;
     bool force=false,log=false, only_sharegen=false, fast_sharegen=false;
     string server_address="127.0.0.1";
     int opt;
@@ -629,7 +671,7 @@ int main(int argc, char *argv[]){
         return 0;
     }else if(strcmp(argv[1],"all")==0){
         std::cout << "Running entire protocol" << endl;
-        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:lxy")) != -1)  
+        while((opt = getopt(argc, argv, ":hm:n:t:b:fk:s:lxyc:")) != -1)  
         {  
             switch(opt)  
             {  
@@ -666,6 +708,9 @@ int main(int argc, char *argv[]){
                 case 'y':
                     fast_sharegen=true;
                     break;
+                case 'c':
+                    c=stoi(optarg);
+                    break;
                 case ':':
                     cout << optarg << endl;
                     printf("option needs a value\n");  
@@ -676,11 +721,11 @@ int main(int argc, char *argv[]){
             }
         }
         if (scheme==0){
-            run_benchmark(m,n,t,bitsize,1,force,server_address,log,only_sharegen,fast_sharegen);
+            run_benchmark(m,n,t,bitsize,c,1,force,server_address,log,only_sharegen,fast_sharegen);
             cout << endl;
-            run_benchmark(m,n,t,bitsize,2,force,server_address,log,only_sharegen,fast_sharegen);
+            run_benchmark(m,n,t,bitsize,c,2,force,server_address,log,only_sharegen,fast_sharegen);
         }else{
-            run_benchmark(m,n,t,bitsize,scheme,force,server_address,log,only_sharegen,fast_sharegen);
+            run_benchmark(m,n,t,bitsize,c,scheme,force,server_address,log,only_sharegen,fast_sharegen);
         }
         return 0;
     }else if(strcmp(argv[1],"sharegen")==0){
@@ -728,7 +773,7 @@ int main(int argc, char *argv[]){
         return 0;
     }else if(strcmp(argv[1],"recon")==0){
         std::cout << "Running Reconstruction" << endl;
-        while((opt = getopt(argc, argv, ":hm:n:t:b:s:r:l")) != -1)  
+        while((opt = getopt(argc, argv, ":hm:n:t:b:s:r:lc:")) != -1)  
         {  
             switch(opt)  
             {  
@@ -756,6 +801,9 @@ int main(int argc, char *argv[]){
                 case 'l':
                     log=true;
                     break;
+                case 'c':
+                    c=stoi(optarg);
+                    break;
                 case ':':  
                     printf("option needs a value\n");  
                     break;
@@ -765,10 +813,10 @@ int main(int argc, char *argv[]){
             }
         }
         if (scheme==0){
-            benchmark_reconstruction_single_bin(m,n,t,bitsize,1,repeat,log);
-            benchmark_reconstruction_single_bin(m,n,t,bitsize,2,repeat,log);
+            benchmark_reconstruction_single_bin(m,n,t,bitsize,c,1,repeat,log);
+            benchmark_reconstruction_single_bin(m,n,t,bitsize,c,2,repeat,log);
         }else{
-            benchmark_reconstruction_single_bin(m,n,t,bitsize,scheme,repeat,log);
+            benchmark_reconstruction_single_bin(m,n,t,bitsize,c,scheme,repeat,log);
         }        
         return 0;
     }else{
