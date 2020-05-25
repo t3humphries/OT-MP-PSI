@@ -84,7 +84,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
     config["m"] = m;
     config["n"] = n;
     // config["num_bins"] = n / (int)log(n);
-    config["num_bins"] = modified_c * ( n / (int)log(n) );
+    config["num_bins"] = ceil( modified_c *  n / (int)log(n) );
     // config["max_bin_size"] = 4 * (int)log(n);
     config["max_bin_size"] = max_bin_size;
     config["t"] = t;
