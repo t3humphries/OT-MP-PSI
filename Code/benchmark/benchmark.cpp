@@ -27,34 +27,60 @@ inline bool exists(const std::string& name) {
   return (stat (name.c_str(), &buffer) == 0); 
 }
 
-string get_dirname(int m, int n, int t, int bitsize, int c){
-    return "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);//TODO
+string get_dirname(int m, int n, int t, int bitsize, int c, bool for_recon=false){
+    if (for_recon)
+        return "benchmark_recon_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);//TODO
+    else
+        return "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);//TODO
+
 }
 
-string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool force=false){
+string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool force=false, bool for_recon=false){
 
     // get the best bin_size
 
-    int bin_sizes[19][14]={
-        {4,4,4,3,3,3,3,2,2,2,2,2},//2,4,
-        {7,7,5,4,4,3,3,3,3,2,2,2},//3,8,
-        {9,8,6,6,4,4,4,4,3,2,2,2},//4,16,
-        {10,9,8,6,5,4,4,3,3,3,3,2},//5,32,
-        {12,11,9,6,5,4,4,3,3,3,3,2},//6,64,
-        {14,14,10,7,6,5,4,4,3,3,3,2},//7,128,
-        {15,10,8,6,5,4,5,4,3,3,3},//8,256,
-        {16,16,11,9,7,6,5,4,4,3,3,3},//9,512,
-        {18,17,12,10,8,6,5,4,4,4,4,3},//10,1024,
-        {20,17,12,10,7,7,5,5,4,4,3,3},//11,2048,
-        {20,18,14,11,8,7,6,6,5,4,3,3},//12,4096,
-        {22,19,15,11,8,7,6,5,5,4,4,3},//13,8192,
-        {23,20,16,11,11,8,7,5,5,4,4,4},//14,16384,
-        {23,22,16,12,10,8,7,6,5,5,4,4},//15,32768,
-        {26,24,17,13,10,10,7,6,6,5,5,4},//16,65536,
-        {26,24,17,13,11,8,7,6,5,5,4,4},//17,131072,
-        {28,26,18,15,11,9,8,6,5,5,4,4},//18,262144,
-        {29,28,20,14,12,9,8,7,6,5,5,4},//19,524288,
-        {29,31,20,15,12,10,8,7,6,5,5,5}//20,1048576,
+    // int bin_sizes[19][14]={
+    //     {4,4,4,3,3,3,3,2,2,2,2,2},//2,4,
+    //     {7,7,5,4,4,3,3,3,3,2,2,2},//3,8,
+    //     {9,8,6,6,4,4,4,4,3,2,2,2},//4,16,
+    //     {10,9,8,6,5,4,4,3,3,3,3,2},//5,32,
+    //     {12,11,9,6,5,4,4,3,3,3,3,2},//6,64,
+    //     {14,14,10,7,6,5,4,4,3,3,3,2},//7,128,
+    //     {15,10,8,6,5,4,5,4,3,3,3},//8,256,
+    //     {16,16,11,9,7,6,5,4,4,3,3,3},//9,512,
+    //     {18,17,12,10,8,6,5,4,4,4,4,3},//10,1024,
+    //     {20,17,12,10,7,7,5,5,4,4,3,3},//11,2048,
+    //     {20,18,14,11,8,7,6,6,5,4,3,3},//12,4096,
+    //     {22,19,15,11,8,7,6,5,5,4,4,3},//13,8192,
+    //     {23,20,16,11,11,8,7,5,5,4,4,4},//14,16384,
+    //     {23,22,16,12,10,8,7,6,5,5,4,4},//15,32768,
+    //     {26,24,17,13,10,10,7,6,6,5,5,4},//16,65536,
+    //     {26,24,17,13,11,8,7,6,5,5,4,4},//17,131072,
+    //     {28,26,18,15,11,9,8,6,5,5,4,4},//18,262144,
+    //     {29,28,20,14,12,9,8,7,6,5,5,4},//19,524288,
+    //     {29,31,20,15,12,10,8,7,6,5,5,5}//20,1048576,
+    // };
+
+    int bin_sizes[19][8]={
+        {4,4,4,4,3,3,3,2},//0,4,
+        {7,6,5,5,3,4,3,3},//1,8,
+        {11,8,7,5,4,4,3,3},//2,16,
+        {13,10,8,6,5,4,4,3},//3,32,
+        {15,12,8,7,5,4,4,4},//4,64,
+        {17,13,8,7,6,5,4,4},//5,128,
+        {19,14,10,9,6,6,4,5},//6,256,
+        {25,15,11,9,7,6,4,4},//7,512,
+        {23,18,12,10,8,7,6,5},//8,1024,
+        {25,17,13,10,8,7,5,4},//9,2048,
+        {26,19,14,11,10,6,6,5},//10,4096,
+        {28,21,15,10,9,6,6,5},//11,8192,
+        {32,21,15,12,10,7,6,5},//12,16384,
+        {33,23,16,12,10,8,7,6},//13,32768,
+        {36,24,17,13,10,8,7,6},//14,65536,
+        {35,25,17,13,11,9,7,6},//15,131072,
+        {39,26,20,15,11,9,7,7},//16,262144,
+        {38,27,22,15,12,9,8,6},//17,524288,
+        {41,28,21,15,12,11,9,7},//18,1048576,
     };
 
     int modified_c;
@@ -67,7 +93,9 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
         max_bin_size = 4 * (n/(int)log(n));
     }
 
-    string dirname = get_dirname(m,n,t,bitsize,modified_c);
+    cout << "Here1: " << modified_c << endl;
+
+    string dirname = get_dirname(m,n,t,bitsize,modified_c, for_recon);
     int return_code;
     if (!force && exists(dirname)){
         cout << "Benchmark config already exists...";
@@ -84,9 +112,10 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
     config["m"] = m;
     config["n"] = n;
     // config["num_bins"] = n / (int)log(n);
-    config["num_bins"] = ceil( modified_c *  n / (int)log(n) );
+    cout << "HERE2: " <<  n << " " << modified_c << " " << log(n) << " " << endl; 
+    config["num_bins"] = ceil( (float)modified_c *  (float)n / log(n) );
     // config["max_bin_size"] = 4 * (int)log(n);
-    config["max_bin_size"] = max_bin_size;
+    config["max_bin_size"] = (int)max_bin_size;
     config["t"] = t;
     int id_list[m];
     for (int i = 0;i < m;i++){
@@ -94,53 +123,56 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
         config["id_list"][i] = id_list[i];
     }
 
-
-    // generate elements
-    return_code=system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
-    int __num_elements__,__new_element;
-    std::set<int> party_set;
-    vector<int> all_elements;
-    ofstream element_file;
-    for (int i =0; i< m; i++){
-        party_set.clear();
-        __num_elements__ = 1 + rand() % n;
-        element_file.open(dirname + "//elements//" + to_string(id_list[i]) + ".txt");
-        if (!element_file.is_open()){
-            cout << "Something wrong for party " + to_string(id_list[i]) << endl;
-        } else{
-            for (int j =0;j<__num_elements__;j++){
-                do{
-                    __new_element=rand() % (2*n);
-                } while(party_set.find(__new_element)!=party_set.end());
-                party_set.insert(__new_element);
-                element_file << __new_element << endl; //TODO: generate the elements accordingly
+    if (!for_recon){
+        // generate elements
+        return_code=system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
+        int __num_elements__,__new_element;
+        std::set<int> party_set;
+        vector<int> all_elements;
+        ofstream element_file;
+        for (int i =0; i< m; i++){
+            party_set.clear();
+            __num_elements__ = 1 + rand() % n;
+            element_file.open(dirname + "//elements//" + to_string(id_list[i]) + ".txt");
+            if (!element_file.is_open()){
+                cout << "Something wrong for party " + to_string(id_list[i]) << endl;
+            } else{
+                for (int j =0;j<__num_elements__;j++){
+                    do{
+                        __new_element=rand() % (2*n);
+                    } while(party_set.find(__new_element)!=party_set.end());
+                    party_set.insert(__new_element);
+                    element_file << __new_element << endl; //TODO: generate the elements accordingly
+                }
+            }
+            element_file.close();
+            for (std::set<int>::iterator it=party_set.begin(); it!=party_set.end(); ++it){
+                all_elements.push_back(*it);
             }
         }
-        element_file.close();
-        for (std::set<int>::iterator it=party_set.begin(); it!=party_set.end(); ++it){
-            all_elements.push_back(*it);
+        sort(all_elements.begin(), all_elements.end());
+        int cnt = 0, temp_cnt=1;
+        for (std::vector<int>::iterator it=all_elements.begin()+1; it!=all_elements.end(); ++it){
+            if ((*it) == (*(it-1)))
+                temp_cnt+=1;
+            else
+                temp_cnt=1;
+            if (temp_cnt==t)
+                cnt += 1;
         }
-    }
-    sort(all_elements.begin(), all_elements.end());
-    int cnt = 0, temp_cnt=1;
-    for (std::vector<int>::iterator it=all_elements.begin()+1; it!=all_elements.end(); ++it){
-        if ((*it) == (*(it-1)))
-            temp_cnt+=1;
-        else
-            temp_cnt=1;
-        if (temp_cnt==t)
-            cnt += 1;
+        config["answer"]=cnt;
     }
 
-    config["answer"]=cnt;
     config_file << config;
 
     cout << "Benchmark config created successfully" << endl;
 
-    ZZ p = read_prime(bitsize);
-    KeyholderContext keyholder_context;
-    keyholder_context.initialize_context(ZZ(p)-1, t);
-    keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    if (!for_recon){
+        ZZ p = read_prime(bitsize);
+        KeyholderContext keyholder_context;
+        keyholder_context.initialize_context(ZZ(p)-1, t);
+        keyholder_context.write_to_file(dirname + "/keyholder_context.json");
+    }
 
     return dirname;
 }
@@ -190,6 +222,7 @@ vector<vector<Share>> generate_shares_of_id(
     Context context, client* elem_holder, int scheme,
     bool fast_sharegen
     ){
+        cout << "Here: " << num_bins << " " << max_bin_size << endl;
     vector<vector<Share>> shares_bins;
     Share share_x;
     for (int i=0;i<num_bins;i++){
@@ -217,7 +250,8 @@ vector<vector<Share>> generate_shares_of_id(
     //padding the bins
     for (int i=0;i<num_bins;i++){
         if (shares_bins[i].size() > max_bin_size){
-            cout << "Bin Overflow for a party " + to_string(elementholder.id) + "!" << endl;
+            cout << "Bin Overflow for a party " + to_string(elementholder.id) + "!" 
+                 << " (max_bin_size: " << max_bin_size << "Party bin size: " << shares_bins[i].size() << ")" << endl;
         }
         while(shares_bins[i].size() < max_bin_size){
             shares_bins[i].push_back(Share(elementholder.id, i, context.p));
@@ -307,6 +341,25 @@ void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dir
         }
     }
 }
+
+void generate_random_shares_in_bin(vector<vector<Share>> &people_shares, int m, int max_bin_size, ZZ p, int* id_list){
+    ZZ_p::init(ZZ(p));
+
+    // vector<vector<Share>> people_shares = vector<vector<Share>>();
+    int id=0;
+    for(int j=0; j<m; j++)
+    {
+        id=id_list[j];
+        people_shares.push_back(vector<Share>());
+        for (int k=0;k<max_bin_size;k++)
+        {
+            Share __share(ZZ(id),ZZ(0),conv<ZZ>(random_ZZ_p()));
+            people_shares[j].push_back(__share);
+        }
+    }
+    // return people_shares;
+}
+
 
 void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false, bool fast_sharegen=false){
 
@@ -541,26 +594,37 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
 
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
-
     int modified_c=(int)pow(2,(int)ceil(log2(c)));
-    string dirname=get_dirname(m,n,t,bitsize,modified_c);
+    string dirname=get_dirname(m,n,t,bitsize,modified_c, true);
 
     if (!exists(dirname)){
-        cout << "Necessary shares for running this benchmark don't exist." << endl
-            << "run \"./benchmark all\" first" << endl;
-        return;
+        generate_benchmark_context(m,n,t,bitsize,modified_c,false,true);
+        // cout << "Necessary shares for running this benchmark don't exist." << endl
+        //     << "run \"./benchmark all\" first" << endl;
+        // return;
     }
 
     ifstream config_file(dirname + "//benchmark_config.json");
     json config;
     config_file >> config;
-    int num_bins=config["num_bins"], max_bin_size=config["max_bin_size"];
+    int num_bins=config["num_bins"],max_bin_size=config["max_bin_size"];
+    int id_list[m];
+    for (int i=0;i<m;i++){
+        id_list[i]=config["id_list"][i];
+    }
 
     Context context(p, q, g, t);
 
-    vector<vector<Share>> bins_people_shares[num_bins];
-    read_shares_from_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
-    
+    // vector<vector<Share>> bins_people_shares[num_bins];
+    // read_shares_from_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
+
+    cout << "Generating random elements to run reconstruction..." << endl;
+    vector<vector<Share>> a_bin_people_shares;
+    generate_random_shares_in_bin(a_bin_people_shares, m,max_bin_size,p,id_list);
+    cout << "Finished generating random elements" << endl;
+    cout << "Starting reconstruction" << endl;
+
+
     vector<vector<int>> ans;//2D binary vector where user<is element in intersection>>
     int sum = 0;//Todo is this not outputted??
     float duration[repeat] = {0.0};
@@ -570,8 +634,8 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
     time_min = (float)-1;
     for (int i=0;i<repeat;i++){
         auto begin = chrono::high_resolution_clock::now();
-        int random_bin = rand()%num_bins;
-        ans = recon_in_bin_x(bins_people_shares[random_bin], context, m, max_bin_size,schemetype, &sum);
+        // int random_bin = rand()%num_bins;
+        ans = recon_in_bin_x(a_bin_people_shares, context, m, max_bin_size, schemetype, &sum);
         auto end = chrono::high_resolution_clock::now();    
     auto dur = end - begin;
     auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
