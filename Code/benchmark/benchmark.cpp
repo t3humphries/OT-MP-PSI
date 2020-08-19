@@ -36,7 +36,7 @@ string get_dirname(int m, int n, int t, int bitsize, int c, bool for_recon=false
 }
 
 string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool force=false, bool for_recon=false){
-    
+
     int bin_sizes[19][8]={
         {4,4,4,4,3,3,3,2},//0,4,
         {7,6,5,5,3,4,3,3},//1,8,
@@ -404,7 +404,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
         int sum = 0;
         auto begin = chrono::high_resolution_clock::now();    
         for (int i=0;i<num_bins;i++){
-            ans.push_back(recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype, &sum));
+            ans.push_back(recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype));
         }
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
@@ -553,6 +553,7 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
 
 
     vector<vector<int>> ans;//2D binary vector where user<is element in intersection>>
+    int sum = 0;
     float duration[repeat] = {0.0};
     float time_avg, time_min, time_max, time_std, time_total;
     time_total = (float)0;
