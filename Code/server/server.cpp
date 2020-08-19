@@ -38,7 +38,7 @@ void serverInitFunction()
         perror("listen"); 
         exit(EXIT_FAILURE); 
     }
-    cout <<"Init done"<<endl;
+    cout <<"Server Initialized"<<endl;
 } 
 
 int main()
@@ -57,7 +57,7 @@ int main()
             exit(EXIT_FAILURE); 
         }
 
-	cout <<"Incoming connection"<<endl;
+	cout << "Incoming connection" << endl;
 	
         //Get the input from the client
         vector<char> buffer(MAX_BUF_LENGTH);
@@ -92,7 +92,7 @@ int main()
             Scheme1_Round1_send input = Scheme1_Round1_send(message);
             Scheme1_Round1_receive output = k.Scheme1_Round1(input);
             result = output.toString();
-            cout<<"S1_R1 Complete!"<<endl;
+            cout<<"Scheme 1 Round 1 Complete!"<<endl;
         }
         
         else if(arg.compare("S1_R2") == 0)
@@ -100,7 +100,7 @@ int main()
             Scheme1_Round2_send input = Scheme1_Round2_send(message);
             Scheme1_Round2_receive output = k.Scheme1_Round2(input);
             result = output.toString();
-            cout<<"S1_R2 Complete!"<<endl;
+            cout<<"Scheme 1 Round 2 Complete!"<<endl;
         }
 
         else if(arg.compare("S2") == 0)
@@ -108,7 +108,7 @@ int main()
             Scheme2_send input = Scheme2_send(message);
             Scheme2_receive output = k.Scheme2_Round1(input);
             result = output.toString();
-            cout<<"S2 Complete!"<<endl;
+            cout<<"Scheme 2 Complete!"<<endl;
         }
         
         send(new_socket , result.c_str() , result.length() , 0 );

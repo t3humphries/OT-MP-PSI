@@ -388,7 +388,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
     {
         ofstream log_file;
         log_file.open(dirname + "//logfile.txt",std::ofstream::out | std::ofstream::app);
-        log_file << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Scheme " << schemetype << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ";
+        log_file << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Scheme " << schemetype << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " << endl;
         log_file << "---------- Share Generation ---------- " << endl;
         log_file << "---------- Share Genration Complete  ----------" << endl;
         log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
@@ -409,8 +409,16 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
         cout << "---------- Reconstruction complete ----------" << endl; 
         cout << "\tTotal time: " << ms << " miliseconds" << endl;
-        cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
-        cout << "Real answer is " << config["answer"] << endl;
+        if(log)
+        {
+            ofstream log_file;
+            log_file.open(dirname + "//logfile.txt",std::ofstream::out | std::ofstream::app);
+            log_file << "---------- Reconstruction ---------- " << endl;
+            log_file << "---------- Reconstruction complete ----------" << endl;
+            log_file <<"\tTotal time: " << ms << " miliseconds" << endl;
+            log_file.close();
+        }
+
     }
 }
 
