@@ -69,12 +69,10 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
         max_bin_size = 4 * (n/(int)log(n));
     }
 
-    cout << "Here1: " << modified_c << endl;
-
     string dirname = get_dirname(m,n,t,bitsize,modified_c, for_recon);
     int return_code;
     if (!force && exists(dirname)){
-        cout << "Benchmark config already exists...";
+        cout << "Benchmark config already exists..." << endl;
         return dirname;
     }
     else if(force & exists(dirname)){
@@ -365,7 +363,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
         cout << "Proceeding without server (fast)" << endl;
     }
     
-    cout << "-------------------- Scheme " << schemetype << " -------------------- " << endl;
+    cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Scheme " << schemetype << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " << endl;
     cout << "---------- Share Generation ---------- " << endl;
     for (int i=0;i<m;i++){
         idd=config["id_list"][i];
@@ -390,7 +388,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
     {
         ofstream log_file;
         log_file.open(dirname + "//logfile.txt",std::ofstream::out | std::ofstream::app);
-        log_file << "-------------------- Scheme " << schemetype << " -------------------- ";
+        log_file << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Scheme " << schemetype << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ";
         log_file << "---------- Share Generation ---------- " << endl;
         log_file << "---------- Share Genration Complete  ----------" << endl;
         log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
@@ -404,7 +402,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
         int sum = 0;
         auto begin = chrono::high_resolution_clock::now();    
         for (int i=0;i<num_bins;i++){
-            ans.push_back(recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype));
+            ans.push_back(recon_in_bin_x(bins_people_shares[i], context, m, max_bin_size, schemetype, &sum));
         }
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
@@ -430,7 +428,7 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
 
     Keyholder keyholder(context);
     Elementholder elementholder(rand()%1000 + 1, bitsize);
-    client elem_holder(server_ip,log);//TODO change this to an arg??
+    client elem_holder(server_ip,log);
     elem_holder.send_to_server("INIT", keyholder.toString());
 
     cout << "Connected to server" << endl;
