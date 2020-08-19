@@ -333,4 +333,3 @@ Scheme2_receive::Scheme2_receive(string str)
 {
     secret_share_alpha = str_to_ZZ(str);
 }
-

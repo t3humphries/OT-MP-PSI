@@ -11,25 +11,21 @@
 #include <fstream>
 
 using namespace std;
-
 #define PORT 8080 
 
 class client{
-
 public:
 
     int sock;
     struct sockaddr_in serv_addr; 
     unsigned int MAX_BUF_LENGTH;
     int log;
-    std::vector<int> s1r1, s1r2, s2;
+    std::vector<int> s1r1_comm_cost, s1r2_comm_cost, s2_comm_cost;
 
     client(string connection_address, int log_sizes);
     client(){} 
-    //client(const client &old_obj); 
     string send_to_server(string arg, string message);
     vector<int> get_message_sizes();
-    
 };
 
 #endif

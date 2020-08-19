@@ -10,7 +10,7 @@
 #include <time.h>
 #include <vector>
 #include <gmp.h>
-#include <libhcs.h> // master header includes everything
+#include <libhcs.h> 
 #include <string>
 #include <stdlib.h>
 
@@ -56,7 +56,6 @@ class Context{
     Context(int pp, int tt){
         p = NTL::ZZ(pp);
         q = NTL::ZZ((p-1)/2);
-        // g = NTL::ZZ(gg);
         t = tt;
     }
     
@@ -74,9 +73,7 @@ class Context{
         t = tt;
     }
 
-
     void write_to_file(std::string filename){
-        //write this to file
     }
 };
 
@@ -150,4 +147,3 @@ class Scheme2_receive{
 };
 
 #endif
-

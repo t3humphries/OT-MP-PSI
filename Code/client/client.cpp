@@ -1,9 +1,6 @@
-
 #include "client.h" 
 using namespace std;
-
-
-client::client(string connection_address, int __log)   // constructor for intiializing
+client::client(string connection_address, int __log)
 {
     sock= 0;  
     MAX_BUF_LENGTH = 4096;  
@@ -15,18 +12,17 @@ client::client(string connection_address, int __log)   // constructor for intiia
     }
 
     log = __log;
-    
+    //Initialize vectors to store message sizes in the form [#messages, bytes_sent, bytes_recived]
     for(int i=0 ; i<3 ;i++)
     {
-        s1r1.push_back(0);
-        s1r2.push_back(0);
-        s2.push_back(0);
+        s1r1_comm_cost.push_back(0);
+        s1r2_comm_cost.push_back(0);
+        s2_comm_cost.push_back(0);
     }
 }
        
 string client::send_to_server(string arg, string raw_message) 
 { 
-
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
     { 
         printf("\n Socket creation error \n"); 
@@ -46,9 +42,9 @@ string client::send_to_server(string arg, string raw_message)
     do {
         buffer = vector<char>(MAX_BUF_LENGTH);
         bytesReceived = read(sock, &buffer[0], buffer.size());
-        // append string from buffer.
+        //Append to string from the buffer
         if ( bytesReceived == -1 ) { 
-            // error 
+            cout<< "Error: couldn't read from server"<<endl;
         } else {
             response.append( buffer.cbegin(), buffer.cend() );
         }
@@ -56,63 +52,50 @@ string client::send_to_server(string arg, string raw_message)
     response.resize(strlen(response.c_str()));
     if(close(sock)<0)
     {
-        cout<<"connection could not be closed";
+        cout<<"Error: connection could not be closed"<<endl;
     } 
 
-    
     if(arg.compare("S1_R1") == 0)
     {
-        s1r1[0] += 1;
-        s1r1[1] += message.length();
-        s1r1[2] += response.length();
+        s1r1_comm_cost[0] += 1;
+        s1r1_comm_cost[1] += message.length();
+        s1r1_comm_cost[2] += response.length();
     }
     
     else if(arg.compare("S1_R2") == 0)
     {
-        s1r2[0] += 1;
-        s1r2[1] += message.length();
-        s1r2[2] += response.length();
+        s1r2_comm_cost[0] += 1;
+        s1r2_comm_cost[1] += message.length();
+        s1r2_comm_cost[2] += response.length();
     }
 
     else if(arg.compare("S2") == 0)
     {
-        s2[0] += 1;
-        s2[1] += message.length();
-        s2[2] += response.length();
+        s2_comm_cost[0] += 1;
+        s2_comm_cost[1] += message.length();
+        s2_comm_cost[2] += response.length();
         }
     
     return response; 
 } 
 
-vector <int> client::get_message_sizes()   //here
+vector <int> client::get_message_sizes() 
 {
-  // string toReturn = "Message Sizes: \n";
-    vector<int>  toReturn;
-   if(s1r1[0] != 0)
+   vector<int>  message_sizes;
+   if(s1r1_comm_cost[0] != 0)
    {
-     toReturn.push_back(s1r1[1]/s1r1[0]);
-     toReturn.push_back(s1r1[2]/s1r1[0]);
+     message_sizes.push_back(s1r1_comm_cost[1]/s1r1_comm_cost[0]);
+     message_sizes.push_back(s1r1_comm_cost[2]/s1r1_comm_cost[0]);
    }
-   if(s1r2[0] != 0)
+   if(s1r2_comm_cost[0] != 0)
    {
-    toReturn.push_back(s1r2[1]/s1r2[0]);
-    toReturn.push_back(s1r2[2]/s1r2[0]);
+    message_sizes.push_back(s1r2_comm_cost[1]/s1r2_comm_cost[0]);
+    message_sizes.push_back(s1r2_comm_cost[2]/s1r2_comm_cost[0]);
    }
-   if(s2[0] != 0)
+   if(s2_comm_cost[0] != 0)
    {
-    toReturn.push_back(s2[1]/s2[0]);
-    toReturn.push_back(s2[2]/s2[0]);
+    message_sizes.push_back(s2_comm_cost[1]/s2_comm_cost[0]);
+    message_sizes.push_back(s2_comm_cost[2]/s2_comm_cost[0]);
    }
-   return toReturn;
+   return message_sizes;
 }
-
-
-
-// int main()
-// {
-//     client object("127.0.0.1");
-// 	cout<<"first return"<<object.send_to_server("this is the message one")<<"\n";    
-//     cout<<"first return"<<object.send_to_server("this is the message two")<<"\n";  //These are test messages.
-      
-// 	return 0;
-// }

@@ -17,8 +17,8 @@ void Keyholder::initialize_context(Context __c1){
     public_context = __c1;
     ZZ_p::init(public_context.p-1);
     key = rep(random_ZZ_p());
-    randoms = new ZZ[public_context.t]; //TODO this is wrong should be t-1??
-    for (int i=0;i<public_context.t;i++){
+    randoms = new ZZ[public_context.t -1]; 
+    for (int i=0;i<public_context.t -1;i++){
         randoms[i] = rep(random_ZZ_p());
     }
 }
@@ -92,9 +92,7 @@ Scheme1_Round2_receive Keyholder::Scheme1_Round2(Scheme1_Round2_send payload){
 
 		pcs_ee_add(payload.pk, output.mpz_secret, output.mpz_secret, (payload.mpz_coefficients)[i]);
 	}
-
     return output;
-
 }
 
 Scheme2_receive Keyholder::Scheme2_Round1(Scheme2_send payload){
@@ -187,5 +185,4 @@ Keyholder::Keyholder(string str)
     __R = str_to_ZZ(token);
     std::getline(ss, token, delim);
     __R_inverse = str_to_ZZ(token);
-
 }

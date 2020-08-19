@@ -36,31 +36,7 @@ string get_dirname(int m, int n, int t, int bitsize, int c, bool for_recon=false
 }
 
 string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool force=false, bool for_recon=false){
-
-    // get the best bin_size
-
-    // int bin_sizes[19][14]={
-    //     {4,4,4,3,3,3,3,2,2,2,2,2},//2,4,
-    //     {7,7,5,4,4,3,3,3,3,2,2,2},//3,8,
-    //     {9,8,6,6,4,4,4,4,3,2,2,2},//4,16,
-    //     {10,9,8,6,5,4,4,3,3,3,3,2},//5,32,
-    //     {12,11,9,6,5,4,4,3,3,3,3,2},//6,64,
-    //     {14,14,10,7,6,5,4,4,3,3,3,2},//7,128,
-    //     {15,10,8,6,5,4,5,4,3,3,3},//8,256,
-    //     {16,16,11,9,7,6,5,4,4,3,3,3},//9,512,
-    //     {18,17,12,10,8,6,5,4,4,4,4,3},//10,1024,
-    //     {20,17,12,10,7,7,5,5,4,4,3,3},//11,2048,
-    //     {20,18,14,11,8,7,6,6,5,4,3,3},//12,4096,
-    //     {22,19,15,11,8,7,6,5,5,4,4,3},//13,8192,
-    //     {23,20,16,11,11,8,7,5,5,4,4,4},//14,16384,
-    //     {23,22,16,12,10,8,7,6,5,5,4,4},//15,32768,
-    //     {26,24,17,13,10,10,7,6,6,5,5,4},//16,65536,
-    //     {26,24,17,13,11,8,7,6,5,5,4,4},//17,131072,
-    //     {28,26,18,15,11,9,8,6,5,5,4,4},//18,262144,
-    //     {29,28,20,14,12,9,8,7,6,5,5,4},//19,524288,
-    //     {29,31,20,15,12,10,8,7,6,5,5,5}//20,1048576,
-    // };
-
+    
     int bin_sizes[19][8]={
         {4,4,4,4,3,3,3,2},//0,4,
         {7,6,5,5,3,4,3,3},//1,8,
@@ -111,10 +87,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
     json config;
     config["m"] = m;
     config["n"] = n;
-    // config["num_bins"] = n / (int)log(n);
-    cout << "HERE2: " <<  n << " " << modified_c << " " << log(n) << " " << endl; 
     config["num_bins"] = ceil( (float)modified_c *  (float)n / log(n) );
-    // config["max_bin_size"] = 4 * (int)log(n);
     config["max_bin_size"] = (int)max_bin_size;
     config["t"] = t;
     int id_list[m];
@@ -214,15 +187,12 @@ Share get_fast_share_2(Context context, int X, int num_bins, Keyholder keyholder
     );
 }
 
-
-//generally needed
 vector<vector<Share>> generate_shares_of_id(
     Elementholder elementholder,  Keyholder keyholder,
     int num_bins, int max_bin_size,
     Context context, client* elem_holder, int scheme,
     bool fast_sharegen
     ){
-        cout << "Here: " << num_bins << " " << max_bin_size << endl;
     vector<vector<Share>> shares_bins;
     Share share_x;
     for (int i=0;i<num_bins;i++){
@@ -344,8 +314,6 @@ void read_shares_from_file(vector<vector<Share>> *bins_people_shares, string dir
 
 void generate_random_shares_in_bin(vector<vector<Share>> &people_shares, int m, int max_bin_size, ZZ p, int* id_list){
     ZZ_p::init(ZZ(p));
-
-    // vector<vector<Share>> people_shares = vector<vector<Share>>();
     int id=0;
     for(int j=0; j<m; j++)
     {
@@ -357,14 +325,11 @@ void generate_random_shares_in_bin(vector<vector<Share>> &people_shares, int m, 
             people_shares[j].push_back(__share);
         }
     }
-    // return people_shares;
 }
-
 
 void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool force=false, string server_address="127.0.0.1", bool log=false, bool only_sharegen=false, bool fast_sharegen=false){
 
     //find the num_bins and max_bin_size
-
     string dirname = generate_benchmark_context(m,n,t,bitsize,c,force);
     ZZ p = read_prime(bitsize), g=read_generator(bitsize), q;
     q = (p-1)/2;
@@ -389,9 +354,7 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
     Keyholder keyholder;  
     keyholder.initialize_from_file(context, dirname + "/keyholder_context.json");
 
-
     //Initialize connection to server
-   
     client *elem_holder = NULL;
     if(!fast_sharegen)
     {
@@ -423,7 +386,6 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
     cout << "Average Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
     write_shares_to_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
 
-
     if(log)
     {
         ofstream log_file;
@@ -432,7 +394,6 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
         log_file << "---------- Share Generation ---------- " << endl;
         log_file << "---------- Share Genration Complete  ----------" << endl;
         log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
-        //log_file << elem_holder.get_message_sizes() << endl;
         log_file.close();
     }
 
@@ -450,25 +411,9 @@ void run_benchmark(int m, int n, int t, int bitsize, int c, int schemetype, bool
         auto ms = chrono::duration_cast<chrono::milliseconds>(dur).count();
         cout << "---------- Reconstruction complete ----------" << endl; 
         cout << "\tTotal time: " << ms << " miliseconds" << endl;
-        //cout<< elem_holder.get_message_sizes() << endl;
         cout << "\tFound " << sum << " elements in t-threshold intersection" << endl;
         cout << "Real answer is " << config["answer"] << endl;
-        // if(log)
-        // {
-        //     ofstream log_file;
-        //     log_file.open(dirname + "//logfile.txt",std::ofstream::out | std::ofstream::app);
-        //     // log_file << "-------------------- Scheme " << schemetype << " -------------------- ";
-        //     // log_file << "---------- Share Generation ---------- " << endl;
-        //     // log_file << "---------- Share Genration Complete  ----------" << endl;
-        //     // log_file << "\tAverage Share Generation time for each party: " << sum_sharegen/m << " miliseconds (including padding)" << endl;
-        //     log_file << "---------- Reconstruction ---------- ";
-        //     log_file << "---------- Reconstruction complete ----------" << endl; 
-        //     log_file << "\tTotal time: " << ms << " miliseconds" << endl;        log_file << "\tFound " << sum << " elements in t-threshold intersection" << endl;
-        //     //log_file << elem_holder.get_message_sizes() << endl;
-        //     log_file.close();
-        // }
     }
-   //write results to file
 }
 
 void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="127.0.0.1", int repeat=100, bool log = false){
@@ -531,25 +476,14 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
     vector<int> comm=elem_holder.get_message_sizes(); 
 
     if (log){
-        // ofstream log_file;
-        ofstream log_file2;
+        ofstream log_file;
         string dirname="benchmark_sharegen_"+to_string(t)+to_string(bitsize);
         if(!exists(dirname))
         {
             int return_code=system(("mkdir " + dirname).c_str());
         }
-        // log_file.open(dirname+"//logfile.txt",std::ofstream::out | std::ofstream::app);
-        // log_file << "---------- Generating Share with Scheme " << scheme << " ----------" << endl
-        //         << "\tt=" << t
-        //         << "\tbitsize=" << bitsize
-        //         << "\trepeat=" << repeat << endl;
 
-        // log_file << "Average time=" << (float)time_total/repeat << " ms" << endl;
-        // //log_file << elem_holder.get_message_sizes() << endl;
-        // log_file.close();
-
-
-        log_file2.open(dirname+"//Sharegen"+to_string(t)+to_string(scheme)+".json");
+        log_file.open(dirname+"//Sharegen"+to_string(t)+to_string(scheme)+".json");
         json outputlog;
         outputlog["scheme"] = scheme;
         outputlog["repeat"] = repeat;
@@ -574,8 +508,8 @@ void benchmark_generate_share(int t, int bitsize, int scheme, string server_ip="
             outputlog["s2r1recv"] = comm[1];
             outputlog["s2comm_total"] = comm[0]+comm[1];
         }
-        log_file2 << outputlog;
-        log_file2.close();
+        log_file << outputlog;
+        log_file.close();
 
         cout << "Results written at " + dirname + "//Sharegen"+to_string(t)+to_string(scheme)+".json" << endl;
     }
@@ -599,9 +533,6 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
 
     if (!exists(dirname)){
         generate_benchmark_context(m,n,t,bitsize,modified_c,false,true);
-        // cout << "Necessary shares for running this benchmark don't exist." << endl
-        //     << "run \"./benchmark all\" first" << endl;
-        // return;
     }
 
     ifstream config_file(dirname + "//benchmark_config.json");
@@ -614,10 +545,6 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
     }
 
     Context context(p, q, g, t);
-
-    // vector<vector<Share>> bins_people_shares[num_bins];
-    // read_shares_from_file(bins_people_shares,dirname,schemetype,num_bins,m,max_bin_size);
-
     cout << "Generating random elements to run reconstruction..." << endl;
     vector<vector<Share>> a_bin_people_shares;
     generate_random_shares_in_bin(a_bin_people_shares, m,max_bin_size,p,id_list);
@@ -626,7 +553,6 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
 
 
     vector<vector<int>> ans;//2D binary vector where user<is element in intersection>>
-    int sum = 0;//Todo is this not outputted??
     float duration[repeat] = {0.0};
     float time_avg, time_min, time_max, time_std, time_total;
     time_total = (float)0;
@@ -634,7 +560,6 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
     time_min = (float)-1;
     for (int i=0;i<repeat;i++){
         auto begin = chrono::high_resolution_clock::now();
-        // int random_bin = rand()%num_bins;
         ans = recon_in_bin_x(a_bin_people_shares, context, m, max_bin_size, schemetype, &sum);
         auto end = chrono::high_resolution_clock::now();    
     auto dur = end - begin;
@@ -660,18 +585,8 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
     time_std = sqrt(temp);
 
     if (log){
-        // ofstream log_file;
-        ofstream log_file2;
-        // log_file.open(dirname+"//recon_logfile.txt",std::ofstream::out | std::ofstream::app);
-        // log_file << "---------- Reconstructing in single bin with Scheme " << schemetype << " ----------" << endl
-        //         << "\tm=" << m
-        //         << "\tn=" << n
-        //         << "\tt=" << t
-        //         << "\tbitsize=" << bitsize
-        //         << "\trepeat=" << repeat << endl;
-        // log_file << "\tReconstruction complete in " << (float)time_total/repeat << " miliseconds" << endl;
-        // log_file.close();
-        log_file2.open(dirname+"//Recon"+to_string(m)+to_string(n)+to_string(t)+to_string(schemetype)+".json");
+        ofstream log_file;
+        log_file.open(dirname+"//Recon"+to_string(m)+to_string(n)+to_string(t)+to_string(schemetype)+".json");
 
         json outputlog;
         
@@ -691,8 +606,8 @@ void benchmark_reconstruction_single_bin(int m, int n, int t, int bitsize, int c
                 outputlog["s2time_min"] = time_min;
                 outputlog["s2time_std"] = time_std;
             }
-            log_file2<<outputlog;
-        log_file2.close();
+            log_file<<outputlog;
+        log_file.close();
         cout << "Results written at " + dirname+"//Recon"+to_string(m)+to_string(n)+to_string(t)+to_string(schemetype)+".json" << endl;
     }
 }
@@ -719,7 +634,6 @@ void show_usage(){
             << "\t-y\tFast Share Generation in the \"all\" command, for generating shares fast, without the actual protocol"
             << endl;
 }
-
 
 int main(int argc, char *argv[]){ 
     int m=10, n=10, t=2, bitsize=2048, repeat=1, scheme=0,c=1;

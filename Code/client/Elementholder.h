@@ -33,8 +33,6 @@ class Elementholder{
     void Scheme2_Final(ZZ *secret_share, Context public_context, ZZ secret_share_alpha);
 
     Share get_share_2(Context context, int __X, client* elem_holder, int num_bins);
-
-
 };
 
 #endif

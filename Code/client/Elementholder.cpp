@@ -84,7 +84,7 @@ Share Elementholder::get_share_1(Context context, int __X, client* elem_holder, 
     to_send_round_1.h_x_alpha = h_x_alpha;
     to_send_round_1.g_alpha = g_alpha;
     result = elem_holder->send_to_server("S1_R1", to_send_round_1.toString());
-    Scheme1_Round1_receive out_round1 = Scheme1_Round1_receive(result); //this will be done on server side
+    Scheme1_Round1_receive out_round1 = Scheme1_Round1_receive(result);
     
     //Round 2
     Scheme1_Round2_send to_send_round_2 = Scheme1_Round2(context, out_round1);
