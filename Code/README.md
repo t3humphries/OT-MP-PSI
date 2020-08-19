@@ -1,10 +1,11 @@
 # Over-Threshold Multi-Party Private Set Intersection
 
 ## Description
-This is exprimental code for the paper "Practical Over-Threshold Multi-Party Private Set Intersection"
+This is exprimental code for the paper "Practical Over-Threshold Multi-Party Private Set Intersection". It benchmarks over threshold private set intersection  in a multiparty fashion. 
 
 ## Dependencies
-Experiments are to be run on a Unix. Also, the following dependencies are needed:
+Experiments are to be run on a Unix machine. Also, the following dependencies are needed:
+
 * GMP==6.1.2
 * NTL==11.4.1
 * Paillier library: [libhcs](https://github.com/tiehuis/libhcs)
