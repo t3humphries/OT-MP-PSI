@@ -103,7 +103,7 @@ Scheme2_receive Keyholder::Scheme2_Round1(Scheme2_send payload){
 	{
 		ZZ_pPush push(p-1);
 		ZZ_p __secret_exp, __mac_exp, id_pows, __temp, __temp_id;
-		__secret_exp = ZZ_p(0);//TODO Double check conv(__secret_exp, key);
+		__secret_exp = ZZ_p(0);
 		conv(id_pows, payload.id);
         conv(__temp_id, payload.id);
 		for (int i = 0; i < t-1; i++){

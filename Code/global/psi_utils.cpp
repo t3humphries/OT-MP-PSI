@@ -33,9 +33,7 @@ void ZZ_p_to_mpz_t(mpz_t __out, ZZ_p& num){
 
 void mpz_t_to_ZZ(ZZ& __out, mpz_t num){
 	std::stringstream __ssa;
-	string __temp;//TODO remove this somehow
-	__temp=mpz_get_str(NULL, 10, num);
-	__ssa << __temp;
+	__ssa << mpz_get_str(NULL, 10, num);
 	__ssa >> __out;
 }
 

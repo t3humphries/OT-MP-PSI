@@ -29,9 +29,9 @@ inline bool exists(const std::string& name) {
 
 string get_dirname(int m, int n, int t, int bitsize, int c, bool for_recon=false){
     if (for_recon)
-        return "benchmark_recon_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);//TODO
+        return "benchmark_recon_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);
     else
-        return "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);//TODO
+        return "benchmark_"+to_string(m)+to_string(n)+to_string(t)+to_string(bitsize)+"_"+to_string(c);
 
 }
 
@@ -96,7 +96,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
 
     if (!for_recon){
         // generate elements
-        return_code=system(("mkdir " + dirname + "//elements").c_str());//TODO: must be better way of doing this
+        return_code=system(("mkdir " + dirname + "//elements").c_str());
         int __num_elements__,__new_element;
         std::set<int> party_set;
         vector<int> all_elements;
@@ -113,7 +113,7 @@ string generate_benchmark_context(int m, int n, int t, int bitsize, int c, bool 
                         __new_element=rand() % (2*n);
                     } while(party_set.find(__new_element)!=party_set.end());
                     party_set.insert(__new_element);
-                    element_file << __new_element << endl; //TODO: generate the elements accordingly
+                    element_file << __new_element << endl;
                 }
             }
             element_file.close();
